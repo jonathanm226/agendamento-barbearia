@@ -1,0 +1,197 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #121212;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    background-color: #1E1E1E;
+    padding: 20px;
+    padding-bottom: 90px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.barber-header {
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.brand-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.barber-icon {
+    font-size: 2rem;
+    color: #D4AF37;
+}
+
+.brand-info h1 {
+    font-size: 1.4rem;
+}
+
+.brand-info p {
+    font-size: 0.85rem;
+    color: #AAA;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    color: #D4AF37;
+}
+
+/* Cards de Barbeiros */
+.barbers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.barber-card {
+    background: #2A2A2A;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.barber-card.active {
+    border-color: #D4AF37;
+    background: #332B15;
+}
+
+.barber-avatar {
+    font-size: 1.5rem;
+    color: #D4AF37;
+    margin-bottom: 8px;
+}
+
+.barber-card h3 {
+    font-size: 1rem;
+}
+
+/* Cards de Serviços */
+.services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.service-card {
+    background: #2A2A2A;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.service-card.active {
+    border-color: #D4AF37;
+    background: #332B15;
+}
+
+.service-info h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.service-info span {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.price {
+    font-weight: bold;
+    color: #25D366;
+}
+
+/* Inputs */
+.datetime-inputs, .client-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    color: #CCC;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    background: #2A2A2A;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #D4AF37;
+}
+
+/* Rodapé Fixo com Botão */
+.footer-action {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    padding: 15px 20px;
+    background: #1E1E1E;
+    border-top: 1px solid #333;
+}
+
+.btn-whatsapp {
+    width: 100%;
+    padding: 15px;
+    background-color: #25D366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.btn-whatsapp:hover {
+    background-color: #1EBE5D;
+}
