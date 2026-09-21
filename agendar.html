@@ -40,89 +40,91 @@
             </div>
         </section>
 
-        <!-- Seleção de Serviços -->
+        <!-- Seleção de Serviços (Múltipla Escolha) -->
         <section class="section">
-            <h2>2. Escolha o Serviço</h2>
+            <h2>2. Escolha os Serviços (Pode selecionar vários)</h2>
             <div class="services-grid">
-                <div class="service-card active" onclick="selectService(this, 'Corte', 35)">
+                
+                <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
                     <div class="service-info">
-                        <h3>Corte</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Corte</h3>
                         <span><i class="fa-regular fa-clock"></i> 30 min</span>
                     </div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Barba', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
                     <div class="service-info">
-                        <h3>Barba</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Barba</h3>
                         <span><i class="fa-regular fa-clock"></i> 30 min</span>
                     </div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Sobrancelha', 15)">
+                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)">
                     <div class="service-info">
-                        <h3>Sobrancelha</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha</h3>
                         <span><i class="fa-regular fa-clock"></i> 15 min</span>
                     </div>
                     <span class="price">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Acabamento', 15)">
+                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)">
                     <div class="service-info">
-                        <h3>Acabamento</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Acabamento</h3>
                         <span><i class="fa-regular fa-clock"></i> 15 min</span>
                     </div>
                     <span class="price">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Pigmentação', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)">
                     <div class="service-info">
-                        <h3>Pigmentação</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação</h3>
                         <span><i class="fa-regular fa-clock"></i> 20 min</span>
                     </div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Alisamento', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)">
                     <div class="service-info">
-                        <h3>Alisamento</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Alisamento</h3>
                         <span><i class="fa-regular fa-clock"></i> 40 min</span>
                     </div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Hidratação', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)">
                     <div class="service-info">
-                        <h3>Hidratação</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Hidratação</h3>
                         <span><i class="fa-regular fa-clock"></i> 20 min</span>
                     </div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Selagem', 70)">
+                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)">
                     <div class="service-info">
-                        <h3>Selagem</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Selagem</h3>
                         <span><i class="fa-regular fa-clock"></i> 45 min</span>
                     </div>
                     <span class="price">R$ 70,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Luzes', 90)">
+                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)">
                     <div class="service-info">
-                        <h3>Luzes</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Luzes</h3>
                         <span><i class="fa-regular fa-clock"></i> 60 min</span>
                     </div>
                     <span class="price">R$ 90,00</span>
                 </div>
 
-                <div class="service-card" onclick="selectService(this, 'Platinado', 120)">
+                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)">
                     <div class="service-info">
-                        <h3>Platinado</h3>
+                        <h3><i class="fa-regular fa-square checkbox-icon"></i> Platinado</h3>
                         <span><i class="fa-regular fa-clock"></i> 90 min</span>
                     </div>
                     <span class="price">R$ 120,00</span>
                 </div>
+
             </div>
         </section>
 
@@ -151,7 +153,7 @@
             </div>
         </section>
 
-        <!-- Identificação do Cliente (Apenas uma vez) -->
+        <!-- Identificação do Cliente -->
         <section class="section">
             <h2>4. Seus Dados</h2>
             <div class="client-inputs" style="display: flex; flex-direction: column; gap: 12px;">
