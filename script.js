@@ -5,8 +5,7 @@ const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let selectedBarber = "Willian";
-let selectedService = "Corte";
-let selectedPrice = 35;
+let selectedServices = []; // Agora armazena uma lista de serviços selecionados
 
 const allTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
@@ -28,12 +27,30 @@ function selectBarber(element, barberName) {
     checkAvailableTimes();
 }
 
-// Seleção de Serviço
-function selectService(element, serviceName, price) {
-    document.querySelectorAll(".service-card").forEach(card => card.classList.remove("active"));
-    element.classList.add("active");
-    selectedService = serviceName;
-    selectedPrice = price;
+// Alternar Seleção de Múltiplos Serviços
+function toggleService(element, serviceName, price) {
+    const icon = element.querySelector(".checkbox-icon");
+    
+    // Verifica se já está selecionado
+    const index = selectedServices.findIndex(s => s.name === serviceName);
+
+    if (index > -1) {
+        // Remove se já estiver na lista
+        selectedServices.splice(index, 1);
+        element.classList.remove("active");
+        if (icon) {
+            icon.classList.remove("fa-solid", "fa-square-check");
+            icon.classList.add("fa-regular", "fa-square");
+        }
+    } else {
+        // Adiciona à lista
+        selectedServices.push({ name: serviceName, price: price });
+        element.classList.add("active");
+        if (icon) {
+            icon.classList.remove("fa-regular", "fa-square");
+            icon.classList.add("fa-solid", "fa-square-check");
+        }
+    }
 }
 
 // Checa no Supabase quais horários já estão ocupados
@@ -94,6 +111,11 @@ async function sendToWhatsapp() {
         return;
     }
 
+    if (selectedServices.length === 0) {
+        alert("Por favor, selecione pelo menos um serviço.");
+        return;
+    }
+
     if (!time) {
         alert("Nenhum horário selecionado ou todos os horários estão ocupados nessa data.");
         return;
@@ -104,6 +126,13 @@ async function sendToWhatsapp() {
         btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agendando...';
     }
 
+    // Calcula o preço total e une os nomes dos serviços selecionados
+    let precoTotal = 0;
+    let listaNomesServicos = selectedServices.map(s => {
+        precoTotal += s.price;
+        return s.name;
+    }).join(", ");
+
     const formattedDate = date.split("-").reverse().join("/");
     const whatsappNumber = "5531994951564";
 
@@ -111,13 +140,13 @@ async function sendToWhatsapp() {
                     `*Cliente:* ${name}\n` +
                     `*Telefone:* ${phone}\n` +
                     `*Barbeiro:* ${selectedBarber}\n` +
-                    `*Serviço:* ${selectedService} (R$ ${selectedPrice},00)\n` +
+                    `*Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n` +
                     `*Data:* ${formattedDate}\n` +
                     `*Horário:* ${time}`;
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    // Grava no Supabase salvando o telefone
+    // Grava no Supabase salvando os serviços combinados
     try {
         const { error } = await _supabase
             .from("agendamentos")
@@ -126,7 +155,7 @@ async function sendToWhatsapp() {
                     cliente: name,
                     telefone: phone,
                     barbeiro: selectedBarber,
-                    servico: selectedService,
+                    servico: listaNomesServicos, // Salva todos os serviços escolhidos juntos
                     data: date,
                     horario: time
                 }
