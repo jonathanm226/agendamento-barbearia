@@ -78,7 +78,7 @@
 
     </div>
 
-    <!-- Script do Painel corrigido -->
+    <!-- Script do Painel com normalização de texto -->
     <script>
         const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
         const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
@@ -99,6 +99,12 @@
             } else {
                 alert("Senha incorreta!");
             }
+        }
+
+        // Função auxiliar para padronizar textos (remove acentos e letras maiúsculas para comparar sem erro)
+        function normalizarTexto(texto) {
+            if (!texto) return "";
+            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
         }
 
         async function carregarAgendamentos() {
@@ -122,27 +128,28 @@
 
                 lblQtd.textContent = data.length;
                 
-                // Tabela unificada abrangendo nomes novos e antigos do banco
+                // Tabela de preços baseada em chaves normalizadas
                 const precosTabela = {
-                    "Corte": 35,
-                    "Corte de Cabelo": 45,
-                    "Barba": 35,
-                    "Barba Completa": 35,
-                    "Combo Cabelo + Barba": 70,
-                    "Sobrancelha": 15,
-                    "Acabamento": 15,
-                    "Pigmentação": 35,
-                    "Alisamento": 35,
-                    "Hidratação": 35,
-                    "Selagem": 70,
-                    "Luzes": 90,
-                    "Platinado": 120
+                    "corte": 35,
+                    "corte de cabelo": 45,
+                    "barba": 35,
+                    "barba completa": 35,
+                    "combo cabelo + barba": 70,
+                    "sobrancelha": 15,
+                    "acabamento": 15,
+                    "pigmentacao": 35,
+                    "alisamento": 35,
+                    "hidratacao": 35,
+                    "selagem": 70,
+                    "luzes": 90,
+                    "platinado": 120
                 };
 
                 let faturamentoTotal = 0;
 
                 data.forEach(item => {
-                    let precoServico = precosTabela[item.servico] || 0;
+                    const nomeNormalizado = normalizarTexto(item.servico);
+                    let precoServico = precosTabela[nomeNormalizado] || 35; // Se não achar na tabela, assume 35 por segurança
                     faturamentoTotal += precoServico;
                 });
 
@@ -156,7 +163,8 @@
                 container.innerHTML = "";
                 data.forEach(item => {
                     const dataFormatada = item.data.split("-").reverse().join("/");
-                    let precoServico = precosTabela[item.servico] || 0;
+                    const nomeNormalizado = normalizarTexto(item.servico);
+                    let precoServico = precosTabela[nomeNormalizado] || 35;
                     
                     const card = document.createElement("div");
                     card.style.background = "#2A2A2A";
