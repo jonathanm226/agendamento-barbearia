@@ -20,7 +20,7 @@
                 <i class="fa-solid fa-calendar-days barber-icon"></i>
                 <div>
                     <h1>Painel de Controle</h1>
-                    <p>Gerenciamento de Agendamentos</p>
+                    <p>Gerenciamento e Fechamento</p>
                 </div>
             </div>
         </header>
@@ -40,19 +40,37 @@
         <!-- Seção da Agenda (Oculta até logar) -->
         <section id="dashboard-section" class="section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>Agendamentos Registrados</h2>
+                <h2>Agendamentos e Caixa</h2>
                 <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem;">
                     <i class="fa-solid fa-rotate"></i> Atualizar
                 </button>
             </div>
 
             <!-- Filtro por Data -->
-            <div class="input-group" style="margin-bottom: 15px;">
-                <label for="filter-date">Filtrar por Data:</label>
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label for="filter-date">Selecionar Data:</label>
                 <input type="date" id="filter-date" onchange="carregarAgendamentos()">
             </div>
 
+            <!-- Card de Fechamento Diário -->
+            <div style="background: #332B15; border: 2px solid #D4AF37; padding: 15px; border-radius: 10px; margin-bottom: 25px;">
+                <h3 style="color: #D4AF37; margin-bottom: 10px; font-size: 1.1rem;">
+                    <i class="fa-solid fa-cash-register"></i> Fechamento do Dia
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem;">
+                    <div style="background: #1E1E1E; padding: 10px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.8rem;">Total Atendimentos</span>
+                        <strong id="resumo-qtd" style="font-size: 1.2rem; color: #FFF;">0</strong>
+                    </div>
+                    <div style="background: #1E1E1E; padding: 10px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.8rem;">Faturamento Total</span>
+                        <strong id="resumo-total" style="font-size: 1.2rem; color: #25D366;">R$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tabela / Lista de Agendamentos -->
+            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #D4AF37;">Lista de Horários</h3>
             <div id="agendamentos-list" style="display: flex; flex-direction: column; gap: 10px;">
                 <!-- Os dados entram aqui via JavaScript -->
             </div>
@@ -60,13 +78,12 @@
 
     </div>
 
-    <!-- Script do Painel -->
+    <!-- Script do Painel e Fechamento -->
     <script>
         const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
         const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Defina uma senha simples para o painel
         const SENHA_MESTRE = "admin123"; 
 
         function fazerLogin() {
@@ -75,7 +92,6 @@
                 document.getElementById("login-section").style.display = "none";
                 document.getElementById("dashboard-section").style.display = "block";
                 
-                // Define a data de hoje no filtro
                 const today = new Date().toISOString().split("T")[0];
                 document.getElementById("filter-date").value = today;
                 
@@ -88,6 +104,9 @@
         async function carregarAgendamentos() {
             const dataFiltro = document.getElementById("filter-date").value;
             const container = document.getElementById("agendamentos-list");
+            const lblQtd = document.getElementById("resumo-qtd");
+            const lblTotal = document.getElementById("resumo-total");
+
             container.innerHTML = "<p style='color: #aaa; text-align: center;'>Carregando...</p>";
 
             try {
@@ -101,6 +120,28 @@
 
                 if (error) throw error;
 
+                // Atualiza contadores do Fechamento Diário
+                lblQtd.textContent = data.length;
+                
+                // Como o banco salva o nome do serviço mas o preço exato depende da tabela, 
+                // podemos estimar buscando os preços ou se basear nas strings comuns. 
+                // Vamos calcular somando o valor com base nos serviços cadastrados:
+                let faturamentoTotal = 0;
+                
+                const precosTabela = {
+                    "Corte": 35, "Barba": 35, "Sobrancelha": 15, "Acabamento": 15,
+                    "Pigmentação": 35, "Alisamento": 35, "Hidratação": 35,
+                    "Selagem": 70, "Luzes": 90, "Platinado": 120
+                };
+
+                data.forEach(item => {
+                    // Tenta achar o preço correspondente ao nome do serviço salvo
+                    let precoServico = precosTabela[item.servico] || 0;
+                    faturamentoTotal += precoServico;
+                });
+
+                lblTotal.textContent = `R$ ${faturamentoTotal.toFixed(2).replace(".", ",")}`;
+
                 if (data.length === 0) {
                     container.innerHTML = "<p style='color: #aaa; text-align: center;'>Nenhum agendamento encontrado para esta data.</p>";
                     return;
@@ -109,6 +150,7 @@
                 container.innerHTML = "";
                 data.forEach(item => {
                     const dataFormatada = item.data.split("-").reverse().join("/");
+                    let precoServico = precosTabela[item.servico] || 0;
                     
                     const card = document.createElement("div");
                     card.style.background = "#2A2A2A";
@@ -122,8 +164,8 @@
                             <span style="font-size: 0.85rem; color: #888;">Data: ${dataFormatada}</span>
                         </div>
                         <p style="margin: 4px 0;"><strong>Cliente:</strong> ${item.cliente}</p>
-                        <p style="margin: 4px 0;"><strong>Serviço:</strong> ${item.servico}</p>
-                        <p style="margin: 4px 0; font-size: 0.9rem; color: #25D366;"><strong>Barbeiro:</strong> ${item.barbeiro}</p>
+                        <p style="margin: 4px 0;"><strong>Serviço:</strong> ${item.servico} <span style="color: #25D366; float: right;">R$ ${precoServico},00</span></p>
+                        <p style="margin: 4px 0; font-size: 0.9rem; color: #AAA;"><strong>Barbeiro:</strong> ${item.barbeiro}</p>
                         <div style="margin-top: 10px; text-align: right;">
                             <button onclick="deletarAgendamento(${item.id})" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                                 <i class="fa-solid fa-trash"></i> Cancelar/Excluir
