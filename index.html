@@ -3,174 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willian Barber | Agendamento</title>
+    <title>Willian Barber | Bem-vindo</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- SDK do Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container landing-container">
         
-        <!-- Cabeçalho -->
-        <header class="barber-header">
-            <div class="brand-info">
-                <i class="fa-solid fa-scissors barber-icon"></i>
-                <div>
-                    <h1>Willian Barber</h1>
-                    <p>Hoje é dia de cuidar do visual</p>
-                </div>
+        <!-- Cabeçalho / Banner da Landing Page -->
+        <header class="landing-header">
+            <div class="brand-logo-container">
+                <i class="fa-solid fa-scissors landing-icon"></i>
             </div>
+            <h1>Willian Barber</h1>
+            <p class="tagline">Tradição, estilo e o melhor corte da região.</p>
         </header>
 
-        <!-- Seleção de Barbeiro -->
-        <section class="section">
-            <h2>1. Escolha o Barbeiro</h2>
-            <div class="barbers-grid">
-                <div class="barber-card active" onclick="selectBarber(this, 'Willian')">
-                    <i class="fa-solid fa-user-check barber-avatar"></i>
-                    <h3>Willian</h3>
+        <!-- Seção Sobre / Apresentação -->
+        <section class="section about-section">
+            <h2>Sobre a Barbearia</h2>
+            <p>
+                Bem-vindo ao espaço dedicado ao seu visual! Contamos com profissionais qualificados, ambiente climatizado, bebidas de cortesia e um atendimento de primeira para garantir que você saia renovado.
+            </p>
+        </section>
+
+        <!-- Seção de Informações Úteis (Horários e Endereço) -->
+        <section class="section info-section">
+            <div class="info-card">
+                <i class="fa-regular fa-clock"></i>
+                <div>
+                    <h3>Horário de Funcionamento</h3>
+                    <p>Segunda a Sábado: 09h às 19h</p>
                 </div>
-                <div class="barber-card" onclick="selectBarber(this, 'Pedro')">
-                    <i class="fa-solid fa-user-check barber-avatar"></i>
-                    <h3>Pedro</h3>
+            </div>
+            <div class="info-card">
+                <i class="fa-solid fa-location-dot"></i>
+                <div>
+                    <h3>Localização</h3>
+                    <p>Rua Exemplo, 123 - Centro</p>
                 </div>
             </div>
         </section>
 
-        <!-- Seleção de Serviços -->
-        <section class="section">
-            <h2>2. Escolha o Serviço</h2>
-            <div class="services-grid">
-                
-                <div class="service-card active" onclick="selectService(this, 'Corte', 35)">
-                    <div class="service-info">
-                        <h3>Corte</h3>
-                        <span><i class="fa-regular fa-clock"></i> 30 min</span>
-                    </div>
-                    <span class="price">R$ 35,00</span>
-                </div>
+        <!-- Botão de Chamada para Ação (CTA) aponta para agendar.html -->
+        <div class="landing-action">
+            <a href="agendar.html" class="btn-primary-action">
+                <i class="fa-regular fa-calendar-check"></i> Agendar Horário
+            </a>
+        </div>
 
-                <div class="service-card" onclick="selectService(this, 'Barba', 35)">
-                    <div class="service-info">
-                        <h3>Barba</h3>
-                        <span><i class="fa-regular fa-clock"></i> 30 min</span>
-                    </div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Sobrancelha', 15)">
-                    <div class="service-info">
-                        <h3>Sobrancelha</h3>
-                        <span><i class="fa-regular fa-clock"></i> 15 min</span>
-                    </div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Acabamento', 15)">
-                    <div class="service-info">
-                        <h3>Acabamento</h3>
-                        <span><i class="fa-regular fa-clock"></i> 15 min</span>
-                    </div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Pigmentação', 35)">
-                    <div class="service-info">
-                        <h3>Pigmentação</h3>
-                        <span><i class="fa-regular fa-clock"></i> 20 min</span>
-                    </div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Alisamento', 35)">
-                    <div class="service-info">
-                        <h3>Alisamento</h3>
-                        <span><i class="fa-regular fa-clock"></i> 40 min</span>
-                    </div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Hidratação', 35)">
-                    <div class="service-info">
-                        <h3>Hidratação</h3>
-                        <span><i class="fa-regular fa-clock"></i> 20 min</span>
-                    </div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Selagem', 70)">
-                    <div class="service-info">
-                        <h3>Selagem</h3>
-                        <span><i class="fa-regular fa-clock"></i> 45 min</span>
-                    </div>
-                    <span class="price">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Luzes', 90)">
-                    <div class="service-info">
-                        <h3>Luzes</h3>
-                        <span><i class="fa-regular fa-clock"></i> 60 min</span>
-                    </div>
-                    <span class="price">R$ 90,00</span>
-                </div>
-
-                <div class="service-card" onclick="selectService(this, 'Platinado', 120)">
-                    <div class="service-info">
-                        <h3>Platinado</h3>
-                        <span><i class="fa-regular fa-clock"></i> 90 min</span>
-                    </div>
-                    <span class="price">R$ 120,00</span>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Seleção de Data e Horário -->
-        <section class="section">
-            <h2>3. Data e Horário</h2>
-            <div class="datetime-inputs">
-                <div class="input-group">
-                    <label for="date"><i class="fa-regular fa-calendar"></i> Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()">
-                </div>
-                
-                <div class="input-group">
-                    <label for="time"><i class="fa-regular fa-clock"></i> Horário:</label>
-                    <select id="time">
-                        <option value="09:00">09:00</option>
-                        <option value="10:00">10:00</option>
-                        <option value="11:00">11:00</option>
-                        <option value="14:00">14:00</option>
-                        <option value="15:00">15:00</option>
-                        <option value="16:00">16:00</option>
-                        <option value="17:00">17:00</option>
-                        <option value="18:00">18:00</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <!-- Identificação do Cliente -->
-        <section class="section">
-            <h2>4. Seus Dados</h2>
-            <div class="client-inputs">
-                <input type="text" id="client-name" placeholder="Seu Nome Completo" required>
-            </div>
-        </section>
-
-        <!-- Botão de Ação Fixo -->
-        <footer class="footer-action">
-            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()">
-                <i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp
-            </button>
+        <!-- Rodapé simples -->
+        <footer class="landing-footer">
+            <p>&copy; 2026 Willian Barber. Todos os direitos reservados.</p>
         </footer>
 
     </div>
 
-    <!-- Vinculação do arquivo de lógica -->
-    <script src="script.js"></script>
 </body>
 </html>
