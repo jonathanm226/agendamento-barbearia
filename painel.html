@@ -25,7 +25,7 @@
             </div>
         </header>
 
-        <!-- Seção de Login (Proteção básica) -->
+        <!-- Seção de Login -->
         <section id="login-section" class="section">
             <h2>Acesso Restrito</h2>
             <div class="datetime-inputs">
@@ -37,7 +37,7 @@
             </div>
         </section>
 
-        <!-- Seção da Agenda (Oculta até logar) -->
+        <!-- Seção da Agenda -->
         <section id="dashboard-section" class="section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>Agendamentos e Caixa</h2>
@@ -78,7 +78,7 @@
 
     </div>
 
-    <!-- Script do Painel e Fechamento -->
+    <!-- Script do Painel corrigido -->
     <script>
         const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
         const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
@@ -120,22 +120,28 @@
 
                 if (error) throw error;
 
-                // Atualiza contadores do Fechamento Diário
                 lblQtd.textContent = data.length;
                 
-                // Como o banco salva o nome do serviço mas o preço exato depende da tabela, 
-                // podemos estimar buscando os preços ou se basear nas strings comuns. 
-                // Vamos calcular somando o valor com base nos serviços cadastrados:
-                let faturamentoTotal = 0;
-                
+                // Tabela unificada abrangendo nomes novos e antigos do banco
                 const precosTabela = {
-                    "Corte": 35, "Barba": 35, "Sobrancelha": 15, "Acabamento": 15,
-                    "Pigmentação": 35, "Alisamento": 35, "Hidratação": 35,
-                    "Selagem": 70, "Luzes": 90, "Platinado": 120
+                    "Corte": 35,
+                    "Corte de Cabelo": 45,
+                    "Barba": 35,
+                    "Barba Completa": 35,
+                    "Combo Cabelo + Barba": 70,
+                    "Sobrancelha": 15,
+                    "Acabamento": 15,
+                    "Pigmentação": 35,
+                    "Alisamento": 35,
+                    "Hidratação": 35,
+                    "Selagem": 70,
+                    "Luzes": 90,
+                    "Platinado": 120
                 };
 
+                let faturamentoTotal = 0;
+
                 data.forEach(item => {
-                    // Tenta achar o preço correspondente ao nome do serviço salvo
                     let precoServico = precosTabela[item.servico] || 0;
                     faturamentoTotal += precoServico;
                 });
