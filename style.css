@@ -216,3 +216,119 @@ input:focus, select:focus {
 .btn-whatsapp:hover {
     background-color: #1EBE5D;
 }
+/* Estilos específicos para a Landing Page */
+.landing-container {
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+.landing-header {
+    padding: 30px 0 20px 0;
+    border-bottom: 1px solid #333;
+    margin-bottom: 25px;
+}
+
+.brand-logo-container {
+    width: 80px;
+    height: 80px;
+    background: #332B15;
+    border: 2px solid #D4AF37;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+}
+
+.landing-icon {
+    font-size: 2.5rem;
+    color: #D4AF37;
+}
+
+.landing-header h1 {
+    font-size: 1.8rem;
+    color: #FFFFFF;
+    margin-bottom: 5px;
+}
+
+.tagline {
+    font-size: 0.95rem;
+    color: #AAA;
+}
+
+.about-section {
+    text-align: left;
+    background: #2A2A2A;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.about-section p {
+    font-size: 0.9rem;
+    color: #CCC;
+    line-height: 1.5;
+}
+
+.info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.info-card {
+    background: #2A2A2A;
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+}
+
+.info-card i {
+    font-size: 1.5rem;
+    color: #D4AF37;
+}
+
+.info-card h3 {
+    font-size: 0.95rem;
+    color: #FFF;
+    margin-bottom: 3px;
+}
+
+.info-card p {
+    font-size: 0.8rem;
+    color: #AAA;
+}
+
+.landing-action {
+    margin-top: 20px;
+}
+
+.btn-primary-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background-color: #D4AF37;
+    color: #121212;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-primary-action:hover {
+    background-color: #C19E31;
+}
+
+.landing-footer {
+    margin-top: 30px;
+    font-size: 0.75rem;
+    color: #666;
+}
