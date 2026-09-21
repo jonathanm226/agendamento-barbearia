@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willian Barber | Painel de Agendamentos</title>
+    <title>Willian Barber | Agendamento</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -12,200 +12,166 @@
 </head>
 <body>
 
-    <div class="app-container" style="max-width: 700px;">
+    <div class="app-container">
         
         <!-- Cabeçalho -->
         <header class="barber-header">
             <div class="brand-info">
-                <i class="fa-solid fa-calendar-days barber-icon"></i>
+                <i class="fa-solid fa-scissors barber-icon"></i>
                 <div>
-                    <h1>Painel de Controle</h1>
-                    <p>Gerenciamento e Fechamento</p>
+                    <h1>Willian Barber</h1>
+                    <p>Hoje é dia de cuidar do visual</p>
                 </div>
             </div>
         </header>
 
-        <!-- Seção de Login -->
-        <section id="login-section" class="section">
-            <h2>Acesso Restrito</h2>
+        <!-- Seleção de Barbeiro -->
+        <section class="section">
+            <h2>1. Escolha o Barbeiro</h2>
+            <div class="barbers-grid">
+                <div class="barber-card active" onclick="selectBarber(this, 'Willian')">
+                    <i class="fa-solid fa-user-check barber-avatar"></i>
+                    <h3>Willian</h3>
+                </div>
+                <div class="barber-card" onclick="selectBarber(this, 'Pedro')">
+                    <i class="fa-solid fa-user-check barber-avatar"></i>
+                    <h3>Pedro</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seleção de Serviços -->
+        <section class="section">
+            <h2>2. Escolha o Serviço</h2>
+            <div class="services-grid">
+                
+                <div class="service-card active" onclick="selectService(this, 'Corte', 35)">
+                    <div class="service-info">
+                        <h3>Corte</h3>
+                        <span><i class="fa-regular fa-clock"></i> 30 min</span>
+                    </div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Barba', 35)">
+                    <div class="service-info">
+                        <h3>Barba</h3>
+                        <span><i class="fa-regular fa-clock"></i> 30 min</span>
+                    </div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Sobrancelha', 15)">
+                    <div class="service-info">
+                        <h3>Sobrancelha</h3>
+                        <span><i class="fa-regular fa-clock"></i> 15 min</span>
+                    </div>
+                    <span class="price">R$ 15,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Acabamento', 15)">
+                    <div class="service-info">
+                        <h3>Acabamento</h3>
+                        <span><i class="fa-regular fa-clock"></i> 15 min</span>
+                    </div>
+                    <span class="price">R$ 15,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Pigmentação', 35)">
+                    <div class="service-info">
+                        <h3>Pigmentação</h3>
+                        <span><i class="fa-regular fa-clock"></i> 20 min</span>
+                    </div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Alisamento', 35)">
+                    <div class="service-info">
+                        <h3>Alisamento</h3>
+                        <span><i class="fa-regular fa-clock"></i> 40 min</span>
+                    </div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Hidratação', 35)">
+                    <div class="service-info">
+                        <h3>Hidratação</h3>
+                        <span><i class="fa-regular fa-clock"></i> 20 min</span>
+                    </div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Selagem', 70)">
+                    <div class="service-info">
+                        <h3>Selagem</h3>
+                        <span><i class="fa-regular fa-clock"></i> 45 min</span>
+                    </div>
+                    <span class="price">R$ 70,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Luzes', 90)">
+                    <div class="service-info">
+                        <h3>Luzes</h3>
+                        <span><i class="fa-regular fa-clock"></i> 60 min</span>
+                    </div>
+                    <span class="price">R$ 90,00</span>
+                </div>
+
+                <div class="service-card" onclick="selectService(this, 'Platinado', 120)">
+                    <div class="service-info">
+                        <h3>Platinado</h3>
+                        <span><i class="fa-regular fa-clock"></i> 90 min</span>
+                    </div>
+                    <span class="price">R$ 120,00</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Seleção de Data e Horário -->
+        <section class="section">
+            <h2>3. Data e Horário</h2>
             <div class="datetime-inputs">
                 <div class="input-group">
-                    <label for="admin-pass">Senha de Acesso:</label>
-                    <input type="password" id="admin-pass" placeholder="Digite a senha">
+                    <label for="date"><i class="fa-regular fa-calendar"></i> Data:</label>
+                    <input type="date" id="date" onchange="checkAvailableTimes()">
                 </div>
-                <button class="btn-primary-action" onclick="fazerLogin()">Entrar</button>
+                
+                <div class="input-group">
+                    <label for="time"><i class="fa-regular fa-clock"></i> Horário:</label>
+                    <select id="time">
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                        <option value="18:00">18:00</option>
+                    </select>
+                </div>
             </div>
         </section>
 
-        <!-- Seção da Agenda -->
-        <section id="dashboard-section" class="section" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2>Agendamentos e Caixa</h2>
-                <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem;">
-                    <i class="fa-solid fa-rotate"></i> Atualizar
-                </button>
-            </div>
-
-            <!-- Filtro por Data -->
-            <div class="input-group" style="margin-bottom: 20px;">
-                <label for="filter-date">Selecionar Data:</label>
-                <input type="date" id="filter-date" onchange="carregarAgendamentos()">
-            </div>
-
-            <!-- Card de Fechamento Diário -->
-            <div style="background: #332B15; border: 2px solid #D4AF37; padding: 15px; border-radius: 10px; margin-bottom: 25px;">
-                <h3 style="color: #D4AF37; margin-bottom: 10px; font-size: 1.1rem;">
-                    <i class="fa-solid fa-cash-register"></i> Fechamento do Dia
-                </h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem;">
-                    <div style="background: #1E1E1E; padding: 10px; border-radius: 6px;">
-                        <span style="color: #888; display: block; font-size: 0.8rem;">Total Atendimentos</span>
-                        <strong id="resumo-qtd" style="font-size: 1.2rem; color: #FFF;">0</strong>
-                    </div>
-                    <div style="background: #1E1E1E; padding: 10px; border-radius: 6px;">
-                        <span style="color: #888; display: block; font-size: 0.8rem;">Faturamento Total</span>
-                        <strong id="resumo-total" style="font-size: 1.2rem; color: #25D366;">R$ 0,00</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabela / Lista de Agendamentos -->
-            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #D4AF37;">Lista de Horários</h3>
-            <div id="agendamentos-list" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Os dados entram aqui via JavaScript -->
+        <!-- Identificação do Cliente -->
+        <section class="section">
+            <h2>4. Seus Dados</h2>
+            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="text" id="client-name" placeholder="Seu Nome Completo" required>
+                <input type="tel" id="client-phone" placeholder="Seu WhatsApp / Telefone (com DDD)" required>
             </div>
         </section>
+
+        <!-- Botão de Ação Fixo -->
+        <footer class="footer-action">
+            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()">
+                <i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp
+            </button>
+        </footer>
 
     </div>
 
-    <!-- Script do Painel com normalização de texto -->
-    <script>
-        const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        const SENHA_MESTRE = "admin123"; 
-
-        function fazerLogin() {
-            const senha = document.getElementById("admin-pass").value;
-            if (senha === SENHA_MESTRE) {
-                document.getElementById("login-section").style.display = "none";
-                document.getElementById("dashboard-section").style.display = "block";
-                
-                const today = new Date().toISOString().split("T")[0];
-                document.getElementById("filter-date").value = today;
-                
-                carregarAgendamentos();
-            } else {
-                alert("Senha incorreta!");
-            }
-        }
-
-        // Função auxiliar para padronizar textos (remove acentos e letras maiúsculas para comparar sem erro)
-        function normalizarTexto(texto) {
-            if (!texto) return "";
-            return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        }
-
-        async function carregarAgendamentos() {
-            const dataFiltro = document.getElementById("filter-date").value;
-            const container = document.getElementById("agendamentos-list");
-            const lblQtd = document.getElementById("resumo-qtd");
-            const lblTotal = document.getElementById("resumo-total");
-
-            container.innerHTML = "<p style='color: #aaa; text-align: center;'>Carregando...</p>";
-
-            try {
-                let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
-
-                if (dataFiltro) {
-                    query = query.eq("data", dataFiltro);
-                }
-
-                const { data, error } = await query;
-
-                if (error) throw error;
-
-                lblQtd.textContent = data.length;
-                
-                // Tabela de preços baseada em chaves normalizadas
-                const precosTabela = {
-                    "corte": 35,
-                    "corte de cabelo": 45,
-                    "barba": 35,
-                    "barba completa": 35,
-                    "combo cabelo + barba": 70,
-                    "sobrancelha": 15,
-                    "acabamento": 15,
-                    "pigmentacao": 35,
-                    "alisamento": 35,
-                    "hidratacao": 35,
-                    "selagem": 70,
-                    "luzes": 90,
-                    "platinado": 120
-                };
-
-                let faturamentoTotal = 0;
-
-                data.forEach(item => {
-                    const nomeNormalizado = normalizarTexto(item.servico);
-                    let precoServico = precosTabela[nomeNormalizado] || 35; // Se não achar na tabela, assume 35 por segurança
-                    faturamentoTotal += precoServico;
-                });
-
-                lblTotal.textContent = `R$ ${faturamentoTotal.toFixed(2).replace(".", ",")}`;
-
-                if (data.length === 0) {
-                    container.innerHTML = "<p style='color: #aaa; text-align: center;'>Nenhum agendamento encontrado para esta data.</p>";
-                    return;
-                }
-
-                container.innerHTML = "";
-                data.forEach(item => {
-                    const dataFormatada = item.data.split("-").reverse().join("/");
-                    const nomeNormalizado = normalizarTexto(item.servico);
-                    let precoServico = precosTabela[nomeNormalizado] || 35;
-                    
-                    const card = document.createElement("div");
-                    card.style.background = "#2A2A2A";
-                    card.style.padding = "15px";
-                    card.style.borderRadius = "8px";
-                    card.style.borderLeft = "4px solid #D4AF37";
-                    
-                    card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <strong style="color: #D4AF37; font-size: 1.05rem;"><i class="fa-regular fa-clock"></i> ${item.horario}</strong>
-                            <span style="font-size: 0.85rem; color: #888;">Data: ${dataFormatada}</span>
-                        </div>
-                        <p style="margin: 4px 0;"><strong>Cliente:</strong> ${item.cliente}</p>
-                        <p style="margin: 4px 0;"><strong>Serviço:</strong> ${item.servico} <span style="color: #25D366; float: right;">R$ ${precoServico},00</span></p>
-                        <p style="margin: 4px 0; font-size: 0.9rem; color: #AAA;"><strong>Barbeiro:</strong> ${item.barbeiro}</p>
-                        <div style="margin-top: 10px; text-align: right;">
-                            <button onclick="deletarAgendamento(${item.id})" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                <i class="fa-solid fa-trash"></i> Cancelar/Excluir
-                            </button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (err) {
-                console.error("Erro ao buscar agendamentos:", err);
-                container.innerHTML = "<p style='color: #e74c3c; text-align: center;'>Erro ao carregar os dados do painel.</p>";
-            }
-        }
-
-        async function deletarAgendamento(id) {
-            if (confirm("Deseja realmente excluir/cancelar este agendamento?")) {
-                const { error } = await _supabase.from("agendamentos").delete().eq("id", id);
-                if (error) {
-                    alert("Erro ao excluir agendamento.");
-                    console.error(error);
-                } else {
-                    carregarAgendamentos();
-                }
-            }
-        }
-    </script>
+    <!-- Vinculação do arquivo de lógica -->
+    <script src="script.js"></script>
 </body>
 </html>
