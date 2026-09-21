@@ -5,8 +5,8 @@ const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let selectedBarber = "Willian";
-let selectedService = "Corte de Cabelo";
-let selectedPrice = 45;
+let selectedService = "Corte";
+let selectedPrice = 35;
 
 const allTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 
@@ -79,16 +79,18 @@ async function checkAvailableTimes() {
 // Envia para o WhatsApp e grava o agendamento no Supabase
 async function sendToWhatsapp() {
     const nameInput = document.getElementById("client-name");
+    const phoneInput = document.getElementById("client-phone");
     const dateInput = document.getElementById("date");
     const timeSelect = document.getElementById("time");
     const btnAgendar = document.getElementById("btn-agendar");
 
     const name = nameInput ? nameInput.value.trim() : "";
+    const phone = phoneInput ? phoneInput.value.trim() : "";
     const date = dateInput ? dateInput.value : "";
     const time = timeSelect ? timeSelect.value : "";
 
-    if (!name) {
-        alert("Por favor, digite seu nome antes de prosseguir.");
+    if (!name || !phone) {
+        alert("Por favor, digite seu nome e telefone antes de prosseguir.");
         return;
     }
 
@@ -102,12 +104,12 @@ async function sendToWhatsapp() {
         btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agendando...';
     }
 
-    // Prepara a mensagem do WhatsApp
     const formattedDate = date.split("-").reverse().join("/");
     const whatsappNumber = "5531994951564";
 
     const message = `Olá! Gostaria de agendar um horário:\n\n` +
                     `*Cliente:* ${name}\n` +
+                    `*Telefone:* ${phone}\n` +
                     `*Barbeiro:* ${selectedBarber}\n` +
                     `*Serviço:* ${selectedService} (R$ ${selectedPrice},00)\n` +
                     `*Data:* ${formattedDate}\n` +
@@ -115,13 +117,14 @@ async function sendToWhatsapp() {
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    // Grava no Supabase em segundo plano
+    // Grava no Supabase salvando o telefone
     try {
         const { error } = await _supabase
             .from("agendamentos")
             .insert([
                 {
                     cliente: name,
+                    telefone: phone,
                     barbeiro: selectedBarber,
                     servico: selectedService,
                     data: date,
@@ -137,7 +140,6 @@ async function sendToWhatsapp() {
         console.error(err);
     }
 
-    // Atualiza a lista de horários
     await checkAvailableTimes();
 
     if (btnAgendar) {
@@ -145,6 +147,5 @@ async function sendToWhatsapp() {
         btnAgendar.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp';
     }
 
-    // Redireciona diretamente para o WhatsApp
     window.location.href = link;
 }
