@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willian Barber | Painel de Agendamentos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- SDK do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-container" style="max-width: 700px;">
+        
+        <!-- Cabeçalho -->
+        <header class="barber-header">
+            <div class="brand-info">
+                <i class="fa-solid fa-calendar-days barber-icon"></i>
+                <div>
+                    <h1>Painel de Controle</h1>
+                    <p>Gerenciamento de Agendamentos</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Seção de Login (Proteção básica) -->
+        <section id="login-section" class="section">
+            <h2>Acesso Restrito</h2>
+            <div class="datetime-inputs">
+                <div class="input-group">
+                    <label for="admin-pass">Senha de Acesso:</label>
+                    <input type="password" id="admin-pass" placeholder="Digite a senha">
+                </div>
+                <button class="btn-primary-action" onclick="fazerLogin()">Entrar</button>
+            </div>
+        </section>
+
+        <!-- Seção da Agenda (Oculta até logar) -->
+        <section id="dashboard-section" class="section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Agendamentos Registrados</h2>
+                <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-rotate"></i> Atualizar
+                </button>
+            </div>
+
+            <!-- Filtro por Data -->
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label for="filter-date">Filtrar por Data:</label>
+                <input type="date" id="filter-date" onchange="carregarAgendamentos()">
+            </div>
+
+            <!-- Tabela / Lista de Agendamentos -->
+            <div id="agendamentos-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Os dados entram aqui via JavaScript -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Script do Painel -->
+    <script>
+        const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Defina uma senha simples para o painel
+        const SENHA_MESTRE = "admin123"; 
+
+        function fazerLogin() {
+            const senha = document.getElementById("admin-pass").value;
+            if (senha === SENHA_MESTRE) {
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("dashboard-section").style.display = "block";
+                
+                // Define a data de hoje no filtro
+                const today = new Date().toISOString().split("T")[0];
+                document.getElementById("filter-date").value = today;
+                
+                carregarAgendamentos();
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
+        async function carregarAgendamentos() {
+            const dataFiltro = document.getElementById("filter-date").value;
+            const container = document.getElementById("agendamentos-list");
+            container.innerHTML = "<p style='color: #aaa; text-align: center;'>Carregando...</p>";
+
+            try {
+                let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
+
+                if (dataFiltro) {
+                    query = query.eq("data", dataFiltro);
+                }
+
+                const { data, error } = await query;
+
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    container.innerHTML = "<p style='color: #aaa; text-align: center;'>Nenhum agendamento encontrado para esta data.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                data.forEach(item => {
+                    const dataFormatada = item.data.split("-").reverse().join("/");
+                    
+                    const card = document.createElement("div");
+                    card.style.background = "#2A2A2A";
+                    card.style.padding = "15px";
+                    card.style.borderRadius = "8px";
+                    card.style.borderLeft = "4px solid #D4AF37";
+                    
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong style="color: #D4AF37; font-size: 1.05rem;"><i class="fa-regular fa-clock"></i> ${item.horario}</strong>
+                            <span style="font-size: 0.85rem; color: #888;">Data: ${dataFormatada}</span>
+                        </div>
+                        <p style="margin: 4px 0;"><strong>Cliente:</strong> ${item.cliente}</p>
+                        <p style="margin: 4px 0;"><strong>Serviço:</strong> ${item.servico}</p>
+                        <p style="margin: 4px 0; font-size: 0.9rem; color: #25D366;"><strong>Barbeiro:</strong> ${item.barbeiro}</p>
+                        <div style="margin-top: 10px; text-align: right;">
+                            <button onclick="deletarAgendamento(${item.id})" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                <i class="fa-solid fa-trash"></i> Cancelar/Excluir
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error("Erro ao buscar agendamentos:", err);
+                container.innerHTML = "<p style='color: #e74c3c; text-align: center;'>Erro ao carregar os dados do painel.</p>";
+            }
+        }
+
+        async function deletarAgendamento(id) {
+            if (confirm("Deseja realmente excluir/cancelar este agendamento?")) {
+                const { error } = await _supabase.from("agendamentos").delete().eq("id", id);
+                if (error) {
+                    alert("Erro ao excluir agendamento.");
+                    console.error(error);
+                } else {
+                    carregarAgendamentos();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
