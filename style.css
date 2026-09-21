@@ -90,11 +90,32 @@ body {
     font-size: 1rem;
 }
 
-/* Cards de Serviços */
+/* Cards de Serviços com rolagem */
 .services-grid {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Estilo da barra de rolagem */
+.services-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.services-grid::-webkit-scrollbar-track {
+    background: #1E1E1E;
+}
+
+.services-grid::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.services-grid::-webkit-scrollbar-thumb:hover {
+    background: #D4AF37;
 }
 
 .service-card {
