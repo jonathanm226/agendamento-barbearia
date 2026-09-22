@@ -6,7 +6,7 @@
 }
 
 body {
-    background-color: #121212;
+    background-color: #000000;
     color: #FFFFFF;
     display: flex;
     justify-content: center;
@@ -16,36 +16,53 @@ body {
 .app-container {
     width: 100%;
     max-width: 480px;
-    background-color: #1E1E1E;
+    background-color: #121212;
     padding: 20px;
     padding-bottom: 90px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+    border-left: 1px solid #222222;
+    border-right: 1px solid #222222;
 }
 
+/* Cabeçalho Minimalista Preto e Branco */
 .barber-header {
-    border-bottom: 1px solid #333;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid #333333;
+    padding-bottom: 18px;
+    margin-bottom: 25px;
+    text-align: center;
 }
 
 .brand-info {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
 }
 
 .barber-icon {
     font-size: 2rem;
-    color: #D4AF37;
+    color: #FFFFFF;
+    background: #000000;
+    padding: 12px;
+    border-radius: 50%;
+    border: 1px solid #FFFFFF;
+    margin-bottom: 5px;
 }
 
 .brand-info h1 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
+    letter-spacing: 1.5px;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    font-weight: 700;
 }
 
 .brand-info p {
-    font-size: 0.85rem;
-    color: #AAA;
+    font-size: 0.75rem;
+    color: #AAAAAA;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
 .section {
@@ -53,9 +70,13 @@ body {
 }
 
 .section h2 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     margin-bottom: 12px;
-    color: #D4AF37;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-left: 3px solid #FFFFFF;
+    padding-left: 8px;
 }
 
 /* Cards de Barbeiros */
@@ -66,9 +87,9 @@ body {
 }
 
 .barber-card {
-    background: #2A2A2A;
-    border: 2px solid transparent;
-    border-radius: 10px;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 6px;
     padding: 15px;
     text-align: center;
     cursor: pointer;
@@ -76,25 +97,27 @@ body {
 }
 
 .barber-card.active {
-    border-color: #D4AF37;
-    background: #332B15;
+    border-color: #FFFFFF;
+    background: #252525;
 }
 
 .barber-avatar {
     font-size: 1.5rem;
-    color: #D4AF37;
+    color: #FFFFFF;
     margin-bottom: 8px;
 }
 
 .barber-card h3 {
     font-size: 1rem;
+    color: #FFF;
+    font-weight: 600;
 }
 
 /* Cards de Serviços com rolagem */
 .services-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     max-height: 360px;
     overflow-y: auto;
     padding-right: 4px;
@@ -102,27 +125,27 @@ body {
 
 /* Estilo da barra de rolagem */
 .services-grid::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 
 .services-grid::-webkit-scrollbar-track {
-    background: #1E1E1E;
+    background: #121212;
 }
 
 .services-grid::-webkit-scrollbar-thumb {
-    background: #333;
+    background: #444444;
     border-radius: 4px;
 }
 
 .services-grid::-webkit-scrollbar-thumb:hover {
-    background: #D4AF37;
+    background: #FFFFFF;
 }
 
 .service-card {
-    background: #2A2A2A;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    padding: 15px;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    padding: 14px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -131,23 +154,32 @@ body {
 }
 
 .service-card.active {
-    border-color: #D4AF37;
-    background: #332B15;
+    border-color: #FFFFFF;
+    background: #252525;
 }
 
 .service-info h3 {
-    font-size: 1rem;
-    margin-bottom: 5px;
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .service-info span {
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.78rem;
+    color: #888888;
 }
 
 .price {
     font-weight: bold;
-    color: #25D366;
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    background: #2A2A2A;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #444;
 }
 
 /* Inputs */
@@ -165,22 +197,22 @@ body {
 
 .input-group label {
     font-size: 0.85rem;
-    color: #CCC;
+    color: #CCCCCC;
 }
 
 input, select {
     width: 100%;
     padding: 12px;
-    background: #2A2A2A;
-    border: 1px solid #444;
-    border-radius: 8px;
+    background: #1A1A1A;
+    border: 1px solid #333333;
+    border-radius: 6px;
     color: white;
     font-size: 1rem;
     outline: none;
 }
 
 input:focus, select:focus {
-    border-color: #D4AF37;
+    border-color: #FFFFFF;
 }
 
 /* Rodapé Fixo com Botão */
@@ -192,18 +224,18 @@ input:focus, select:focus {
     width: 100%;
     max-width: 480px;
     padding: 15px 20px;
-    background: #1E1E1E;
-    border-top: 1px solid #333;
+    background: #121212;
+    border-top: 1px solid #222222;
 }
 
 .btn-whatsapp {
     width: 100%;
     padding: 15px;
-    background-color: #25D366;
-    color: white;
+    background-color: #FFFFFF;
+    color: #000000;
     border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
+    border-radius: 6px;
+    font-size: 1.05rem;
     font-weight: bold;
     cursor: pointer;
     display: flex;
@@ -211,10 +243,12 @@ input:focus, select:focus {
     align-items: center;
     gap: 10px;
     transition: 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-whatsapp:hover {
-    background-color: #1EBE5D;
+    background-color: #E0E0E0;
 }
 
 /* Estilos específicos para a Landing Page */
@@ -225,49 +259,50 @@ input:focus, select:focus {
 
 .landing-header {
     padding: 30px 0 20px 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #333333;
     margin-bottom: 25px;
 }
 
 .brand-logo-container {
-    width: 80px;
-    height: 80px;
-    background: #332B15;
-    border: 2px solid #D4AF37;
+    width: 90px;
+    height: 90px;
+    background: #000000;
+    border: 2px solid #FFFFFF;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 15px auto;
-}
-
-.landing-icon {
-    font-size: 2.5rem;
-    color: #D4AF37;
+    overflow: hidden;
 }
 
 .landing-header h1 {
     font-size: 1.8rem;
     color: #FFFFFF;
     margin-bottom: 5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
 .tagline {
-    font-size: 0.95rem;
-    color: #AAA;
+    font-size: 0.8rem;
+    color: #AAAAAA;
+    text-transform: uppercase;
+    letter-spacing: 3px;
 }
 
 .about-section {
     text-align: left;
-    background: #2A2A2A;
+    background: #1A1A1A;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 6px;
     margin-bottom: 20px;
+    border: 1px solid #333333;
 }
 
 .about-section p {
     font-size: 0.9rem;
-    color: #CCC;
+    color: #CCCCCC;
     line-height: 1.5;
 }
 
@@ -279,18 +314,19 @@ input:focus, select:focus {
 }
 
 .info-card {
-    background: #2A2A2A;
+    background: #1A1A1A;
     padding: 12px 15px;
-    border-radius: 10px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     gap: 15px;
     text-align: left;
+    border: 1px solid #333333;
 }
 
 .info-card i {
-    font-size: 1.5rem;
-    color: #D4AF37;
+    font-size: 1.4rem;
+    color: #FFFFFF;
 }
 
 .info-card h3 {
@@ -301,7 +337,7 @@ input:focus, select:focus {
 
 .info-card p {
     font-size: 0.8rem;
-    color: #AAA;
+    color: #AAAAAA;
 }
 
 .landing-action {
@@ -315,21 +351,23 @@ input:focus, select:focus {
     gap: 10px;
     width: 100%;
     padding: 16px;
-    background-color: #D4AF37;
-    color: #121212;
+    background-color: #FFFFFF;
+    color: #000000;
     text-decoration: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
+    border-radius: 6px;
+    font-size: 1.05rem;
     font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: 0.2s;
 }
 
 .btn-primary-action:hover {
-    background-color: #C19E31;
+    background-color: #E0E0E0;
 }
 
 .landing-footer {
     margin-top: 30px;
     font-size: 0.75rem;
-    color: #666;
+    color: #666666;
 }
