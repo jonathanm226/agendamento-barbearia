@@ -14,7 +14,7 @@
 
     <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 15px;">
         
-        <!-- Cabeçalho Compacto -->
+        <!-- Cabeçalho com a Logo -->
         <header class="barber-header" style="text-align: center; margin-bottom: 15px;">
             <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
                 <div class="brand-logo-container" style="width: 45px; height: 45px;">
@@ -22,14 +22,14 @@
                 </div>
                 <div style="text-align: left;">
                     <h1 style="font-size: 1.2rem; margin: 0;">Willian Cortes</h1>
-                    <p style="font-size: 0.8rem; margin: 0;">Desde 2019</p>
+                    <p style="font-size: 0.8rem; margin: 0;">Desde 2019[cite: 11]</p>
                 </div>
             </div>
         </header>
 
-        <!-- Seleção de Barbeiro (Lado a Lado) -->
+        <!-- Seleção de Barbeiro -->
         <section class="section" style="margin-bottom: 12px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">1. Barbeiro</h2>
+            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">1. Escolha o Barbeiro</h2>
             <div class="barbers-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                 <div class="barber-card active" onclick="selectBarber(this, 'Willian')" style="padding: 8px; text-align: center; cursor: pointer;">
                     <h3 style="font-size: 0.9rem; margin: 0;">Willian</h3>
@@ -40,9 +40,9 @@
             </div>
         </section>
 
-        <!-- Seleção de Serviços (Com altura máxima e rolagem interna para economizar espaço) -->
+        <!-- Seleção de Serviços (Múltipla Escolha com Scroll Compacto) -->
         <section class="section" style="margin-bottom: 12px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">2. Serviços (Selecione)</h2>
+            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">2. Escolha os Serviços</h2>
             <div class="services-grid" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
                 
                 <div class="service-card" onclick="toggleService(this, 'Corte', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
@@ -98,25 +98,27 @@
             </div>
         </section>
 
-        <!-- Data e Horário (Lado a Lado) -->
+        <!-- Seleção de Data e Horário (Alinhado e Simétrico) -->
         <section class="section" style="margin-bottom: 12px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">3. Data e Horário</h2>
-            <div class="datetime-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div class="input-group">
-                    <label for="date" style="font-size: 0.8rem;">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; padding: 8px; font-size: 0.85rem;">
+            <h2 style="font-size: 0.95rem; margin-bottom: 8px;">3. Data e Horário</h2>
+            <div class="datetime-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch;">
+                
+                <div class="input-group" style="display: flex; flex-direction: column;">
+                    <label for="date" style="font-size: 0.8rem; margin-bottom: 4px; color: #fff;">Data:</label>
+                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; height: 42px; padding: 0 10px; font-size: 0.85rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
                 </div>
                 
-                <div class="input-group">
-                    <label for="time" style="font-size: 0.8rem;">Horário:</label>
-                    <select id="time" style="width: 100%; padding: 8px; font-size: 0.85rem;">
-                        <!-- Carregado dinamicamente -->
+                <div class="input-group" style="display: flex; flex-direction: column;">
+                    <label for="time" style="font-size: 0.8rem; margin-bottom: 4px; color: #fff;">Horário:</label>
+                    <select id="time" style="width: 100%; height: 42px; padding: 0 10px; font-size: 0.85rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                        <!-- Carregado dinamicamente via script.js -->
                     </select>
                 </div>
+
             </div>
         </section>
 
-        <!-- Identificação do Cliente (Lado a Lado em telas maiores ou compactas) -->
+        <!-- Identificação do Cliente -->
         <section class="section" style="margin-bottom: 15px;">
             <h2 style="font-size: 0.95rem; margin-bottom: 6px;">4. Seus Dados</h2>
             <div class="client-inputs" style="display: flex; flex-direction: column; gap: 8px;">
@@ -134,6 +136,7 @@
 
     </div>
 
+    <!-- Vinculação do arquivo de lógica -->
     <script src="script.js"></script>
 </body>
 </html>
