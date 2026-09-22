@@ -5,9 +5,7 @@ const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let selectedBarber = "Willian";
-let selectedServices = []; // Agora armazena uma lista de serviços selecionados
-
-const allTimes = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+let selectedServices = []; 
 
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("date");
@@ -19,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAvailableTimes();
 });
 
-// Seleção de Barbeiro
 function selectBarber(element, barberName) {
     document.querySelectorAll(".barber-card").forEach(card => card.classList.remove("active"));
     element.classList.add("active");
@@ -27,15 +24,11 @@ function selectBarber(element, barberName) {
     checkAvailableTimes();
 }
 
-// Alternar Seleção de Múltiplos Serviços
 function toggleService(element, serviceName, price) {
     const icon = element.querySelector(".checkbox-icon");
-    
-    // Verifica se já está selecionado
     const index = selectedServices.findIndex(s => s.name === serviceName);
 
     if (index > -1) {
-        // Remove se já estiver na lista
         selectedServices.splice(index, 1);
         element.classList.remove("active");
         if (icon) {
@@ -43,7 +36,6 @@ function toggleService(element, serviceName, price) {
             icon.classList.add("fa-regular", "fa-square");
         }
     } else {
-        // Adiciona à lista
         selectedServices.push({ name: serviceName, price: price });
         element.classList.add("active");
         if (icon) {
@@ -53,7 +45,35 @@ function toggleService(element, serviceName, price) {
     }
 }
 
-// Checa no Supabase quais horários já estão ocupados
+function getTimesForDate(dateString) {
+    if (!dateString) return [];
+    
+    const partes = dateString.split('-');
+    const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
+    const diaSemana = dataObj.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+
+    let horarios = [];
+
+    // Domingo (0): Fechado
+    if (diaSemana === 0) {
+        return [];
+    } 
+    // Sábado (6): 05:00 às 13:00
+    else if (diaSemana === 6) {
+        for (let h = 5; h <= 13; h++) {
+            horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
+        }
+    } 
+    // Segunda a Sexta (1 a 5): 07:00 às 19:00
+    else {
+        for (let h = 7; h <= 19; h++) {
+            horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
+        }
+    }
+
+    return horarios;
+}
+
 async function checkAvailableTimes() {
     const dateElement = document.getElementById("date");
     const timeSelect = document.getElementById("time");
@@ -62,6 +82,18 @@ async function checkAvailableTimes() {
 
     const selectedDate = dateElement.value;
     if (!selectedDate) return;
+
+    const allTimes = getTimesForDate(selectedDate);
+    timeSelect.innerHTML = "";
+
+    if (allTimes.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Fechado neste dia";
+        option.disabled = true;
+        timeSelect.appendChild(option);
+        return;
+    }
 
     try {
         const { data: agendamentos, error } = await _supabase
@@ -73,7 +105,6 @@ async function checkAvailableTimes() {
         if (error) throw error;
 
         const occupiedTimes = agendamentos.map(a => a.horario);
-        timeSelect.innerHTML = "";
 
         allTimes.forEach(time => {
             const option = document.createElement("option");
@@ -93,7 +124,6 @@ async function checkAvailableTimes() {
     }
 }
 
-// Envia para o WhatsApp e grava o agendamento no Supabase
 async function sendToWhatsapp() {
     const nameInput = document.getElementById("client-name");
     const phoneInput = document.getElementById("client-phone");
@@ -116,8 +146,8 @@ async function sendToWhatsapp() {
         return;
     }
 
-    if (!time) {
-        alert("Nenhum horário selecionado ou todos os horários estão ocupados nessa data.");
+    if (!time || timeSelect.selectedOptions[0]?.disabled) {
+        alert("Por favor, selecione um horário válido e disponível.");
         return;
     }
 
@@ -126,7 +156,6 @@ async function sendToWhatsapp() {
         btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agendando...';
     }
 
-    // Calcula o preço total e une os nomes dos serviços selecionados
     let precoTotal = 0;
     let listaNomesServicos = selectedServices.map(s => {
         precoTotal += s.price;
@@ -146,7 +175,6 @@ async function sendToWhatsapp() {
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    // Grava no Supabase salvando os serviços combinados
     try {
         const { error } = await _supabase
             .from("agendamentos")
@@ -155,7 +183,7 @@ async function sendToWhatsapp() {
                     cliente: name,
                     telefone: phone,
                     barbeiro: selectedBarber,
-                    servico: listaNomesServicos, // Salva todos os serviços escolhidos juntos
+                    servico: listaNomesServicos,
                     data: date,
                     horario: time
                 }
