@@ -196,7 +196,7 @@
         </div>
     </div>
 
-    <script[cite: 15]>
+    <script>
         const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
         const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -439,7 +439,7 @@
                                     <i class="fa-solid ${isConcluido ? 'fa-check-double' : 'fa-check'}"></i> ${isConcluido ? 'Concluído' : 'Confirmar'}
                                 </button>
                                 
-                                <button onclick="window.open('${linkZapCliente}', '_blank')" style="background: #25D366; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <button onclick="event.preventDefault(); event.stopPropagation(); window.open('${linkZapCliente}', '_blank');" style="background: #25D366; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                                     <i class="fa-brands fa-whatsapp"></i> Lembrete
                                 </button>
 
