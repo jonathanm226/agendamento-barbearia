@@ -14,7 +14,7 @@
 
     <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 12px;">
         
-        <!-- Cabeçalho com a Logo -->
+        <!-- Cabeçalho com a Logo (Texto corrigido sem a marcação indesejada) -->
         <header class="barber-header" style="text-align: center; margin-bottom: 12px;">
             <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                 <div class="brand-logo-container" style="width: 40px; height: 40px;">
@@ -22,7 +22,7 @@
                 </div>
                 <div style="text-align: left;">
                     <h1 style="font-size: 1.1rem; margin: 0;">Willian Cortes</h1>
-                    <p style="font-size: 0.75rem; margin: 0;">Desde 2019[cite: 11]</p>
+                    <p style="font-size: 0.75rem; margin: 0;">Desde 2019</p>
                 </div>
             </div>
         </header>
@@ -43,7 +43,7 @@
         <!-- Seleção de Serviços (Múltipla Escolha com Scroll Compacto) -->
         <section class="section" style="margin-bottom: 10px;">
             <h2 style="font-size: 0.9rem; margin-bottom: 4px;">2. Escolha os Serviços</h2>
-            <div class="services-grid" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px;">
+            <div class="services-grid" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px;">
                 
                 <div class="service-card" onclick="toggleService(this, 'Corte', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
                     <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Corte (30 min)</h3></div>
@@ -98,10 +98,10 @@
             </div>
         </section>
 
-        <!-- Seleção de Data e Horário (Reduzido, alinhado à direita e espaçado) -->
-        <section class="section" style="margin-top: 12px; margin-bottom: 10px; clear: both;">
+        <!-- Seleção de Data e Horário (Isolado com position relative para evitar sobreposição do CSS externo) -->
+        <section class="section" style="position: relative; z-index: 5; margin-top: 15px; margin-bottom: 12px; clear: both; display: block;">
             <h2 style="font-size: 0.9rem; margin-bottom: 6px;">3. Data e Horário</h2>
-            <div class="datetime-inputs" style="display: flex; justify-content: flex-end; gap: 8px; width: 100%;">
+            <div class="datetime-inputs" style="display: flex; justify-content: space-between; gap: 8px; width: 100%;">
                 
                 <div class="input-group" style="display: flex; flex-direction: column; width: 48%;">
                     <label for="date" style="font-size: 0.75rem; margin-bottom: 2px; color: #fff;">Data:</label>
@@ -119,7 +119,7 @@
         </section>
 
         <!-- Identificação do Cliente -->
-        <section class="section" style="margin-bottom: 12px;">
+        <section class="section" style="position: relative; z-index: 4; margin-bottom: 12px; clear: both;">
             <h2 style="font-size: 0.9rem; margin-bottom: 4px;">4. Seus Dados</h2>
             <div class="client-inputs" style="display: flex; flex-direction: column; gap: 6px;">
                 <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="padding: 7px; font-size: 0.8rem;">
