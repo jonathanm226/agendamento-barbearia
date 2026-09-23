@@ -12,105 +12,105 @@
 </head>
 <body>
 
-    <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 15px;">
+    <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 12px;">
         
         <!-- Cabeçalho com a Logo -->
-        <header class="barber-header" style="text-align: center; margin-bottom: 15px;">
-            <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                <div class="brand-logo-container" style="width: 45px; height: 45px;">
+        <header class="barber-header" style="text-align: center; margin-bottom: 12px;">
+            <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <div class="brand-logo-container" style="width: 40px; height: 40px;">
                     <img src="logo.jpg.jpg" alt="Willian Cortes Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 </div>
                 <div style="text-align: left;">
-                    <h1 style="font-size: 1.2rem; margin: 0;">Willian Cortes</h1>
-                    <p style="font-size: 0.8rem; margin: 0;">Desde 2019[cite: 11]</p>
+                    <h1 style="font-size: 1.1rem; margin: 0;">Willian Cortes</h1>
+                    <p style="font-size: 0.75rem; margin: 0;">Desde 2019[cite: 11]</p>
                 </div>
             </div>
         </header>
 
         <!-- Seleção de Barbeiro -->
-        <section class="section" style="margin-bottom: 12px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">1. Escolha o Barbeiro</h2>
-            <div class="barbers-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div class="barber-card active" onclick="selectBarber(this, 'Willian')" style="padding: 8px; text-align: center; cursor: pointer;">
-                    <h3 style="font-size: 0.9rem; margin: 0;">Willian</h3>
+        <section class="section" style="margin-bottom: 10px;">
+            <h2 style="font-size: 0.9rem; margin-bottom: 4px;">1. Escolha o Barbeiro</h2>
+            <div class="barbers-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div class="barber-card active" onclick="selectBarber(this, 'Willian')" style="padding: 6px; text-align: center; cursor: pointer;">
+                    <h3 style="font-size: 0.85rem; margin: 0;">Willian</h3>
                 </div>
-                <div class="barber-card" onclick="selectBarber(this, 'Pedro')" style="padding: 8px; text-align: center; cursor: pointer;">
-                    <h3 style="font-size: 0.9rem; margin: 0;">Pedro</h3>
+                <div class="barber-card" onclick="selectBarber(this, 'Pedro')" style="padding: 6px; text-align: center; cursor: pointer;">
+                    <h3 style="font-size: 0.85rem; margin: 0;">Pedro</h3>
                 </div>
             </div>
         </section>
 
         <!-- Seleção de Serviços (Múltipla Escolha com Scroll Compacto) -->
-        <section class="section" style="margin-bottom: 12px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">2. Escolha os Serviços</h2>
-            <div class="services-grid" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+        <section class="section" style="margin-bottom: 10px;">
+            <h2 style="font-size: 0.9rem; margin-bottom: 4px;">2. Escolha os Serviços</h2>
+            <div class="services-grid" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px;">
                 
-                <div class="service-card" onclick="toggleService(this, 'Corte', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Corte (30 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 35,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Corte', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Corte (30 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Barba', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Barba (30 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 35,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Barba', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Barba (30 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (15 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 15,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (15 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 15,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 35,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 35,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 35,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 70,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 70,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 90,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 90,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)" style="display: flex; justify-content: space-between; padding: 8px 10px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.85rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
-                    <span class="price" style="font-size: 0.85rem; font-weight: bold;">R$ 120,00</span>
+                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)" style="display: flex; justify-content: space-between; padding: 6px 8px; align-items: center; cursor: pointer;">
+                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
+                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 120,00</span>
                 </div>
 
             </div>
         </section>
 
-        <!-- Seleção de Data e Horário (Corrigido sem sobreposição) -->
-        <section class="section" style="margin-top: 15px; margin-bottom: 12px; clear: both;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 8px;">3. Data e Horário</h2>
-            <div class="datetime-inputs" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;">
+        <!-- Seleção de Data e Horário (Reduzido, alinhado à direita e espaçado) -->
+        <section class="section" style="margin-top: 12px; margin-bottom: 10px; clear: both;">
+            <h2 style="font-size: 0.9rem; margin-bottom: 6px;">3. Data e Horário</h2>
+            <div class="datetime-inputs" style="display: flex; justify-content: flex-end; gap: 8px; width: 100%;">
                 
-                <div class="input-group" style="display: flex; flex-direction: column; width: 100%;">
-                    <label for="date" style="font-size: 0.8rem; margin-bottom: 4px; color: #fff;">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; height: 42px; padding: 0 8px; font-size: 0.8rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                <div class="input-group" style="display: flex; flex-direction: column; width: 48%;">
+                    <label for="date" style="font-size: 0.75rem; margin-bottom: 2px; color: #fff;">Data:</label>
+                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; height: 38px; padding: 0 6px; font-size: 0.75rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
                 </div>
                 
-                <div class="input-group" style="display: flex; flex-direction: column; width: 100%;">
-                    <label for="time" style="font-size: 0.8rem; margin-bottom: 4px; color: #fff;">Horário:</label>
-                    <select id="time" style="width: 100%; height: 42px; padding: 0 8px; font-size: 0.85rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                <div class="input-group" style="display: flex; flex-direction: column; width: 48%;">
+                    <label for="time" style="font-size: 0.75rem; margin-bottom: 2px; color: #fff;">Horário:</label>
+                    <select id="time" style="width: 100%; height: 38px; padding: 0 6px; font-size: 0.8rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
                         <!-- Carregado dinamicamente via script.js -->
                     </select>
                 </div>
@@ -119,17 +119,17 @@
         </section>
 
         <!-- Identificação do Cliente -->
-        <section class="section" style="margin-bottom: 15px;">
-            <h2 style="font-size: 0.95rem; margin-bottom: 6px;">4. Seus Dados</h2>
-            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 8px;">
-                <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="padding: 8px; font-size: 0.85rem;">
-                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required style="padding: 8px; font-size: 0.85rem;">
+        <section class="section" style="margin-bottom: 12px;">
+            <h2 style="font-size: 0.9rem; margin-bottom: 4px;">4. Seus Dados</h2>
+            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 6px;">
+                <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="padding: 7px; font-size: 0.8rem;">
+                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required style="padding: 7px; font-size: 0.8rem;">
             </div>
         </section>
 
         <!-- Botão de Ação Fixo -->
-        <footer class="footer-action" style="text-align: center; margin-bottom: 10px;">
-            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()" style="width: 100%; padding: 12px; font-size: 0.95rem;">
+        <footer class="footer-action" style="text-align: center; margin-bottom: 5px;">
+            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()" style="width: 100%; padding: 10px; font-size: 0.9rem;">
                 <i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp
             </button>
         </footer>
