@@ -163,7 +163,9 @@ async function sendToWhatsapp() {
     }).join(", ");
 
     const formattedDate = date.split("-").reverse().join("/");
-    const whatsappNumber = "5531994951564";
+    
+    // Novo número de atendimento configurado
+    const whatsappNumber = "5531975552202";
 
     const message = `Olá! Gostaria de agendar um horário:\n\n` +
                     `*Cliente:* ${name}\n` +
