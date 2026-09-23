@@ -66,16 +66,16 @@
 
         <!-- Seção da Agenda do Barbeiro -->
         <section id="dashboard-barbeiro" class="section" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 id="titulo-agenda-barbeiro">Minha Agenda</h2>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #D4AF37; color: #000;">
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <h2 id="titulo-agenda-barbeiro" style="font-size: 1.1rem; margin: 0;">Minha Agenda</h2>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="flex: 1; min-width: 110px; padding: 8px 6px; font-size: 0.75rem; background: #D4AF37; color: #000; text-align: center;">
                         <i class="fa-solid fa-key"></i> Alterar Senha
                     </button>
-                    <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem;">
+                    <button onclick="carregarAgendamentos()" class="btn-whatsapp" style="flex: 1; min-width: 90px; padding: 8px 6px; font-size: 0.75rem; text-align: center;">
                         <i class="fa-solid fa-rotate"></i> Atualizar
                     </button>
-                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #e74c3c; color: #FFF;">
+                    <button onclick="fazerLogout()" class="btn-whatsapp" style="flex: 1; min-width: 70px; padding: 8px 6px; font-size: 0.75rem; background: #e74c3c; color: #FFF; text-align: center;">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
