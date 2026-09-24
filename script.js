@@ -95,6 +95,16 @@ async function checkAvailableTimes() {
         return;
     }
 
+    // Obter data e hora atual para validação de horários passados
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const dataHojeStr = `${ano}-${mes}-${dia}`;
+    
+    const horaAtual = agora.getHours();
+    const minutoAtual = agora.getMinutes();
+
     try {
         const { data: agendamentos, error } = await _supabase
             .from("agendamentos")
@@ -110,7 +120,19 @@ async function checkAvailableTimes() {
             const option = document.createElement("option");
             option.value = time;
 
-            if (occupiedTimes.includes(time)) {
+            // Verificar se o horário já passou (caso a data selecionada seja hoje)
+            let horarioPassado = false;
+            if (selectedDate === dataHojeStr) {
+                const [hTime, mTime] = time.split(":").map(Number);
+                if (hTime < horaAtual || (hTime === horaAtual && mTime <= minutoAtual)) {
+                    horarioPassado = true;
+                }
+            }
+
+            if (horarioPassado) {
+                option.textContent = `${time} - (Passado)`;
+                option.disabled = true;
+            } else if (occupiedTimes.includes(time)) {
                 option.textContent = `${time} - (Indisponível)`;
                 option.disabled = true;
             } else {
