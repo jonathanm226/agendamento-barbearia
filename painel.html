@@ -84,7 +84,7 @@
                     <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #EEEEEE; color: #000; border: 1px solid #CCC;">
                         <i class="fa-solid fa-key"></i> Senha
                     </button>
-                    <button onclick="carregarAgendaSemanal()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #000; color: #FFF;">
+                    <button onclick="carregarAgendaSemanal(); carregarFaturamentoBarbeiro();" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #000; color: #FFF;">
                         <i class="fa-solid fa-rotate"></i> Atualizar
                     </button>
                     <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
@@ -93,10 +93,17 @@
                 </div>
             </div>
 
-            <!-- Resumo de Faturamento do Barbeiro no Dia -->
+            <!-- Extrato de Faturamento do Barbeiro com Filtro (Dia, Semana, Mês) -->
             <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <h3 style="color: #000000; margin-bottom: 10px; font-size: 1rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 6px;"><i class="fa-solid fa-wallet"></i> Meu Faturamento de Hoje (<span id="label-data-hoje"></span>)</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="color: #000000; font-size: 1rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Meu Extrato de Faturamento</h3>
+                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 6px 10px; font-size: 0.85rem; margin: 0; background: #F9F9F9; border: 1px solid #CCC; border-radius: 6px;">
+                        <option value="dia">Hoje (Dia)</option>
+                        <option value="semana">Esta Semana</option>
+                        <option value="mes">Este Mês</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem; margin-bottom: 12px;">
                     <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px;">
                         <span style="color: #666; display: block; font-size: 0.75rem;">Atendimentos Concluídos</span>
                         <strong id="barber-resumo-qtd" style="font-size: 1.2rem; color: #000;">0</strong>
@@ -105,6 +112,11 @@
                         <span style="color: #666; display: block; font-size: 0.75rem;">Total Recebido</span>
                         <strong id="barber-resumo-total" style="font-size: 1.2rem; color: #25D366;">R$ 0,00</strong>
                     </div>
+                </div>
+                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #333;" id="barber-detalhes-pagamento">
+                    <strong>Por Forma de Pagamento:</strong><br>
+                    💵 Dinheiro: R$ 0,00 | 📱 Pix: R$ 0,00<br>
+                    💳 Débito: R$ 0,00 | 💳 Crédito: R$ 0,00
                 </div>
             </div>
 
@@ -276,10 +288,9 @@
                 document.getElementById("dashboard-admin").style.display = "none";
                 document.getElementById("dashboard-barbeiro").style.display = "block";
                 document.getElementById("titulo-agenda-barbeiro").textContent = `Agenda Semanal: ${usuarioLogado}`;
-                document.getElementById("label-data-hoje").textContent = new Date().toLocaleDateString("pt-BR");
                 offsetSemana = 0;
                 carregarAgendaSemanal();
-                carregarFaturamentoBarbeiroHoje();
+                carregarFaturamentoBarbeiro();
             } else {
                 mostrarAlertaPersonalizado("Erro", "Usuário não encontrado ou sem permissão de acesso!");
             }
@@ -335,32 +346,71 @@
             return total > 0 ? total : 35;
         }
 
-        async function carregarFaturamentoBarbeiroHoje() {
-            const dataHoje = new Date().toISOString().split("T")[0];
+        // Função de Faturamento do Barbeiro com Filtro (Dia, Semana, Mês)
+        async function carregarFaturamentoBarbeiro() {
+            const periodo = document.getElementById("select-periodo-faturamento").value;
             const lblQtd = document.getElementById("barber-resumo-qtd");
             const lblTotal = document.getElementById("barber-resumo-total");
+            const lblDetalhes = document.getElementById("barber-detalhes-pagamento");
+
+            const hoje = new Date();
+            let primeiraData, ultimaData;
+
+            if (periodo === 'dia') {
+                const dataStr = hoje.toISOString().split("T")[0];
+                primeiraData = dataStr;
+                ultimaData = dataStr;
+            } else if (periodo === 'semana') {
+                const diaSemana = hoje.getDay();
+                const diffToMon = (diaSemana === 0 ? -6 : 1) - diaSemana;
+                const segunda = new Date(hoje);
+                segunda.setDate(hoje.getDate() + diffToMon);
+                const domingo = new Date(segunda);
+                domingo.setDate(segunda.getDate() + 6);
+                primeiraData = segunda.toISOString().split("T")[0];
+                ultimaData = domingo.toISOString().split("T")[0];
+            } else if (periodo === 'mes') {
+                const ano = hoje.getFullYear();
+                const mes = hoje.getMonth();
+                primeiraData = new Date(ano, mes, 1).toISOString().split("T")[0];
+                ultimaData = new Date(ano, mes + 1, 0).toISOString().split("T")[0];
+            }
 
             try {
                 const { data, error } = await _supabase
                     .from("agendamentos")
                     .select("*")
                     .eq("barbeiro", usuarioLogado)
-                    .eq("data", dataHoje)
+                    .gte("data", primeiraData)
+                    .lte("data", ultimaData)
                     .eq("status", "concluido");
 
                 if (error) throw error;
 
                 let qtd = 0;
                 let total = 0;
+                let totaisPagamento = { Dinheiro: 0, Pix: 0, Débito: 0, Crédito: 0 };
+
                 (data || []).forEach(item => {
                     qtd++;
-                    total += calcularPrecoServico(item.servico);
+                    const preco = calcularPrecoServico(item.servico);
+                    total += preco;
+                    if (item.pagamentos && totaisPagamento[item.pagamentos] !== undefined) {
+                        totaisPagamento[item.pagamentos] += preco;
+                    }
                 });
 
                 lblQtd.textContent = qtd;
                 lblTotal.textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+                lblDetalhes.innerHTML = `
+                    <strong>Por Forma de Pagamento:</strong><br>
+                    💵 Dinheiro: R$ ${totaisPagamento.Dinheiro.toFixed(2).replace(".", ",")} | 
+                    📱 Pix: R$ ${totaisPagamento.Pix.toFixed(2).replace(".", ",")}<br>
+                    💳 Débito: R$ ${totaisPagamento.Débito.toFixed(2).replace(".", ",")} | 
+                    💳 Crédito: R$ ${totaisPagamento.Crédito.toFixed(2).replace(".", ",")}
+                `;
             } catch (err) {
-                console.error("Erro ao carregar faturamento do dia:", err);
+                console.error("Erro ao carregar faturamento:", err);
             }
         }
 
@@ -462,7 +512,7 @@
                     container.appendChild(coluna);
                 });
 
-                carregarFaturamentoBarbeiroHoje();
+                carregarFaturamentoBarbeiro();
 
             } catch (err) {
                 console.error("Erro ao carregar agenda semanal:", err);
@@ -470,7 +520,6 @@
             }
         }
 
-        // Abre o Modal Interativo para Cancelar ou Validar Atendimento
         async function abrirGerenciadorAgendamento(id) {
             try {
                 const { data, error } = await _supabase.from("agendamentos").select("*").eq("id", id).single();
@@ -498,7 +547,6 @@
                 buttonsBox.innerHTML = "";
 
                 if (data.status !== 'concluido') {
-                    // Botão Validar como Atendido
                     const btnAtendido = document.createElement("button");
                     btnAtendido.className = "custom-modal-btn btn-modal-atendido";
                     btnAtendido.innerHTML = '<i class="fa-solid fa-check"></i> Validar como Atendido';
@@ -506,7 +554,6 @@
                         paymentBox.style.display = "block";
                         buttonsBox.innerHTML = "";
 
-                        // Botão Finalizar Pagamento
                         const btnSalvarPg = document.createElement("button");
                         btnSalvarPg.className = "custom-modal-btn btn-modal-confirmar";
                         btnSalvarPg.innerHTML = '<i class="fa-solid fa-dollar-sign"></i> Confirmar Pagamento e Concluir';
@@ -525,7 +572,6 @@
                         buttonsBox.appendChild(btnVoltar);
                     };
 
-                    // Botão Cancelar Agendamento
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
                     btnCancelar.innerHTML = '<i class="fa-solid fa-xmark"></i> Cancelar Agendamento';
@@ -573,6 +619,7 @@
                 if (error) throw error;
 
                 carregarAgendaSemanal();
+                carregarFaturamentoBarbeiro();
                 mostrarAlertaPersonalizado("Sucesso", novoStatus === 'concluido' ? "Atendimento validado e pagamento registrado!" : "Agendamento cancelado com sucesso.");
             } catch (err) {
                 mostrarAlertaPersonalizado("Erro", "Erro ao atualizar o status: " + err.message);
