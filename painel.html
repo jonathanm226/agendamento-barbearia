@@ -2,16 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport bloqueado para evitar zoom no celular ao digitar o login -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Willian Barber | Painel de Controle</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Correção para a tela de login não pular com o teclado no celular */
         html, body {
             height: 100%;
             overscroll-behavior-y: none;
@@ -48,7 +45,6 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
         
-        /* Estilos da Grade Semanal - Modo Claro */
         .week-grid { display: grid; gap: 15px; margin-top: 15px; }
         .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .day-header { font-size: 0.95rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
@@ -62,7 +58,6 @@
 
     <div class="app-container" style="max-width: 1000px;">
         
-        <!-- Cabeçalho -->
         <header class="barber-header">
             <div class="brand-info">
                 <i class="fa-solid fa-calendar-days barber-icon"></i>
@@ -73,7 +68,6 @@
             </div>
         </header>
 
-        <!-- Seção de Login por Input -->
         <section id="login-section" class="section">
             <h2>Acesso ao Painel</h2>
             <div class="datetime-inputs">
@@ -89,7 +83,6 @@
             </div>
         </section>
 
-        <!-- Seção da Agenda do Barbeiro -->
         <section id="dashboard-barbeiro" class="section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <h2 id="titulo-agenda-barbeiro">Minha Agenda Semanal</h2>
@@ -106,7 +99,6 @@
                 </div>
             </div>
 
-            <!-- Extrato de Faturamento do Barbeiro com Filtro (Dia, Semana, Mês) -->
             <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="color: #000000; font-size: 1rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Meu Extrato de Faturamento</h3>
@@ -133,7 +125,6 @@
                 </div>
             </div>
 
-            <!-- Navegação de Semanas Otimizada para Mobile -->
             <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 14px; border-radius: 8px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Período da Agenda</div>
                 <span id="label-periodo-semana" style="font-weight: bold; color: #000000; font-size: 1rem; display: block; margin-bottom: 12px;"></span>
@@ -147,16 +138,13 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000;">Agenda Diária (Clique para Bloquear/Desbloquear)</h3>
+            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000; text-align: center;">Agenda Diária (Clique para Bloquear/Desbloquear)</h3>
             
-            <!-- Novo Seletor de Dias da Semana -->
-            <div id="seletor-dias" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; white-space: nowrap; -webkit-overflow-scrolling: touch;"></div>
+            <div id="seletor-dias" style="display: flex; gap: 4px; justify-content: space-between; width: 100%; margin-bottom: 15px; box-sizing: border-box;"></div>
             
-            <!-- Container principal do dia -->
             <div id="grade-semanal-container" class="week-grid" style="grid-template-columns: 1fr;"></div>
         </section>
 
-        <!-- Seção de Resumo do Administrador -->
         <section id="dashboard-admin" class="section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>Resumo Administrativo</h2>
@@ -196,7 +184,6 @@
 
     </div>
 
-    <!-- Modal de Gerenciamento de Agendamento (Atendido / Cancelado / Pagamento) -->
     <div id="custom-action-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3><i class="fa-solid fa-user-gear"></i> Gerenciar Atendimento</h3>
@@ -213,12 +200,10 @@
             </div>
 
             <div class="custom-modal-buttons" id="action-modal-buttons" style="flex-direction: column; gap: 8px;">
-                <!-- Preenchido via Script -->
             </div>
         </div>
     </div>
 
-    <!-- Modal de Mensagem / Alerta Personalizado -->
     <div id="custom-alert-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3 id="alert-modal-title" style="color: #000000; margin-bottom: 12px;"><i class="fa-solid fa-circle-info"></i> Informação</h3>
@@ -229,7 +214,6 @@
         </div>
     </div>
 
-    <!-- Modal de Alteração de Senha -->
     <div id="custom-password-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3>Alterar sua Senha</h3>
@@ -249,9 +233,8 @@
 
         let usuarioLogado = "";
         let offsetSemana = 0; 
-        let diaAtivoIso = null; // Controle do dia selecionado
+        let diaAtivoIso = null; 
         
-        // Grade expandida para incluir horários a partir das 07:00
         const horariosPadrao = [
             "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
             "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", 
@@ -449,7 +432,6 @@
             const diasSemana = obterDiasDaSemana(offsetSemana);
             lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[diasSemana.length - 1].label}`;
 
-            // Se o dia ativo não existir ou não pertencer a essa semana, seleciona o 1º dia (Segunda)
             if (!diaAtivoIso || !diasSemana.find(d => d.iso === diaAtivoIso)) {
                 diaAtivoIso = diasSemana[0].iso;
             }
@@ -476,19 +458,22 @@
 
                 if (errBlq && errBlq.code !== '42P01') console.warn("Tabela de bloqueios não encontrada, ignorando...");
 
-                // Monta os botões de Segunda a Sábado
                 seletorDias.innerHTML = "";
                 diasSemana.forEach(dia => {
                     const btnDia = document.createElement("button");
-                    btnDia.innerHTML = dia.label.split(',')[0].toUpperCase(); // Ex: "SEG", "TER"
-                    btnDia.style.padding = "10px 15px";
-                    btnDia.style.borderRadius = "8px";
+                    btnDia.innerHTML = dia.label.split(',')[0].toUpperCase(); 
+                    
+                    // Ajuste essencial para caber tudo na tela (minWidth: 0 evita que o botão expanda)
+                    btnDia.style.flex = "1";
+                    btnDia.style.minWidth = "0"; 
+                    btnDia.style.padding = "10px 0";
+                    btnDia.style.fontSize = "0.7rem";
+                    btnDia.style.borderRadius = "6px";
                     btnDia.style.border = "1px solid #CCC";
                     btnDia.style.fontWeight = "bold";
                     btnDia.style.cursor = "pointer";
-                    btnDia.style.minWidth = "60px";
+                    btnDia.style.textAlign = "center";
                     
-                    // Pinta de preto o dia que está selecionado
                     if (dia.iso === diaAtivoIso) {
                         btnDia.style.background = "#000";
                         btnDia.style.color = "#FFF";
@@ -505,13 +490,11 @@
                     seletorDias.appendChild(btnDia);
                 });
 
-                // Função interna para renderizar apenas o dia ativo
                 function renderizarDiaEspecifico(dias, listaAgendamentos, listaBloqueios) {
                     container.innerHTML = "";
                     const diaAtivo = dias.find(d => d.iso === diaAtivoIso);
                     if (!diaAtivo) return;
 
-                    // Atualiza o estilo visual dos botões de seleção
                     Array.from(seletorDias.children).forEach((btn, index) => {
                         if (dias[index].iso === diaAtivoIso) {
                             btn.style.background = "#000"; btn.style.color = "#FFF"; btn.style.borderColor = "#000";
@@ -638,10 +621,9 @@
                         buttonsBox.appendChild(btnVoltar);
                     };
 
-                    // --- NOVO BOTÃO DE LEMBRETE ---
                     const btnLembrete = document.createElement("button");
                     btnLembrete.className = "custom-modal-btn";
-                    btnLembrete.style.background = "#25D366"; // Cor do WhatsApp
+                    btnLembrete.style.background = "#25D366"; 
                     btnLembrete.style.color = "#FFFFFF";
                     btnLembrete.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Enviar Lembrete';
                     btnLembrete.onclick = () => {
@@ -649,14 +631,13 @@
                             mostrarAlertaPersonalizado("Erro", "O cliente não possui telefone cadastrado.");
                             return;
                         }
-                        let numero = data.telefone.replace(/\D/g, ''); // Tira formatação
-                        if (!numero.startsWith('55')) numero = '55' + numero; // Adiciona código do BR se faltar
+                        let numero = data.telefone.replace(/\D/g, '');
+                        if (!numero.startsWith('55')) numero = '55' + numero;
                         
                         const msg = encodeURIComponent(`Olá, ${data.cliente}! Passando para lembrar do seu agendamento na Willian Barber, dia ${dataFormatada} às ${data.horario}.`);
                         window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
                     };
-                    buttonsBox.appendChild(btnLembrete); // Adiciona o botão ao painel
-                    // ------------------------------
+                    buttonsBox.appendChild(btnLembrete);
 
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
