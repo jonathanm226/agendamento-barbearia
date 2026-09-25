@@ -243,7 +243,7 @@ async function buscarClientePorTelefone() {
     }
 }
 
-// Finaliza o agendamento e envia pro WhatsApp
+// Finaliza o agendamento e envia pro WhatsApp com códigos Unicode seguros para emojis
 async function sendToWhatsapp() {
     const nameInput = document.getElementById("client-name");
     const phoneInput = document.getElementById("client-phone");
@@ -287,7 +287,16 @@ async function sendToWhatsapp() {
     const formattedDate = date.split("-").reverse().join("/");
     const whatsappNumber = "5531994951564";
 
-    const message = `✅ *AGENDAMENTO CONFIRMADO!* ✅\n\nOlá! Segue a confirmação do meu horário:\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n💈 *Barbeiro:* ${selectedBarber}\n✂️ *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n📅 *Data:* ${formattedDate}\n⏰ *Horário:* ${time}`;
+    // Utilização de Unicode Escapes para evitar erros de codificação de caracteres (ANSI vs UTF-8)
+    const checkEmoji = "\u2705";
+    const userEmoji = "\uD83D\uDC64";
+    const phoneEmoji = "\uD83D\uDCF1";
+    const barberEmoji = "\uD83D\uDC88";
+    const scissorsEmoji = "\u2702\uFE0F";
+    const calendarEmoji = "\uD83D\uDCC5";
+    const clockEmoji = "\u23F0";
+
+    const message = `${checkEmoji} *AGENDAMENTO CONFIRMADO!* ${checkEmoji}\n\nOlá! Segue a confirmação do meu horário:\n\n${userEmoji} *Cliente:* ${name}\n${phoneEmoji} *Telefone:* ${phone}\n${barberEmoji} *Barbeiro:* ${selectedBarber}\n${scissorsEmoji} *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n${calendarEmoji} *Data:* ${formattedDate}\n${clockEmoji} *Horário:* ${time}`;
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
