@@ -91,11 +91,18 @@
                 </div>
             </div>
 
-            <!-- Navegação de Semanas -->
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px;">
-                <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="width: auto; padding: 6px 12px; font-size: 0.8rem; border: 1px solid #CCC; background: #FFF; color: #000;"><i class="fa-solid fa-chevron-left"></i> Semana Anterior</button>
-                <span id="label-periodo-semana" style="font-weight: bold; color: #000000; font-size: 0.95rem;"></span>
-                <button onclick="mudarSemana(1)" class="btn-whatsapp" style="width: auto; padding: 6px 12px; font-size: 0.8rem; border: 1px solid #CCC; background: #FFF; color: #000;">Próxima Semana <i class="fa-solid fa-chevron-right"></i></button>
+            <!-- Navegação de Semanas Otimizada para Mobile -->
+            <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 14px; border-radius: 8px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Período da Agenda</div>
+                <span id="label-periodo-semana" style="font-weight: bold; color: #000000; font-size: 1rem; display: block; margin-bottom: 12px;"></span>
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #CCC; background: #FFF; color: #000; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #CCC; background: #FFF; color: #000; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        Próxima <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
 
             <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000;">Grade Semanal (Clique para Bloquear/Desbloquear)</h3>
