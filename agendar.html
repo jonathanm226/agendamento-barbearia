@@ -49,6 +49,12 @@
                     <span class="price">R$ 35,00</span>
                 </div>
 
+                <!-- SERVIÇO DE CORTE EMERGENCIAL ADICIONADO AQUI -->
+                <div class="service-card" onclick="toggleService(this, 'Corte Emergencial', 50)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte Emergencial (Após 19h)</h3></div>
+                    <span class="price">R$ 50,00</span>
+                </div>
+
                 <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Barba (30 min)</h3></div>
                     <span class="price">R$ 35,00</span>
@@ -97,7 +103,7 @@
             </div>
         </section>
 
-        <!-- Seleção de Data e Horário (Ajustado para empilhar e evitar sobreposição) -->
+        <!-- Seleção de Data e Horário -->
         <section class="section">
             <h2>3. Data e Horário</h2>
             <div style="display: flex; flex-direction: column; gap: 15px;">
