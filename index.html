@@ -3,140 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willian Cortes | Agendamento</title>
+    <title>Willian Cortes | Bem-vindo</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- SDK do Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 12px;">
+    <div class="app-container landing-container">
         
-        <!-- Cabeçalho com a Logo -->
-        <header class="barber-header" style="text-align: center; margin-bottom: 12px;">
-            <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <div class="brand-logo-container" style="width: 40px; height: 40px;">
-                    <img src="logo.jpg.jpg" alt="Willian Cortes Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                </div>
-                <div style="text-align: left;">
-                    <h1 style="font-size: 1.1rem; margin: 0;">Willian Cortes</h1>
-                    <p style="font-size: 0.75rem; margin: 0;">Desde 2019</p>
-                </div>
+        <!-- Cabeçalho / Banner da Landing Page com a Logo -->
+        <header class="landing-header">
+            <div class="brand-logo-container">
+                <img src="logo.jpg.jpg" alt="Willian Cortes Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
             </div>
+            <h1>Willian Cortes</h1>
+            <p class="tagline">Tradição, estilo e o melhor corte da região.</p>
         </header>
 
-        <!-- Seleção de Barbeiro -->
-        <section class="section" style="margin-bottom: 15px;">
-            <h2 style="font-size: 0.9rem; margin-bottom: 6px;">1. Escolha o Barbeiro</h2>
-            <div class="barbers-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <div class="barber-card active" onclick="selectBarber(this, 'Willian')" style="padding: 8px; text-align: center; cursor: pointer;">
-                    <h3 style="font-size: 0.85rem; margin: 0;">Willian</h3>
+        <!-- Seção Sobre / Apresentação -->
+        <section class="section about-section">
+            <h2>Sobre a Barbearia</h2>
+            <p>
+                Bem-vindo ao espaço dedicado ao seu visual! Contamos com profissionais qualificados, ambiente climatizado e um atendimento de primeira para garantir que você saia renovado.
+            </p>
+        </section>
+
+        <!-- Seção de Informações Úteis (Horários e Endereço) -->
+        <section class="section info-section">
+            <div class="info-card">
+                <i class="fa-regular fa-clock"></i>
+                <div>
+                    <h3>Horário de Funcionamento</h3>
+                    <p>Segunda a Sexta: 07h às 19h<br>Sábado: 05h às 13h</p>
                 </div>
-                <div class="barber-card" onclick="selectBarber(this, 'Pedro')" style="padding: 8px; text-align: center; cursor: pointer;">
-                    <h3 style="font-size: 0.85rem; margin: 0;">Pedro</h3>
+            </div>
+            <div class="info-card">
+                <i class="fa-solid fa-location-dot"></i>
+                <div>
+                    <h3>Localização</h3>
+                    <p>Rua Palma de Santa Rita, nº 146 - Jardim Alterosa 2ª Seção - Betim</p>
                 </div>
             </div>
         </section>
 
-        <!-- Seleção de Serviços -->
-        <section class="section" style="margin-bottom: 15px;">
-            <h2 style="font-size: 0.9rem; margin-bottom: 6px;">2. Escolha os Serviços</h2>
-            <div class="services-grid" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
-                
-                <div class="service-card" onclick="toggleService(this, 'Corte', 35)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Corte (30 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
-                </div>
+        <!-- Botão de Chamada para Ação (CTA) aponta para agendar.html -->
+        <div class="landing-action">
+            <a href="agendar.html" class="btn-primary-action">
+                <i class="fa-regular fa-calendar-check"></i> Agendar Horário
+            </a>
+        </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Barba', 35)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Barba (30 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (15 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 90,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)" style="display: flex; justify-content: space-between; padding: 8px; align-items: center; cursor: pointer;">
-                    <div class="service-info"><h3 style="font-size: 0.8rem; margin: 0;"><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
-                    <span class="price" style="font-size: 0.8rem; font-weight: bold;">R$ 120,00</span>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Seleção de Data e Horário -->
-        <section class="section" style="margin-bottom: 15px;">
-            <h2 style="font-size: 0.9rem; margin-bottom: 6px;">3. Data e Horário</h2>
-            <div class="datetime-inputs" style="display: flex; justify-content: space-between; gap: 8px; width: 100%;">
-                
-                <div class="input-group" style="display: flex; flex-direction: column; width: 48%;">
-                    <label for="date" style="font-size: 0.75rem; margin-bottom: 2px; color: #fff;">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; height: 38px; padding: 0 6px; font-size: 0.75rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
-                </div>
-                
-                <div class="input-group" style="display: flex; flex-direction: column; width: 48%;">
-                    <label for="time" style="font-size: 0.75rem; margin-bottom: 2px; color: #fff;">Horário:</label>
-                    <select id="time" style="width: 100%; height: 38px; padding: 0 6px; font-size: 0.8rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
-                        <!-- Carregado dinamicamente via script.js -->
-                    </select>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Identificação do Cliente -->
-        <section class="section" style="margin-bottom: 15px;">
-            <h2 style="font-size: 0.9rem; margin-bottom: 6px;">4. Seus Dados</h2>
-            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 8px;">
-                <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="padding: 8px; font-size: 0.8rem;">
-                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required style="padding: 8px; font-size: 0.8rem;">
-            </div>
-        </section>
-
-        <!-- Botão de Ação -->
-        <footer class="footer-action" style="text-align: center; margin-bottom: 5px;">
-            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()" style="width: 100%; padding: 10px; font-size: 0.9rem;">
-                <i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp
-            </button>
+        <!-- Rodapé simples -->
+        <footer class="landing-footer">
+            <p>&copy; 2026 Willian Cortes. Todos os direitos reservados.</p>
         </footer>
 
     </div>
 
-    <!-- Vinculação do arquivo de lógica -->
-    <script src="script.js"></script>
 </body>
 </html>
