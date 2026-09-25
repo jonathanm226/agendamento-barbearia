@@ -646,7 +646,7 @@
                         let numero = data.telefone.replace(/\D/g, '');
                         if (!numero.startsWith('55')) numero = '55' + numero;
                         
-                        const msg = encodeURIComponent(`Olá, ${data.cliente}! Passando para lembrar do seu agendamento na Willian Barber, dia ${dataFormatada} às ${data.horario}.`);
+                        const msg = encodeURIComponent(`Olá, ${data.cliente}! Passando para lembrar do seu agendamento na Willian Cortes, dia ${dataFormatada} às ${data.horario}.`);
                         window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
                     };
                     buttonsBox.appendChild(btnLembrete);
