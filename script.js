@@ -69,7 +69,6 @@ function toggleService(element, serviceName, price) {
         }
     }
     
-    // Atualiza os horários disponíveis conforme os serviços são selecionados/removidos
     checkAvailableTimes();
 }
 
@@ -123,9 +122,8 @@ async function checkAvailableTimes() {
         return;
     }
 
-    // Calcula a duração total em minutos dos serviços escolhidos (padrão mínimo de 30 min se nenhum selecionado)
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 30;
-    const slotsNeeded = Math.ceil(totalDurationMinutes / 30); // Quantidade de blocos de 30 min necessários
+    const slotsNeeded = Math.ceil(totalDurationMinutes / 30);
 
     try {
         const { data: agendamentos, error: errAgendamentos } = await _supabase
@@ -144,12 +142,10 @@ async function checkAvailableTimes() {
 
         if (errBloqueios) throw errBloqueios;
 
-        // Mapeia horários ocupados considerando também quantos slots o agendamento anterior ocupou
         let occupiedTimes = [];
         if (agendamentos) {
             agendamentos.filter(a => a.status !== 'cancelado').forEach(a => {
                 occupiedTimes.push(a.horario);
-                // Se o agendamento anterior teve múltiplos serviços, bloqueia os slots seguintes correspondentes
                 if (a.servico) {
                     let duracaoAntiga = 0;
                     a.servico.split(",").forEach(serv => {
@@ -180,16 +176,14 @@ async function checkAvailableTimes() {
             return;
         }
 
-        // Valida se cada horário inicial tem espaço consecutivo suficiente para cobrir todos os serviços
         allTimes.forEach((time, index) => {
             const option = document.createElement("option");
             option.value = time;
 
             let temConflito = false;
 
-            // Verifica se há slots suficientes até o fim do expediente e se nenhum está ocupado ou bloqueado
             if (index + slotsNeeded > allTimes.length) {
-                temConflito = true; // Não há tempo suficiente antes de fechar a barbearia
+                temConflito = true;
             } else {
                 for (let i = 0; i < slotsNeeded; i++) {
                     const slotAtual = allTimes[index + i];
@@ -214,7 +208,7 @@ async function checkAvailableTimes() {
     }
 }
 
-// Busca os dados do cliente se ele já tiver agendado antes
+// Busca os dados do cliente por telefone de forma flexível (ignorando formatação)
 async function buscarClientePorTelefone() {
     const telefoneInput = document.getElementById("client-phone").value.trim();
     if (!telefoneInput) return;
@@ -225,19 +219,21 @@ async function buscarClientePorTelefone() {
     try {
         const { data, error } = await _supabase
             .from("agendamentos")
-            .select("cliente, nascimento")
-            .eq("telefone", telefoneInput)
-            .limit(1);
+            .select("cliente, telefone, nascimento");
+
+        if (error) throw error;
 
         if (data && data.length > 0) {
-            const clienteEncontrado = data[0];
-            if (clienteEncontrado.cliente) {
-                document.getElementById("client-name").value = clienteEncontrado.cliente;
-            }
-            if (clienteEncontrado.nascimento) {
-                document.getElementById("client-nascimento").value = clienteEncontrado.nascimento;
-                const groupNasc = document.getElementById("group-nascimento");
-                if (groupNasc) groupNasc.style.display = "none";
+            const clienteEncontrado = data.find(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo);
+            if (clienteEncontrado) {
+                if (clienteEncontrado.cliente) {
+                    document.getElementById("client-name").value = clienteEncontrado.cliente;
+                }
+                if (clienteEncontrado.nascimento) {
+                    document.getElementById("client-nascimento").value = clienteEncontrado.nascimento;
+                    const groupNasc = document.getElementById("group-nascimento");
+                    if (groupNasc) groupNasc.style.display = "none";
+                }
             }
         }
     } catch (err) {
@@ -304,7 +300,8 @@ async function sendToWhatsapp() {
                     barbeiro: selectedBarber,
                     servico: listaNomesServicos,
                     data: date,
-                    horario: time
+                    horario: time,
+                    status: 'ativo'
                 }
             ]);
 
