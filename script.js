@@ -208,7 +208,7 @@ async function checkAvailableTimes() {
     }
 }
 
-// Busca os dados do cliente por telefone de forma flexível (ignorando formatação)
+// Busca os dados do cliente por telefone e preenche nome e data de nascimento (ocultando o campo se já existir)
 async function buscarClientePorTelefone() {
     const telefoneInput = document.getElementById("client-phone").value.trim();
     if (!telefoneInput) return;
@@ -224,7 +224,7 @@ async function buscarClientePorTelefone() {
         if (error) throw error;
 
         if (data && data.length > 0) {
-            const clienteEncontrado = data.find(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo);
+            const clienteEncontrado = data.find(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo && item.cliente);
             if (clienteEncontrado) {
                 if (clienteEncontrado.cliente) {
                     document.getElementById("client-name").value = clienteEncontrado.cliente;
@@ -232,7 +232,9 @@ async function buscarClientePorTelefone() {
                 if (clienteEncontrado.nascimento) {
                     document.getElementById("client-nascimento").value = clienteEncontrado.nascimento;
                     const groupNasc = document.getElementById("group-nascimento");
-                    if (groupNasc) groupNasc.style.display = "none";
+                    if (groupNasc) {
+                        groupNasc.style.display = "none";
+                    }
                 }
             }
         }
@@ -273,7 +275,7 @@ async function sendToWhatsapp() {
 
     if (btnAgendar) {
         btnAgendar.disabled = true;
-        btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agendando...';
+        btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A agendar...';
     }
 
     let precoTotal = 0;
@@ -307,7 +309,7 @@ async function sendToWhatsapp() {
 
         if (error) {
             console.error("Erro no Supabase:", error);
-            alert("Atenção: Seu agendamento foi direcionado para o WhatsApp, mas houve um problema ao salvar no banco de dados.");
+            alert("Atenção: O seu agendamento foi direcionado para o WhatsApp, mas houve um problema ao guardar no banco de dados.");
         }
     } catch (err) {
         console.error(err);
