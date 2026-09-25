@@ -141,16 +141,41 @@
         <!-- ESPAÇADOR PARA EVITAR SOBREPOSIÇÃO DO BOTÃO FIXO -->
         <div style="height: 100px; width: 100%;"></div>
 
-        <!-- Botão de Ação -->
+        <!-- Botão de Ação Atualizado -->
         <footer class="footer-action">
-            <button class="btn-whatsapp" id="btn-agendar" onclick="sendToWhatsapp()">
-                <i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp
+            <!-- Agora o botão chama "abrirModalConfirmacao()" em vez de "sendToWhatsapp()" direto -->
+            <button class="btn-whatsapp" id="btn-continuar" onclick="abrirModalConfirmacao()" style="background: #000; color: #FFF; border: 1px solid #333;">
+                Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
             </button>
         </footer>
 
     </div>
 
-    <!-- Referência ao script corrigido -->
+    <!-- MODAL DE CONFIRMAÇÃO DE AGENDAMENTO -->
+    <div id="modal-confirmacao" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="background: #FFFFFF; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: #000;">Confirmar Agendamento</h3>
+            
+            <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6;">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
+                Revise os dados acima. Ao confirmar, seu horário será reservado e você será direcionado ao WhatsApp.
+            </p>
+            
+            <div style="display: flex; gap: 10px; flex-direction: column;">
+                <button onclick="confirmarEEnviar()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer; font-size: 1rem; transition: 0.2s;">
+                    <i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar
+                </button>
+                <button onclick="fecharModalConfirmacao()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: 1px solid #CCC; background: #FFF; color: #333; cursor: pointer; font-size: 1rem; transition: 0.2s;">
+                    Voltar e Editar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referência ao script -->
     <script src="script.js"></script>
 </body>
 </html>
