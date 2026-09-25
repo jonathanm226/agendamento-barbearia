@@ -109,6 +109,17 @@ function getTimesForDate(dateString) {
         }
         horarios.push("21:00");
     }
+
+    // Se a data escolhida for hoje, remove horários que já passaram (com 30 min de margem
+    // para o cliente não conseguir "agendar" para um horário que já está em cima da hora)
+    const agora = new Date();
+    const hojeStr = agora.toISOString().split("T")[0];
+    if (dateString === hojeStr) {
+        const limite = new Date(agora.getTime() + 30 * 60000);
+        const horaLimite = `${String(limite.getHours()).padStart(2, "0")}:${String(limite.getMinutes()).padStart(2, "0")}`;
+        horarios = horarios.filter(h => h >= horaLimite);
+    }
+
     return horarios;
 }
 
@@ -138,6 +149,13 @@ async function checkAvailableTimes() {
 
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 30;
     const slotsNeeded = Math.ceil(totalDurationMinutes / 30);
+
+    // Feedback visual enquanto consulta o Supabase
+    const optionCarregando = document.createElement("option");
+    optionCarregando.value = "";
+    optionCarregando.textContent = "Carregando horários...";
+    optionCarregando.disabled = true;
+    timeSelect.appendChild(optionCarregando);
 
     try {
         const { data: agendamentos, error: errAgendamentos } = await _supabase
@@ -187,6 +205,9 @@ async function checkAvailableTimes() {
 
         const blockedTimes = bloqueios ? bloqueios.map(b => b.horario) : [];
 
+        // Remove o "Carregando horários..." antes de montar a lista definitiva
+        timeSelect.innerHTML = "";
+
         if (blockedTimes.includes("TODOS")) {
             const option = document.createElement("option");
             option.value = "";
@@ -231,6 +252,14 @@ async function checkAvailableTimes() {
         });
     } catch (err) {
         console.error("Erro ao buscar disponibilidade:", err);
+        if (minhaRequisicao === requisicaoHorariosAtual) {
+            timeSelect.innerHTML = "";
+            const optionErro = document.createElement("option");
+            optionErro.value = "";
+            optionErro.textContent = "Erro ao carregar horários. Verifique sua internet e tente novamente.";
+            optionErro.disabled = true;
+            timeSelect.appendChild(optionErro);
+        }
     }
 }
 
@@ -310,6 +339,12 @@ async function sendToWhatsapp() {
         return;
     }
 
+    const telefoneDigitos = phone.replace(/\D/g, '');
+    if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+        alert("Por favor, digite um WhatsApp válido, com DDD (ex: 31 99999-9999).");
+        return;
+    }
+
     if (selectedServices.length === 0) {
         alert("Por favor, selecione pelo menos um serviço.");
         return;
@@ -357,6 +392,7 @@ async function sendToWhatsapp() {
                     nascimento: nascimento,
                     barbeiro: selectedBarber,
                     servico: listaNomesServicos,
+                    preco_total: precoTotal,
                     data: date,
                     horario: time,
                     status: 'ativo'
