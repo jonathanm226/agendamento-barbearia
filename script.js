@@ -208,13 +208,21 @@ async function checkAvailableTimes() {
     }
 }
 
-// Busca os dados do cliente por telefone e preenche nome e data de nascimento (ocultando o campo se já existir)
+// Busca os dados do cliente por telemóvel e gere a visibilidade da data de nascimento
 async function buscarClientePorTelefone() {
     const telefoneInput = document.getElementById("client-phone").value.trim();
-    if (!telefoneInput) return;
+    const groupNasc = document.getElementById("group-nascimento");
+    
+    if (!telefoneInput) {
+        if (groupNasc) groupNasc.style.display = "block";
+        return;
+    }
 
     const telefoneLimpo = telefoneInput.replace(/\D/g, '');
-    if (telefoneLimpo.length < 8) return;
+    if (telefoneLimpo.length < 8) {
+        if (groupNasc) groupNasc.style.display = "block";
+        return;
+    }
 
     try {
         const { data, error } = await _supabase
@@ -224,26 +232,42 @@ async function buscarClientePorTelefone() {
         if (error) throw error;
 
         if (data && data.length > 0) {
-            const clienteEncontrado = data.find(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo && item.cliente);
-            if (clienteEncontrado) {
-                if (clienteEncontrado.cliente) {
-                    document.getElementById("client-name").value = clienteEncontrado.cliente;
+            const registrosCliente = data.filter(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo);
+            
+            if (registrosCliente.length > 0) {
+                // Preenche o nome se encontrar
+                const comNome = registrosCliente.find(item => item.cliente);
+                if (comNome && comNome.cliente) {
+                    document.getElementById("client-name").value = comNome.cliente;
                 }
-                if (clienteEncontrado.nascimento) {
-                    document.getElementById("client-nascimento").value = clienteEncontrado.nascimento;
-                    const groupNasc = document.getElementById("group-nascimento");
+
+                // Verifica se já tem data de nascimento guardada
+                const comNascimento = registrosCliente.find(item => item.nascimento);
+
+                if (comNascimento && comNascimento.nascimento) {
+                    document.getElementById("client-nascimento").value = comNascimento.nascimento;
                     if (groupNasc) {
-                        groupNasc.style.display = "none";
+                        groupNasc.style.display = "none"; // Oculta se já tiver preenchido antes
+                    }
+                } else {
+                    if (groupNasc) {
+                        groupNasc.style.display = "block"; // Mostra se estiver vazio
                     }
                 }
+            } else {
+                // Cliente não encontrado (novo)
+                if (groupNasc) groupNasc.style.display = "block";
             }
+        } else {
+            if (groupNasc) groupNasc.style.display = "block";
         }
     } catch (err) {
         console.error("Erro ao buscar cliente:", err);
+        if (groupNasc) groupNasc.style.display = "block";
     }
 }
 
-// Finaliza o agendamento e envia pro WhatsApp com códigos Unicode seguros para emojis
+// Finaliza o agendamento e envia para o WhatsApp
 async function sendToWhatsapp() {
     const nameInput = document.getElementById("client-name");
     const phoneInput = document.getElementById("client-phone");
@@ -259,7 +283,7 @@ async function sendToWhatsapp() {
     const time = timeSelect ? timeSelect.value : "";
 
     if (!name || !phone) {
-        alert("Por favor, digite seu nome e telefone antes de prosseguir.");
+        alert("Por favor, digite o seu nome e telemóvel antes de prosseguir.");
         return;
     }
 
@@ -287,16 +311,7 @@ async function sendToWhatsapp() {
     const formattedDate = date.split("-").reverse().join("/");
     const whatsappNumber = "5531994951564";
 
-    // Utilização de Unicode Escapes para evitar erros de codificação de caracteres (ANSI vs UTF-8)
-    const checkEmoji = "\u2705";
-    const userEmoji = "\uD83D\uDC64";
-    const phoneEmoji = "\uD83D\uDCF1";
-    const barberEmoji = "\uD83D\uDC88";
-    const scissorsEmoji = "\u2702\uFE0F";
-    const calendarEmoji = "\uD83D\uDCC5";
-    const clockEmoji = "\u23F0";
-
-    const message = `${checkEmoji} *AGENDAMENTO CONFIRMADO!* ${checkEmoji}\n\nOlá! Segue a confirmação do meu horário:\n\n${userEmoji} *Cliente:* ${name}\n${phoneEmoji} *Telefone:* ${phone}\n${barberEmoji} *Barbeiro:* ${selectedBarber}\n${scissorsEmoji} *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n${calendarEmoji} *Data:* ${formattedDate}\n${clockEmoji} *Horário:* ${time}`;
+    const message = `✅ *AGENDAMENTO CONFIRMADO!* ✅\n\nOlá! Segue a confirmação do meu horário:\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n💈 *Barbeiro:* ${selectedBarber}\n✂️ *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n📅 *Data:* ${formattedDate}\n⏰ *Horário:* ${time}`;
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
