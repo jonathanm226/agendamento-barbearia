@@ -97,17 +97,17 @@
             </div>
         </section>
 
-        <!-- Seleção de Data e Horário -->
+        <!-- Seleção de Data e Horário (Ajustado para empilhar e evitar sobreposição) -->
         <section class="section">
             <h2>3. Data e Horário</h2>
-            <div style="display: flex; gap: 10px;">
-                <div class="input-group" style="flex: 1;">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group" style="width: 100%;">
                     <label for="date">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()">
+                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; box-sizing: border-box;">
                 </div>
-                <div class="input-group" style="flex: 1;">
+                <div class="input-group" style="width: 100%;">
                     <label for="time">Horário:</label>
-                    <select id="time">
+                    <select id="time" style="width: 100%; box-sizing: border-box;">
                         <!-- Carregado dinamicamente via script.js -->
                     </select>
                 </div>
