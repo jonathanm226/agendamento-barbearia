@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Viewport bloqueado para evitar zoom no celular ao digitar o login -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Willian Barber | Painel de Controle</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -10,6 +11,18 @@
     <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Correção para a tela de login não pular com o teclado no celular */
+        html, body {
+            height: 100%;
+            overscroll-behavior-y: none;
+        }
+        #login-section {
+            min-height: 80vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
         .custom-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center;
@@ -36,7 +49,7 @@
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
         
         /* Estilos da Grade Semanal - Modo Claro */
-        .week-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 15px; }
+        .week-grid { display: grid; gap: 15px; margin-top: 15px; }
         .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .day-header { font-size: 0.95rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .slot-item { background: #FFFFFF; padding: 8px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #EAEAEA; border-left: 4px solid #CCCCCC; color: #000000; }
@@ -134,8 +147,13 @@
                 </div>
             </div>
 
-            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000;">Grade Semanal (Clique para Bloquear/Desbloquear)</h3>
-            <div id="grade-semanal-container" class="week-grid"></div>
+            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000;">Agenda Diária (Clique para Bloquear/Desbloquear)</h3>
+            
+            <!-- Novo Seletor de Dias da Semana -->
+            <div id="seletor-dias" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; white-space: nowrap; -webkit-overflow-scrolling: touch;"></div>
+            
+            <!-- Container principal do dia -->
+            <div id="grade-semanal-container" class="week-grid" style="grid-template-columns: 1fr;"></div>
         </section>
 
         <!-- Seção de Resumo do Administrador -->
@@ -231,6 +249,7 @@
 
         let usuarioLogado = "";
         let offsetSemana = 0; 
+        let diaAtivoIso = null; // Controle do dia selecionado
         
         // Grade expandida para incluir horários a partir das 07:00
         const horariosPadrao = [
@@ -423,10 +442,17 @@
         async function carregarAgendaSemanal() {
             const container = document.getElementById("grade-semanal-container");
             const lblPeriodo = document.getElementById("label-periodo-semana");
-            container.innerHTML = "<p style='color: #666; text-align: center; grid-column: span 6;'>Carregando agenda semanal...</p>";
+            const seletorDias = document.getElementById("seletor-dias");
+            
+            container.innerHTML = "<p style='color: #666; text-align: center;'>Carregando agenda...</p>";
 
             const diasSemana = obterDiasDaSemana(offsetSemana);
             lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[diasSemana.length - 1].label}`;
+
+            // Se o dia ativo não existir ou não pertencer a essa semana, seleciona o 1º dia (Segunda)
+            if (!diaAtivoIso || !diasSemana.find(d => d.iso === diaAtivoIso)) {
+                diaAtivoIso = diasSemana[0].iso;
+            }
 
             try {
                 const primeiraData = diasSemana[0].iso;
@@ -450,45 +476,81 @@
 
                 if (errBlq && errBlq.code !== '42P01') console.warn("Tabela de bloqueios não encontrada, ignorando...");
 
-                container.innerHTML = "";
-
+                // Monta os botões de Segunda a Sábado
+                seletorDias.innerHTML = "";
                 diasSemana.forEach(dia => {
+                    const btnDia = document.createElement("button");
+                    btnDia.innerHTML = dia.label.split(',')[0].toUpperCase(); // Ex: "SEG", "TER"
+                    btnDia.style.padding = "10px 15px";
+                    btnDia.style.borderRadius = "8px";
+                    btnDia.style.border = "1px solid #CCC";
+                    btnDia.style.fontWeight = "bold";
+                    btnDia.style.cursor = "pointer";
+                    btnDia.style.minWidth = "60px";
+                    
+                    // Pinta de preto o dia que está selecionado
+                    if (dia.iso === diaAtivoIso) {
+                        btnDia.style.background = "#000";
+                        btnDia.style.color = "#FFF";
+                        btnDia.style.borderColor = "#000";
+                    } else {
+                        btnDia.style.background = "#FFF";
+                        btnDia.style.color = "#000";
+                    }
+
+                    btnDia.onclick = () => {
+                        diaAtivoIso = dia.iso;
+                        renderizarDiaEspecifico(diasSemana, agendamentos || [], bloqueios || []);
+                    };
+                    seletorDias.appendChild(btnDia);
+                });
+
+                // Função interna para renderizar apenas o dia ativo
+                function renderizarDiaEspecifico(dias, listaAgendamentos, listaBloqueios) {
+                    container.innerHTML = "";
+                    const diaAtivo = dias.find(d => d.iso === diaAtivoIso);
+                    if (!diaAtivo) return;
+
+                    // Atualiza o estilo visual dos botões de seleção
+                    Array.from(seletorDias.children).forEach((btn, index) => {
+                        if (dias[index].iso === diaAtivoIso) {
+                            btn.style.background = "#000"; btn.style.color = "#FFF"; btn.style.borderColor = "#000";
+                        } else {
+                            btn.style.background = "#FFF"; btn.style.color = "#000"; btn.style.borderColor = "#CCC";
+                        }
+                    });
+
                     const coluna = document.createElement("div");
                     coluna.className = "day-column";
 
-                    const blqDia = (bloqueios || []).find(b => b.data === dia.iso && b.horario === 'TODOS');
+                    const blqDia = listaBloqueios.find(b => b.data === diaAtivo.iso && b.horario === 'TODOS');
                     const diaBloqueadoTotal = !!blqDia;
 
                     coluna.innerHTML = `
-                        <div class="day-header">
-                            <span>${dia.label}</span>
-                            <button onclick="alternarBloqueioDia('${dia.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFEBEE' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCCCCC'}; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;" title="Bloquear/Desbloquear Dia Todo">
-                                <i class="fa-solid ${diaBloqueadoTotal ? 'fa-ban' : 'fa-calendar-xmark'}"></i> ${diaBloqueadoTotal ? 'Bloqueado' : 'Bloquear Dia'}
+                        <div class="day-header" style="font-size: 1.1rem;">
+                            <span>${diaAtivo.label}</span>
+                            <button onclick="alternarBloqueioDia('${diaAtivo.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFEBEE' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCCCCC'}; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">
+                                <i class="fa-solid ${diaBloqueadoTotal ? 'fa-ban' : 'fa-calendar-xmark'}"></i> ${diaBloqueadoTotal ? 'Desbloquear Dia' : 'Bloquear Dia'}
                             </button>
                         </div>
                     `;
 
                     const slotsDiv = document.createElement("div");
-                    slotsDiv.style.display = "flex";
-                    slotsDiv.style.flexDirection = "column";
-                    slotsDiv.style.gap = "6px";
+                    slotsDiv.style.display = "flex"; slotsDiv.style.flexDirection = "column"; slotsDiv.style.gap = "8px";
 
                     if (diaBloqueadoTotal) {
-                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.85rem; padding: 30px 0; font-weight: bold;"><i class="fa-solid fa-lock"></i> Dia Inteiro Bloqueado</div>`;
+                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.95rem; padding: 40px 0; font-weight: bold; background: #FFF; border-radius: 8px;"><i class="fa-solid fa-lock"></i> Dia Inteiro Bloqueado</div>`;
                     } else {
                         horariosPadrao.forEach(horario => {
-                            const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
-                            const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
-
+                            const agendamento = listaAgendamentos.find(a => a.data === diaAtivo.iso && a.horario === horario && a.status !== 'cancelado');
+                            const horarioBloqueado = listaBloqueios.find(b => b.data === diaAtivo.iso && b.horario === horario);
                             const itemSlot = document.createElement("div");
 
                             if (horarioBloqueado) {
                                 itemSlot.className = "slot-item blocked";
                                 itemSlot.innerHTML = `
-                                    <span><i class="fa-solid fa-ban" style="color: #e74c3c;"></i> ${horario}</span>
-                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer;" title="Desbloquear Horário">
-                                        Bloqueado
-                                    </button>
+                                    <span style="font-size: 1rem;"><i class="fa-solid fa-ban" style="color: #e74c3c;"></i> ${horario}</span>
+                                    <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', true)" style="background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Desbloquear</button>
                                 `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
@@ -496,28 +558,26 @@
                                 itemSlot.style.borderLeftColor = isConcluido ? '#3498db' : '#25D366';
                                 itemSlot.innerHTML = `
                                     <div>
-                                        <strong>${horario}</strong> ${isConcluido ? '<i class="fa-solid fa-check-circle" style="color:#3498db;" title="Atendido"></i>' : ''}<br>
-                                        <span style="font-size:0.75rem; color:#444;">${agendamento.cliente}</span>
+                                        <strong style="font-size: 1rem;">${horario}</strong> ${isConcluido ? '<i class="fa-solid fa-check-circle" style="color:#3498db;"></i>' : ''}<br>
+                                        <span style="font-size:0.9rem; color:#444;">${agendamento.cliente}</span>
                                     </div>
-                                    <button onclick="abrirGerenciadorAgendamento('${agendamento.id}')" style="background:${isConcluido ? '#3498db' : '#25D366'}; color:#FFF; border:none; padding:5px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fa-solid fa-eye"></i></button>
+                                    <button onclick="abrirGerenciadorAgendamento('${agendamento.id}')" style="background:${isConcluido ? '#3498db' : '#25D366'}; color:#FFF; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.9rem;"><i class="fa-solid fa-gear"></i> Ações</button>
                                 `;
                             } else {
                                 itemSlot.className = "slot-item available";
                                 itemSlot.innerHTML = `
-                                    <span><i class="fa-regular fa-clock"></i> ${horario}</span>
-                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', false)" style="background: #FFFFFF; color: #000; border: 1px solid #CCC; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer;" title="Bloquear este Horário">
-                                        Disponível
-                                    </button>
+                                    <span style="font-size: 1rem;"><i class="fa-regular fa-clock"></i> ${horario}</span>
+                                    <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', false)" style="background: #FFFFFF; color: #000; border: 1px solid #CCC; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Bloquear</button>
                                 `;
                             }
                             slotsDiv.appendChild(itemSlot);
                         });
                     }
-
                     coluna.appendChild(slotsDiv);
                     container.appendChild(coluna);
-                });
+                }
 
+                renderizarDiaEspecifico(diasSemana, agendamentos || [], bloqueios || []);
                 carregarFaturamentoBarbeiro();
 
             } catch (err) {
@@ -577,6 +637,26 @@
                         buttonsBox.appendChild(btnSalvarPg);
                         buttonsBox.appendChild(btnVoltar);
                     };
+
+                    // --- NOVO BOTÃO DE LEMBRETE ---
+                    const btnLembrete = document.createElement("button");
+                    btnLembrete.className = "custom-modal-btn";
+                    btnLembrete.style.background = "#25D366"; // Cor do WhatsApp
+                    btnLembrete.style.color = "#FFFFFF";
+                    btnLembrete.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Enviar Lembrete';
+                    btnLembrete.onclick = () => {
+                        if (!data.telefone) {
+                            mostrarAlertaPersonalizado("Erro", "O cliente não possui telefone cadastrado.");
+                            return;
+                        }
+                        let numero = data.telefone.replace(/\D/g, ''); // Tira formatação
+                        if (!numero.startsWith('55')) numero = '55' + numero; // Adiciona código do BR se faltar
+                        
+                        const msg = encodeURIComponent(`Olá, ${data.cliente}! Passando para lembrar do seu agendamento na Willian Barber, dia ${dataFormatada} às ${data.horario}.`);
+                        window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
+                    };
+                    buttonsBox.appendChild(btnLembrete); // Adiciona o botão ao painel
+                    // ------------------------------
 
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
