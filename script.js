@@ -7,6 +7,10 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let selectedBarber = "Willian";
 let selectedServices = []; 
 
+// Controla qual é a chamada mais recente de checkAvailableTimes, para evitar
+// que respostas assíncronas antigas (fora de ordem) dupliquem/tripliquem a lista de horários
+let requisicaoHorariosAtual = 0;
+
 // A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial"
 const HORARIO_EMERGENCIAL_INICIO = "19:30";
 const VALOR_CORTE_EMERGENCIAL = 50;
@@ -43,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
         dateInput.max = maxDateObj.toISOString().split("T")[0];
 
         dateInput.value = todayStr;
-        dateInput.addEventListener("change", checkAvailableTimes);
     }
     checkAvailableTimes();
 });
@@ -111,6 +114,8 @@ function getTimesForDate(dateString) {
 
 // Verifica horários livres considerando a duração total dos serviços selecionados
 async function checkAvailableTimes() {
+    const minhaRequisicao = ++requisicaoHorariosAtual;
+
     const dateElement = document.getElementById("date");
     const timeSelect = document.getElementById("time");
 
@@ -143,6 +148,9 @@ async function checkAvailableTimes() {
 
         if (errAgendamentos) throw errAgendamentos;
 
+        // Se outra chamada mais recente já começou, esta é obsoleta: não mexe mais no DOM
+        if (minhaRequisicao !== requisicaoHorariosAtual) return;
+
         const { data: bloqueios, error: errBloqueios } = await _supabase
             .from("bloqueios_agenda")
             .select("horario")
@@ -150,6 +158,9 @@ async function checkAvailableTimes() {
             .eq("data", selectedDate);
 
         if (errBloqueios) throw errBloqueios;
+
+        // Verifica novamente após o segundo await, pelo mesmo motivo
+        if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         let occupiedTimes = [];
         if (agendamentos) {
@@ -250,27 +261,24 @@ async function buscarClientePorTelefone() {
             const registrosCliente = data.filter(item => item.telefone && item.telefone.replace(/\D/g, '') === telefoneLimpo);
             
             if (registrosCliente.length > 0) {
-                // Preenche o nome se encontrar
                 const comNome = registrosCliente.find(item => item.cliente);
                 if (comNome && comNome.cliente) {
                     document.getElementById("client-name").value = comNome.cliente;
                 }
 
-                // Verifica se já tem data de nascimento guardada
                 const comNascimento = registrosCliente.find(item => item.nascimento);
 
                 if (comNascimento && comNascimento.nascimento) {
                     document.getElementById("client-nascimento").value = comNascimento.nascimento;
                     if (groupNasc) {
-                        groupNasc.style.display = "none"; // Oculta se já tiver preenchido antes
+                        groupNasc.style.display = "none";
                     }
                 } else {
                     if (groupNasc) {
-                        groupNasc.style.display = "block"; // Mostra se estiver vazio
+                        groupNasc.style.display = "block";
                     }
                 }
             } else {
-                // Cliente não encontrado (novo)
                 if (groupNasc) groupNasc.style.display = "block";
             }
         } else {
