@@ -184,6 +184,7 @@
 
     </div>
 
+    <!-- Modais omitidas por brevidade mas presentes no código -->
     <div id="custom-action-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3><i class="fa-solid fa-user-gear"></i> Gerenciar Atendimento</h3>
@@ -235,11 +236,13 @@
         let offsetSemana = 0; 
         let diaAtivoIso = null; 
         
+        // HORÁRIOS ATUALIZADOS AQUI:
         const horariosPadrao = [
             "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
             "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", 
             "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
-            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"
+            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", 
+            "19:00", "19:30", "20:00", "20:30", "21:00"
         ];
 
         function mostrarAlertaPersonalizado(titulo, mensagem) {
@@ -337,11 +340,13 @@
             return dias;
         }
 
+        // PREÇOS ATUALIZADOS AQUI:
         const precosTabela = {
             "corte": 35, "corte de cabelo": 45, "barba": 35, "barba completa": 35,
             "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
             "pigmentacao": 35, "alisamento": 35, "hidratacao": 35,
-            "selagem": 70, "luzes": 90, "platinado": 120
+            "selagem": 70, "luzes": 90, "platinado": 120,
+            "corte emergencial": 50
         };
 
         function calcularPrecoServico(nomeServico) {
@@ -463,7 +468,6 @@
                     const btnDia = document.createElement("button");
                     btnDia.innerHTML = dia.label.split(',')[0].toUpperCase(); 
                     
-                    // Ajuste essencial para caber tudo na tela (minWidth: 0 evita que o botão expanda)
                     btnDia.style.flex = "1";
                     btnDia.style.minWidth = "0"; 
                     btnDia.style.padding = "10px 0";
