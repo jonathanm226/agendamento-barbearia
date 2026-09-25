@@ -6,8 +6,8 @@
 }
 
 body {
-    background-color: #000000;
-    color: #FFFFFF;
+    background-color: #F4F4F9; /* Fundo levemente cinza para destacar o app */
+    color: #000000;
     display: flex;
     justify-content: center;
     min-height: 100vh;
@@ -16,17 +16,17 @@ body {
 .app-container {
     width: 100%;
     max-width: 480px;
-    background-color: #121212;
+    background-color: #FFFFFF;
     padding: 20px;
-    padding-bottom: 90px;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
-    border-left: 1px solid #222222;
-    border-right: 1px solid #222222;
+    padding-bottom: 130px; /* Mantém o espaço para o botão fixo não cobrir os campos */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08); /* Sombra suave escura */
+    border-left: 1px solid #EAEAEA;
+    border-right: 1px solid #EAEAEA;
 }
 
-/* Cabeçalho Minimalista Preto e Branco */
+/* Cabeçalho Minimalista */
 .barber-header {
-    border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #EAEAEA;
     padding-bottom: 18px;
     margin-bottom: 25px;
     text-align: center;
@@ -41,25 +41,25 @@ body {
 
 .barber-icon {
     font-size: 2rem;
-    color: #FFFFFF;
-    background: #000000;
+    color: #000000;
+    background: #FFFFFF;
     padding: 12px;
     border-radius: 50%;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #000000;
     margin-bottom: 5px;
 }
 
 .brand-info h1 {
     font-size: 1.6rem;
     letter-spacing: 1.5px;
-    color: #FFFFFF;
+    color: #000000;
     text-transform: uppercase;
     font-weight: 700;
 }
 
 .brand-info p {
     font-size: 0.75rem;
-    color: #AAAAAA;
+    color: #666666;
     letter-spacing: 3px;
     text-transform: uppercase;
     font-weight: 500;
@@ -72,10 +72,10 @@ body {
 .section h2 {
     font-size: 1.05rem;
     margin-bottom: 12px;
-    color: #FFFFFF;
+    color: #000000;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-left: 3px solid #FFFFFF;
+    border-left: 3px solid #000000;
     padding-left: 8px;
 }
 
@@ -87,8 +87,8 @@ body {
 }
 
 .barber-card {
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: #F9F9F9;
+    border: 1px solid #EAEAEA;
     border-radius: 6px;
     padding: 15px;
     text-align: center;
@@ -97,19 +97,19 @@ body {
 }
 
 .barber-card.active {
-    border-color: #FFFFFF;
-    background: #252525;
+    border-color: #000000;
+    background: #EEEEEE;
 }
 
 .barber-avatar {
     font-size: 1.5rem;
-    color: #FFFFFF;
+    color: #000000;
     margin-bottom: 8px;
 }
 
 .barber-card h3 {
     font-size: 1rem;
-    color: #FFF;
+    color: #000000;
     font-weight: 600;
 }
 
@@ -129,21 +129,21 @@ body {
 }
 
 .services-grid::-webkit-scrollbar-track {
-    background: #121212;
+    background: #F1F1F1;
 }
 
 .services-grid::-webkit-scrollbar-thumb {
-    background: #444444;
+    background: #CCCCCC;
     border-radius: 4px;
 }
 
 .services-grid::-webkit-scrollbar-thumb:hover {
-    background: #FFFFFF;
+    background: #999999;
 }
 
 .service-card {
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: #F9F9F9;
+    border: 1px solid #EAEAEA;
     border-radius: 6px;
     padding: 14px 15px;
     display: flex;
@@ -154,14 +154,14 @@ body {
 }
 
 .service-card.active {
-    border-color: #FFFFFF;
-    background: #252525;
+    border-color: #000000;
+    background: #EEEEEE;
 }
 
 .service-info h3 {
     font-size: 0.95rem;
     margin-bottom: 3px;
-    color: #FFFFFF;
+    color: #000000;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -169,17 +169,17 @@ body {
 
 .service-info span {
     font-size: 0.78rem;
-    color: #888888;
+    color: #666666;
 }
 
 .price {
     font-weight: bold;
-    color: #FFFFFF;
+    color: #000000;
     font-size: 0.95rem;
-    background: #2A2A2A;
+    background: #EEEEEE;
     padding: 4px 8px;
     border-radius: 4px;
-    border: 1px solid #444;
+    border: 1px solid #DDDDDD;
 }
 
 /* Inputs */
@@ -197,22 +197,24 @@ body {
 
 .input-group label {
     font-size: 0.85rem;
-    color: #CCCCCC;
+    color: #555555;
 }
 
 input, select {
     width: 100%;
     padding: 12px;
-    background: #1A1A1A;
-    border: 1px solid #333333;
+    background: #F9F9F9;
+    border: 1px solid #DDDDDD;
     border-radius: 6px;
-    color: white;
+    color: #000000;
     font-size: 1rem;
     outline: none;
+    transition: 0.2s;
 }
 
 input:focus, select:focus {
-    border-color: #FFFFFF;
+    border-color: #000000;
+    background: #FFFFFF;
 }
 
 /* Rodapé Fixo com Botão */
@@ -224,15 +226,17 @@ input:focus, select:focus {
     width: 100%;
     max-width: 480px;
     padding: 15px 20px;
-    background: #121212;
-    border-top: 1px solid #222222;
+    background: #FFFFFF;
+    border-top: 1px solid #EAEAEA;
+    z-index: 99;
 }
 
+/* O botão principal agora é Preto com letras brancas para destacar no fundo claro */
 .btn-whatsapp {
     width: 100%;
     padding: 15px;
-    background-color: #FFFFFF;
-    color: #000000;
+    background-color: #000000;
+    color: #FFFFFF;
     border: none;
     border-radius: 6px;
     font-size: 1.05rem;
@@ -248,7 +252,7 @@ input:focus, select:focus {
 }
 
 .btn-whatsapp:hover {
-    background-color: #E0E0E0;
+    background-color: #333333;
 }
 
 /* Estilos específicos para a Landing Page */
@@ -259,15 +263,15 @@ input:focus, select:focus {
 
 .landing-header {
     padding: 30px 0 20px 0;
-    border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #EAEAEA;
     margin-bottom: 25px;
 }
 
 .brand-logo-container {
     width: 90px;
     height: 90px;
-    background: #000000;
-    border: 2px solid #FFFFFF;
+    background: #FFFFFF;
+    border: 2px solid #000000;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -278,7 +282,7 @@ input:focus, select:focus {
 
 .landing-header h1 {
     font-size: 1.8rem;
-    color: #FFFFFF;
+    color: #000000;
     margin-bottom: 5px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -286,23 +290,23 @@ input:focus, select:focus {
 
 .tagline {
     font-size: 0.8rem;
-    color: #AAAAAA;
+    color: #666666;
     text-transform: uppercase;
     letter-spacing: 3px;
 }
 
 .about-section {
     text-align: left;
-    background: #1A1A1A;
+    background: #F9F9F9;
     padding: 15px;
     border-radius: 6px;
     margin-bottom: 20px;
-    border: 1px solid #333333;
+    border: 1px solid #EAEAEA;
 }
 
 .about-section p {
     font-size: 0.9rem;
-    color: #CCCCCC;
+    color: #444444;
     line-height: 1.5;
 }
 
@@ -314,30 +318,30 @@ input:focus, select:focus {
 }
 
 .info-card {
-    background: #1A1A1A;
+    background: #F9F9F9;
     padding: 12px 15px;
     border-radius: 6px;
     display: flex;
     align-items: center;
     gap: 15px;
     text-align: left;
-    border: 1px solid #333333;
+    border: 1px solid #EAEAEA;
 }
 
 .info-card i {
     font-size: 1.4rem;
-    color: #FFFFFF;
+    color: #000000;
 }
 
 .info-card h3 {
     font-size: 0.95rem;
-    color: #FFF;
+    color: #000000;
     margin-bottom: 3px;
 }
 
 .info-card p {
     font-size: 0.8rem;
-    color: #AAAAAA;
+    color: #666666;
 }
 
 .landing-action {
@@ -351,8 +355,8 @@ input:focus, select:focus {
     gap: 10px;
     width: 100%;
     padding: 16px;
-    background-color: #FFFFFF;
-    color: #000000;
+    background-color: #000000;
+    color: #FFFFFF;
     text-decoration: none;
     border-radius: 6px;
     font-size: 1.05rem;
@@ -363,11 +367,11 @@ input:focus, select:focus {
 }
 
 .btn-primary-action:hover {
-    background-color: #E0E0E0;
+    background-color: #333333;
 }
 
 .landing-footer {
     margin-top: 30px;
     font-size: 0.75rem;
-    color: #666666;
+    color: #888888;
 }
