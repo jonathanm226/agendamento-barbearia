@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Willian Barber | Painel de Controle</title>
+    <title>Agenda Pro! | Willian Cortes</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -13,8 +13,47 @@
             height: 100%;
             overscroll-behavior-y: none;
         }
+        
+        /* Ajustes no cabeçalho para acomodar a logo centralizada */
+        .barber-header {
+            text-align: center;
+            padding: 20px 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #EAEAEA;
+        }
+        
+        .brand-logo-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .brand-logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .barber-header h1 {
+            font-size: 1.5rem;
+            color: #000;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .barber-header p {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         #login-section {
-            min-height: 80vh; 
+            min-height: 50vh; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -58,18 +97,22 @@
 
     <div class="app-container" style="max-width: 1000px;">
         
+        <!-- CABEÇALHO ATUALIZADO -->
         <header class="barber-header">
-            <div class="brand-info">
-                <i class="fa-solid fa-calendar-days barber-icon"></i>
-                <div>
-                    <h1>Painel de Controle</h1>
-                    <p id="painel-subtitulo">Gerenciamento Semanal e Bloqueios</p>
-                </div>
+            <!-- Espaço para a Logo -->
+            <div class="brand-logo-container">
+                <img src="logo.jpg.jpg" alt="Logo Willian Cortes">
+            </div>
+            
+            <!-- Título e Subtítulo -->
+            <div>
+                <h1>Agenda Pro !</h1>
+                <p id="painel-subtitulo">Gerenciamento de horários e controle financeiro</p>
             </div>
         </header>
 
         <section id="login-section" class="section">
-            <h2>Acesso ao Painel</h2>
+            <h2 style="border-left: 3px solid #000; padding-left: 10px;">ACESSO AO PAINEL</h2>
             <div class="datetime-inputs">
                 <div class="input-group">
                     <label for="login-usuario">Login:</label>
@@ -79,7 +122,7 @@
                     <label for="login-senha">Senha:</label>
                     <input type="password" id="login-senha">
                 </div>
-                <button class="btn-primary-action" onclick="fazerLogin()">Entrar</button>
+                <button class="btn-primary-action" onclick="fazerLogin()" style="background: #000; color: #FFF; font-weight: bold; letter-spacing: 1px; padding: 15px;">ENTRAR</button>
             </div>
         </section>
 
@@ -184,7 +227,7 @@
 
     </div>
 
-    <!-- Modais omitidas por brevidade mas presentes no código -->
+    <!-- Modais -->
     <div id="custom-action-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3><i class="fa-solid fa-user-gear"></i> Gerenciar Atendimento</h3>
