@@ -14,7 +14,7 @@
 
     <div class="app-container" style="max-width: 480px; margin: 0 auto; padding: 12px;">
         
-        <!-- Cabeçalho com a Logo (Texto corrigido sem a marcação indesejada) -->
+        <!-- Cabeçalho com a Logo -->
         <header class="barber-header" style="text-align: center; margin-bottom: 12px;">
             <div class="brand-info" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                 <div class="brand-logo-container" style="width: 40px; height: 40px;">
@@ -98,7 +98,7 @@
             </div>
         </section>
 
-        <!-- Seleção de Data e Horário (Isolado com position relative para evitar sobreposição do CSS externo) -->
+        <!-- Seleção de Data e Horário -->
         <section class="section" style="position: relative; z-index: 5; margin-top: 15px; margin-bottom: 12px; clear: both; display: block;">
             <h2 style="font-size: 0.9rem; margin-bottom: 6px;">3. Data e Horário</h2>
             <div class="datetime-inputs" style="display: flex; justify-content: space-between; gap: 8px; width: 100%;">
@@ -118,12 +118,12 @@
             </div>
         </section>
 
-        <!-- Identificação do Cliente -->
+        <!-- Identificação do Cliente (Corrigido) -->
         <section class="section" style="position: relative; z-index: 4; margin-bottom: 12px; clear: both;">
             <h2 style="font-size: 0.9rem; margin-bottom: 4px;">4. Seus Dados</h2>
-            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 6px;">
-                <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="padding: 7px; font-size: 0.8rem;">
-                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required style="padding: 7px; font-size: 0.8rem;">
+            <div class="client-inputs" style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" id="client-name" placeholder="Seu Nome Completo" required style="width: 100%; height: 38px; padding: 0 8px; font-size: 0.8rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
+                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required style="width: 100%; height: 38px; padding: 0 8px; font-size: 0.8rem; box-sizing: border-box; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 6px;">
             </div>
         </section>
 
