@@ -340,13 +340,12 @@
             return dias;
         }
 
-        // PREÇOS ATUALIZADOS AQUI:
+        // PREÇOS ATUALIZADOS AQUI (usado só como fallback para agendamentos antigos sem preco_total salvo):
         const precosTabela = {
             "corte": 35, "corte de cabelo": 45, "barba": 35, "barba completa": 35,
             "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
             "pigmentacao": 35, "alisamento": 35, "hidratacao": 35,
-            "selagem": 70, "luzes": 90, "platinado": 120,
-            "corte emergencial": 50
+            "selagem": 70, "luzes": 90, "platinado": 120
         };
 
         function calcularPrecoServico(nomeServico) {
@@ -358,6 +357,15 @@
                 total += precosTabela[parte.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()] || 35;
             });
             return total > 0 ? total : 35;
+        }
+
+        // Prioriza o valor realmente cobrado (salvo em preco_total no momento do agendamento).
+        // Só recorre à tabela de preços atual para registros antigos que não têm preco_total salvo.
+        function obterPrecoAgendamento(item) {
+            if (item && item.preco_total !== null && item.preco_total !== undefined) {
+                return Number(item.preco_total);
+            }
+            return calcularPrecoServico(item ? item.servico : null);
         }
 
         async function carregarFaturamentoBarbeiro() {
@@ -406,7 +414,7 @@
 
                 (data || []).forEach(item => {
                     qtd++;
-                    const preco = calcularPrecoServico(item.servico);
+                    const preco = obterPrecoAgendamento(item);
                     total += preco;
                     if (item.pagamentos && totaisPagamento[item.pagamentos] !== undefined) {
                         totaisPagamento[item.pagamentos] += preco;
@@ -585,7 +593,7 @@
                 const buttonsBox = document.getElementById("action-modal-buttons");
 
                 const dataFormatada = data.data.split("-").reverse().join("/");
-                const precoServico = calcularPrecoServico(data.servico);
+                const precoServico = obterPrecoAgendamento(data);
 
                 detailsBox.innerHTML = `
                     <strong>Cliente:</strong> ${data.cliente}<br>
@@ -797,7 +805,7 @@
                 let totaisPagamento = { Dinheiro: 0, Pix: 0, Débito: 0, Crédito: 0 };
 
                 data.forEach(item => {
-                    const preco = calcularPrecoServico(item.servico);
+                    const preco = obterPrecoAgendamento(item);
                     if (item.status === 'concluido') {
                         qtdConcluidos++;
                         faturamentoTotal += preco;
@@ -835,7 +843,7 @@
                             <strong style="color: #000;"><i class="fa-regular fa-clock"></i> ${item.horario} - Barbeiro: ${item.barbeiro}</strong>
                         </div>
                         <p style="margin: 2px 0; font-size: 0.9rem; color: #444;"><strong>Cliente:</strong> ${item.cliente} (${item.status === 'concluido' ? 'Atendido' : 'Ativo'})</p>
-                        <p style="margin: 2px 0; font-size: 0.9rem; color: #444;"><strong>Serviço:</strong> ${item.servico} | <strong>Pagamento:</strong> ${item.pagamentos || 'Não informado'} <span style="color: #25D366; float: right; font-weight: bold;">R$ ${calcularPrecoServico(item.servico)},00</span></p>
+                        <p style="margin: 2px 0; font-size: 0.9rem; color: #444;"><strong>Serviço:</strong> ${item.servico} | <strong>Pagamento:</strong> ${item.pagamentos || 'Não informado'} <span style="color: #25D366; float: right; font-weight: bold;">R$ ${obterPrecoAgendamento(item)},00</span></p>
                     `;
                     container.appendChild(card);
                 });
