@@ -110,8 +110,7 @@ function getTimesForDate(dateString) {
         horarios.push("21:00");
     }
 
-    // Se a data escolhida for hoje, remove horários que já passaram (com 30 min de margem
-    // para o cliente não conseguir "agendar" para um horário que já está em cima da hora)
+    // Se a data escolhida for hoje, remove horários que já passaram (com 30 min de margem)
     const agora = new Date();
     const hojeStr = agora.toISOString().split("T")[0];
     if (dateString === hojeStr) {
@@ -166,7 +165,6 @@ async function checkAvailableTimes() {
 
         if (errAgendamentos) throw errAgendamentos;
 
-        // Se outra chamada mais recente já começou, esta é obsoleta: não mexe mais no DOM
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         const { data: bloqueios, error: errBloqueios } = await _supabase
@@ -177,7 +175,6 @@ async function checkAvailableTimes() {
 
         if (errBloqueios) throw errBloqueios;
 
-        // Verifica novamente após o segundo await, pelo mesmo motivo
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         let occupiedTimes = [];
@@ -205,7 +202,6 @@ async function checkAvailableTimes() {
 
         const blockedTimes = bloqueios ? bloqueios.map(b => b.horario) : [];
 
-        // Remove o "Carregando horários..." antes de montar a lista definitiva
         timeSelect.innerHTML = "";
 
         if (blockedTimes.includes("TODOS")) {
@@ -299,13 +295,9 @@ async function buscarClientePorTelefone() {
 
                 if (comNascimento && comNascimento.nascimento) {
                     document.getElementById("client-nascimento").value = comNascimento.nascimento;
-                    if (groupNasc) {
-                        groupNasc.style.display = "none";
-                    }
+                    if (groupNasc) groupNasc.style.display = "none";
                 } else {
-                    if (groupNasc) {
-                        groupNasc.style.display = "block";
-                    }
+                    if (groupNasc) groupNasc.style.display = "block";
                 }
             } else {
                 if (groupNasc) groupNasc.style.display = "block";
@@ -319,23 +311,21 @@ async function buscarClientePorTelefone() {
     }
 }
 
-// Finaliza o agendamento e envia para o WhatsApp
-async function sendToWhatsapp() {
+// === LÓGICA DO MODAL DE CONFIRMAÇÃO DO CLIENTE ===
+
+function abrirModalConfirmacao() {
     const nameInput = document.getElementById("client-name");
     const phoneInput = document.getElementById("client-phone");
-    const nascimentoInput = document.getElementById("client-nascimento");
     const dateInput = document.getElementById("date");
     const timeSelect = document.getElementById("time");
-    const btnAgendar = document.getElementById("btn-agendar");
 
     const name = nameInput ? nameInput.value.trim() : "";
     const phone = phoneInput ? phoneInput.value.trim() : "";
-    const nascimento = nascimentoInput ? nascimentoInput.value : null; 
     const date = dateInput ? dateInput.value : "";
     const time = timeSelect ? timeSelect.value : "";
 
     if (!name || !phone) {
-        alert("Por favor, digite o seu nome e telemóvel antes de prosseguir.");
+        alert("Por favor, digite o seu nome e WhatsApp antes de prosseguir.");
         return;
     }
 
@@ -354,6 +344,67 @@ async function sendToWhatsapp() {
         alert("Por favor, selecione um horário válido e disponível.");
         return;
     }
+
+    // Calcula valor total e lista de serviços
+    let precoTotal = 0;
+    const servicosNomes = selectedServices.map(s => {
+        precoTotal += s.price;
+        return s.name;
+    });
+
+    const emergencial = isHorarioEmergencial(time);
+    if (emergencial) {
+        precoTotal = VALOR_CORTE_EMERGENCIAL;
+    }
+
+    const formattedDate = date.split("-").reverse().join("/");
+
+    // Monta o HTML dentro do modal de confirmação
+    const resumoDiv = document.getElementById("resumo-agendamento");
+    if (resumoDiv) {
+        resumoDiv.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Barbeiro:</strong> ${selectedBarber}</div>
+            <div style="margin-bottom: 8px;"><strong>Data:</strong> ${formattedDate} às ${time}</div>
+            <div style="margin-bottom: 8px;"><strong>Serviços:</strong> ${servicosNomes.join(", ")}${emergencial ? " 🚨 (Corte Emergencial)" : ""}</div>
+            <div style="margin-top: 12px; border-top: 1px solid #EAEAEA; padding-top: 8px; font-size: 1.1rem;">
+                <strong>Total Estimado:</strong> <span style="color: #25D366; font-weight: bold;">R$ ${precoTotal.toFixed(2).replace('.', ',')}</span>
+            </div>
+        `;
+    }
+
+    // Exibe o modal
+    const modal = document.getElementById("modal-confirmacao");
+    if (modal) {
+        modal.style.display = "flex";
+    }
+}
+
+function fecharModalConfirmacao() {
+    const modal = document.getElementById("modal-confirmacao");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+async function confirmarEEnviar() {
+    fecharModalConfirmacao();
+    await sendToWhatsapp();
+}
+
+// Finaliza o agendamento no Supabase e redireciona para o WhatsApp
+async function sendToWhatsapp() {
+    const nameInput = document.getElementById("client-name");
+    const phoneInput = document.getElementById("client-phone");
+    const nascimentoInput = document.getElementById("client-nascimento");
+    const dateInput = document.getElementById("date");
+    const timeSelect = document.getElementById("time");
+    const btnAgendar = document.getElementById("btn-continuar") || document.getElementById("btn-agendar");
+
+    const name = nameInput ? nameInput.value.trim() : "";
+    const phone = phoneInput ? phoneInput.value.trim() : "";
+    const nascimento = nascimentoInput ? nascimentoInput.value : null; 
+    const date = dateInput ? dateInput.value : "";
+    const time = timeSelect ? timeSelect.value : "";
 
     if (btnAgendar) {
         btnAgendar.disabled = true;
@@ -411,7 +462,7 @@ async function sendToWhatsapp() {
 
     if (btnAgendar) {
         btnAgendar.disabled = false;
-        btnAgendar.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Agendar pelo WhatsApp';
+        btnAgendar.innerHTML = 'Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>';
     }
 
     window.location.href = link;
