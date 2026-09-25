@@ -113,44 +113,28 @@ body {
     font-weight: 600;
 }
 
-/* Cards de Serviços com rolagem */
+/* =========================================
+   NOVA GRADE DE SERVIÇOS (2 Colunas, Sem Rolagem Dupla)
+   ========================================= */
 .services-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Divide em 2 colunas */
     gap: 10px;
-    max-height: 360px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-/* Estilo da barra de rolagem */
-.services-grid::-webkit-scrollbar {
-    width: 5px;
-}
-
-.services-grid::-webkit-scrollbar-track {
-    background: #F1F1F1;
-}
-
-.services-grid::-webkit-scrollbar-thumb {
-    background: #CCCCCC;
-    border-radius: 4px;
-}
-
-.services-grid::-webkit-scrollbar-thumb:hover {
-    background: #999999;
+    /* Removido o max-height e overflow-y para rolar suavemente com a página inteira */
 }
 
 .service-card {
     background: #F9F9F9;
     border: 1px solid #EAEAEA;
     border-radius: 6px;
-    padding: 14px 15px;
+    padding: 12px 10px; /* Padding interno reduzido para acomodar o texto na coluna */
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column; /* Coloca texto em cima e preço embaixo */
+    justify-content: space-between; /* Empurra o preço para baixo se o texto tiver 2 linhas */
+    align-items: flex-start;
     cursor: pointer;
     transition: 0.2s;
+    gap: 8px;
 }
 
 .service-card.active {
@@ -158,13 +142,18 @@ body {
     background: #EEEEEE;
 }
 
+.service-info {
+    width: 100%;
+}
+
 .service-info h3 {
-    font-size: 0.95rem;
-    margin-bottom: 3px;
+    font-size: 0.85rem; /* Reduzido levemente para melhor leitura no mosaico */
+    margin-bottom: 0;
     color: #000000;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.3;
 }
 
 .service-info span {
@@ -175,12 +164,16 @@ body {
 .price {
     font-weight: bold;
     color: #000000;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     background: #EEEEEE;
-    padding: 4px 8px;
+    padding: 6px;
     border-radius: 4px;
     border: 1px solid #DDDDDD;
+    width: 100%; /* Estica para preencher a parte inferior do card */
+    text-align: center;
+    margin-top: auto; /* Alinha no fim (rodapé do próprio card) */
 }
+/* ========================================= */
 
 /* Inputs */
 .datetime-inputs, .client-inputs {
