@@ -7,6 +7,15 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let selectedBarber = "Willian";
 let selectedServices = []; 
 
+// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial"
+const HORARIO_EMERGENCIAL_INICIO = "19:30";
+const VALOR_CORTE_EMERGENCIAL = 50;
+
+// Compara horários no formato "HH:MM" (funciona por comparação de string, pois é zero-padded)
+function isHorarioEmergencial(horario) {
+    return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
+}
+
 // Dicionário com a duração de cada serviço em minutos
 const duracoesServicos = {
     "Corte": 30,
@@ -90,12 +99,12 @@ function getTimesForDate(dateString) {
             horarios.push(h < 10 ? `0${h}:30` : `${h}:30`);
         }
         horarios.push("13:00");
-    } else { // Segunda a Sexta (07:00 às 19:00)
-        for (let h = 7; h < 19; h++) {
+    } else { // Segunda a Sexta (07:00 às 19:00 normal, 19:30 às 21:00 corte emergencial)
+        for (let h = 7; h < 21; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
             horarios.push(h < 10 ? `0${h}:30` : `${h}:30`);
         }
-        horarios.push("19:00");
+        horarios.push("21:00");
     }
     return horarios;
 }
@@ -194,11 +203,17 @@ async function checkAvailableTimes() {
                 }
             }
 
+            const emergencial = isHorarioEmergencial(time);
+
             if (temConflito) {
-                option.textContent = `${time} - (Indisponível para esta duração)`;
+                option.textContent = emergencial
+                    ? `${time} 🚨 Corte Emergencial - (Indisponível)`
+                    : `${time} - (Indisponível para esta duração)`;
                 option.disabled = true;
             } else {
-                option.textContent = time;
+                option.textContent = emergencial
+                    ? `${time} 🚨 Corte Emergencial (R$ ${VALOR_CORTE_EMERGENCIAL},00)`
+                    : time;
             }
 
             timeSelect.appendChild(option);
@@ -308,10 +323,19 @@ async function sendToWhatsapp() {
         return s.name;
     }).join(", ");
 
+    const emergencial = isHorarioEmergencial(time);
+    if (emergencial) {
+        precoTotal = VALOR_CORTE_EMERGENCIAL;
+    }
+
     const formattedDate = date.split("-").reverse().join("/");
     const whatsappNumber = "5531994951564";
 
-    const message = `✅ *AGENDAMENTO CONFIRMADO!* ✅\n\nOlá! Segue a confirmação do meu horário:\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n💈 *Barbeiro:* ${selectedBarber}\n✂️ *Serviços:* ${listaNomesServicos} (Total: R$ ${precoTotal},00)\n📅 *Data:* ${formattedDate}\n⏰ *Horário:* ${time}`;
+    const avisoEmergencial = emergencial
+        ? `🚨 *HORÁRIO EMERGENCIAL (fora do expediente normal)* 🚨\n\n`
+        : "";
+
+    const message = `${avisoEmergencial}✅ *AGENDAMENTO CONFIRMADO!* ✅\n\nOlá! Segue a confirmação do meu horário:\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n💈 *Barbeiro:* ${selectedBarber}\n✂️ *Serviços:* ${listaNomesServicos}${emergencial ? " (Corte Emergencial)" : ""} (Total: R$ ${precoTotal},00)\n📅 *Data:* ${formattedDate}\n⏰ *Horário:* ${time}`;
 
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
