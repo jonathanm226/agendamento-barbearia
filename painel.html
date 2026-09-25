@@ -231,7 +231,14 @@
 
         let usuarioLogado = "";
         let offsetSemana = 0; 
-        const horariosPadrao = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"];
+        
+        // Grade expandida para incluir horários a partir das 07:00
+        const horariosPadrao = [
+            "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
+            "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", 
+            "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
+            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00"
+        ];
 
         function mostrarAlertaPersonalizado(titulo, mensagem) {
             const modal = document.getElementById("custom-alert-modal");
@@ -346,7 +353,6 @@
             return total > 0 ? total : 35;
         }
 
-        // Função de Faturamento do Barbeiro com Filtro (Dia, Semana, Mês)
         async function carregarFaturamentoBarbeiro() {
             const periodo = document.getElementById("select-periodo-faturamento").value;
             const lblQtd = document.getElementById("barber-resumo-qtd");
