@@ -26,22 +26,9 @@
             </div>
         </header>
 
-        <!-- Seleção de Barbeiro -->
-        <section class="section">
-            <h2>1. Escolha o Barbeiro</h2>
-            <div class="barbers-grid">
-                <div class="barber-card active" onclick="selectBarber(this, 'Willian')">
-                    <h3>Willian</h3>
-                </div>
-                <div class="barber-card" onclick="selectBarber(this, 'Pedro')">
-                    <h3>Pedro</h3>
-                </div>
-            </div>
-        </section>
-
         <!-- Seleção de Serviços -->
         <section class="section">
-            <h2>2. Escolha os Serviços</h2>
+            <h2>1. Escolha os Serviços</h2>
             <div class="services-grid">
                 
                 <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
@@ -99,7 +86,7 @@
 
         <!-- Seleção de Data e Horário -->
         <section class="section">
-            <h2>3. Data e Horário</h2>
+            <h2>2. Data e Horário</h2>
             <p style="font-size: 0.8rem; color: #666; margin: -5px 0 12px 0;">
                 <i class="fa-solid fa-circle-info"></i> Horários a partir das 19:30 são atendimentos emergenciais (valor fixo de R$ 50,00).
             </p>
@@ -119,7 +106,7 @@
 
         <!-- Identificação do Cliente -->
         <section class="section">
-            <h2>4. Seus Dados</h2>
+            <h2>3. Seus Dados</h2>
             <div class="client-inputs">
                 <div class="input-group">
                     <label for="client-phone">WhatsApp / Telefone:</label>
@@ -143,7 +130,6 @@
 
         <!-- Botão de Ação Atualizado -->
         <footer class="footer-action">
-            <!-- Agora o botão chama "abrirModalConfirmacao()" em vez de "sendToWhatsapp()" direto -->
             <button class="btn-whatsapp" id="btn-continuar" onclick="abrirModalConfirmacao()" style="background: #000; color: #FFF; border: 1px solid #333;">
                 Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
             </button>
