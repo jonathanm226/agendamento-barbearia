@@ -1,0 +1,15 @@
+{
+  "name": "Painel Willian Cortes",
+  "short_name": "Willian Cortes",
+  "start_url": "/painel.html",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "logo.jpg.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
