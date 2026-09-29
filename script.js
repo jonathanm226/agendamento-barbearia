@@ -51,14 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAvailableTimes();
 });
 
-// Função para selecionar o barbeiro
-function selectBarber(element, barberName) {
-    document.querySelectorAll(".barber-card").forEach(card => card.classList.remove("active"));
-    element.classList.add("active");
-    selectedBarber = barberName;
-    checkAvailableTimes();
-}
-
 // Função para marcar/desmarcar serviços e atualizar horários instantaneamente
 function toggleService(element, serviceName, price) {
     const icon = element.querySelector(".checkbox-icon");
@@ -259,7 +251,7 @@ async function checkAvailableTimes() {
     }
 }
 
-// Busca os dados do cliente por telemóvel e gere a visibilidade da data de nascimento
+// Busca os dados do cliente por telefone
 async function buscarClientePorTelefone() {
     const telefoneInput = document.getElementById("client-phone").value.trim();
     const groupNasc = document.getElementById("group-nascimento");
@@ -345,7 +337,6 @@ function abrirModalConfirmacao() {
         return;
     }
 
-    // Calcula valor total e lista de serviços
     let precoTotal = 0;
     const servicosNomes = selectedServices.map(s => {
         precoTotal += s.price;
@@ -359,7 +350,6 @@ function abrirModalConfirmacao() {
 
     const formattedDate = date.split("-").reverse().join("/");
 
-    // Monta o HTML dentro do modal de confirmação
     const resumoDiv = document.getElementById("resumo-agendamento");
     if (resumoDiv) {
         resumoDiv.innerHTML = `
@@ -372,7 +362,6 @@ function abrirModalConfirmacao() {
         `;
     }
 
-    // Exibe o modal
     const modal = document.getElementById("modal-confirmacao");
     if (modal) {
         modal.style.display = "flex";
@@ -423,7 +412,9 @@ async function sendToWhatsapp() {
     }
 
     const formattedDate = date.split("-").reverse().join("/");
-    const whatsappNumber = "5531994951564";
+    
+    // WHATSAPP ATUALIZADO AQUI:
+    const whatsappNumber = "5531975552202";
 
     const avisoEmergencial = emergencial
         ? `🚨 *HORÁRIO EMERGENCIAL (fora do expediente normal)* 🚨\n\n`
