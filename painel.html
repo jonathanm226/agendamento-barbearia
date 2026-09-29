@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Agenda Pro! | Willian Cortes</title>
+    
+    <!-- Configuração de PWA e Ícone na Tela Inicial -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Willian Cortes">
+    <link rel="apple-touch-icon" href="logo.jpg.jpg">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -14,7 +22,6 @@
             overscroll-behavior-y: none;
         }
         
-        /* Ajustes no cabeçalho para acomodar a logo centralizada */
         .barber-header {
             text-align: center;
             padding: 20px 10px;
@@ -97,14 +104,10 @@
 
     <div class="app-container" style="max-width: 1000px;">
         
-        <!-- CABEÇALHO ATUALIZADO -->
         <header class="barber-header">
-            <!-- Espaço para a Logo -->
             <div class="brand-logo-container">
                 <img src="logo.jpg.jpg" alt="Logo Willian Cortes">
             </div>
-            
-            <!-- Título e Subtítulo -->
             <div>
                 <h1>Agenda Pro !</h1>
                 <p id="painel-subtitulo">Gerenciamento de horários e controle financeiro</p>
@@ -279,7 +282,6 @@
         let offsetSemana = 0; 
         let diaAtivoIso = null; 
         
-        // HORÁRIOS ATUALIZADOS AQUI:
         const horariosPadrao = [
             "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
             "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", 
@@ -337,8 +339,8 @@
                 document.getElementById("dashboard-admin").style.display = "block";
                 document.getElementById("filter-date-admin").value = new Date().toISOString().split("T")[0];
                 carregarResumoAdmin();
-            } else if (userLower === 'willian' || userLower === 'pedro') {
-                usuarioLogado = userLower === 'willian' ? 'Willian' : 'Pedro';
+            } else if (userLower === 'willian') {
+                usuarioLogado = 'Willian';
                 document.getElementById("login-section").style.display = "none";
                 document.getElementById("dashboard-admin").style.display = "none";
                 document.getElementById("dashboard-barbeiro").style.display = "block";
@@ -383,7 +385,6 @@
             return dias;
         }
 
-        // PREÇOS ATUALIZADOS AQUI (usado só como fallback para agendamentos antigos sem preco_total salvo):
         const precosTabela = {
             "corte": 35, "corte de cabelo": 45, "barba": 35, "barba completa": 35,
             "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
@@ -402,8 +403,6 @@
             return total > 0 ? total : 35;
         }
 
-        // Prioriza o valor realmente cobrado (salvo em preco_total no momento do agendamento).
-        // Só recorre à tabela de preços atual para registros antigos que não têm preco_total salvo.
         function obterPrecoAgendamento(item) {
             if (item && item.preco_total !== null && item.preco_total !== undefined) {
                 return Number(item.preco_total);
