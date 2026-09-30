@@ -115,7 +115,6 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
 
-        /* Grid ultra compacta para os 6 dias da semana */
         .week-horizontal-container {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -377,31 +376,49 @@
             <div style="text-align: left; margin-bottom: 15px;">
                 <button onclick="mostrarFormNovoMensalista()" class="custom-modal-btn btn-modal-confirmar" style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> Novo Mensalista</button>
                 <div id="form-novo-mensalista" style="display: none; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #DDD; margin-bottom: 10px;">
-                    <input type="text" id="mensalista-nome" placeholder="Nome do Cliente">
-                    <input type="text" id="mensalista-telefone" placeholder="Telefone (WhatsApp)">
-                    <select id="mensalista-servico">
-                        <option value="Corte">Corte (R$ 35)</option>
-                        <option value="Corte + Barba">Corte + Barba (R$ 70)</option>
-                        <option value="Barba">Barba (R$ 35)</option>
+                    <input type="text" id="mensalista-nome" placeholder="Nome do Cliente (ex: Fulano)">
+                    <input type="text" id="mensalista-telefone" placeholder="Telefone / WhatsApp">
+                    
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Serviço:</label>
+                    <select id="mensalista-servico" onchange="atualizarValorSugeridoMensalista()">
+                        <option value="Corte de Cabelo">Corte de Cabelo</option>
+                        <option value="Barba Completa">Barba Completa</option>
+                        <option value="Combo Cabelo + Barba">Combo Cabelo + Barba</option>
+                        <option value="Sobrancelha">Sobrancelha</option>
+                        <option value="PIGMENTACAO">Pigmentação</option>
+                        <option value="Alisamento">Alisamento</option>
+                        <option value="Hidratacao">Hidratação</option>
+                        <option value="Selagem">Selagem</option>
+                        <option value="Luzes">Luzes</option>
+                        <option value="Platinado">Platinado</option>
                     </select>
-                    <select id="mensalista-dia">
-                        <option value="1">Segunda-feira</option>
-                        <option value="2">Terça-feira</option>
-                        <option value="3">Quarta-feira</option>
-                        <option value="4">Quinta-feira</option>
-                        <option value="5">Sexta-feira</option>
-                        <option value="6">Sábado</option>
-                    </select>
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Valor (R$):</label>
+                    <input type="number" id="mensalista-valor" placeholder="Valor em Reais">
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
+                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário:</label>
                     <select id="mensalista-horario">
                         <!-- Preenchido via script -->
                     </select>
-                    <div style="display: flex; gap: 5px; margin-top: 5px;">
-                        <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar</button>
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Vezes no mês (Repetições):</label>
+                    <select id="mensalista-vezes">
+                        <option value="1">1x no mês (Apenas 1 vez)</option>
+                        <option value="2">2x no mês (A cada 2 semanas)</option>
+                        <option value="3">3x no mês</option>
+                        <option value="4" selected>4x no mês (Toda semana)</option>
+                    </select>
+
+                    <div style="display: flex; gap: 5px; margin-top: 8px;">
+                        <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar e Lançar</button>
                         <button onclick="fecharFormNovoMensalista()" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
                     </div>
                 </div>
             </div>
-            <div id="lista-mensalistas-container" style="max-height: 200px; overflow-y: auto; text-align: left; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+            <div id="lista-mensalistas-container" style="max-height: 180px; overflow-y: auto; text-align: left; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
                 <!-- Lista de mensalistas cadastrados -->
             </div>
             <button onclick="fecharModalMensalista()" class="custom-modal-btn btn-modal-cancelar">Fechar</button>
@@ -531,14 +548,13 @@
                 d.setDate(segunda.getDate() + i);
                 const isoString = d.toISOString().split("T")[0];
                 const formatada = d.toLocaleDateString("pt-BR", { weekday: 'short', day: '2-digit', month: '2-digit' });
-                // getDay(): 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
-                dias.push({ iso: isoString, label: formatada, weekDayIndex: d.getDay() });
+                dias.push({ iso: isoString, label: formatada });
             }
             return dias;
         }
 
         const precosTabela = {
-            "corte": 35, "corte de cabelo": 45, "barba": 35, "barba completa": 35,
+            "corte de cabelo": 45, "corte": 35, "barba completa": 35, "barba": 35,
             "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
             "pigmentacao": 35, "alisamento": 35, "hidratacao": 35,
             "selagem": 70, "luzes": 90, "platinado": 120
@@ -560,6 +576,12 @@
                 return Number(item.preco_total);
             }
             return calcularPrecoServico(item ? item.servico : null);
+        }
+
+        function atualizarValorSugeridoMensalista() {
+            const servico = document.getElementById("mensalista-servico").value;
+            const preco = calcularPrecoServico(servico);
+            document.getElementById("mensalista-valor").value = preco;
         }
 
         async function carregarFaturamentoBarbeiro() {
@@ -642,13 +664,6 @@
                     .gte("data", primeiraData)
                     .lte("data", ultimaData);
 
-                // Buscar mensalistas ativos do barbeiro
-                const { data: mensalistas } = await _supabase
-                    .from("mensalistas")
-                    .select("*")
-                    .eq("barbeiro", usuarioLogado)
-                    .eq("ativo", true);
-
                 container.innerHTML = "";
 
                 diasSemana.forEach(dia => {
@@ -678,10 +693,6 @@
                         horariosPadrao.forEach(horario => {
                             const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
                             const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
-                            
-                            // Verificar se há mensalista para este dia da semana e horário
-                            const mensalistaSlot = (mensalistas || []).find(m => m.dia_semana === dia.weekDayIndex && m.horario === horario);
-
                             const itemSlot = document.createElement("div");
 
                             if (horarioBloqueado) {
@@ -692,31 +703,21 @@
                                     </div>
                                     <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
                                 `;
-                            } else if (mensalistaSlot) {
-                                itemSlot.className = "slot-item mensalista";
-                                itemSlot.onclick = () => abrirModalMensalista();
-                                itemSlot.innerHTML = `
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
-                                        <span style="font-size: 0.52rem; color: #9b59b6; font-weight: bold;">MENSAL</span>
-                                    </div>
-                                    <div style="font-weight: 600; color: #6c3483; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${mensalistaSlot.cliente} (Mensalista)">
-                                        ⭐ ${mensalistaSlot.cliente}
-                                    </div>
-                                `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
-                                itemSlot.className = isConcluido ? "slot-item concluded" : "slot-item booked";
+                                const isMensalista = agendamento.recorrente === true;
+                                
+                                itemSlot.className = isMensalista ? "slot-item mensalista" : (isConcluido ? "slot-item concluded" : "slot-item booked");
                                 itemSlot.onclick = () => abrirGerenciadorAgendamento(agendamento.id);
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <span style="font-weight:bold;">${horario.substring(0,5)}</span>
-                                        <span style="font-size: 0.52rem; color: ${isConcluido ? '#3498db' : '#25D366'}; font-weight: bold;">
-                                            ${isConcluido ? 'P' : 'C'}
+                                        <span style="font-size: 0.52rem; color: ${isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : '#25D366')}; font-weight: bold;">
+                                            ${isMensalista ? 'MENSAL' : (isConcluido ? 'P' : 'C')}
                                         </span>
                                     </div>
-                                    <div style="font-weight: 600; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${agendamento.cliente}">
-                                        ${agendamento.cliente}
+                                    <div style="font-weight: 600; color: ${isMensalista ? '#6c3483' : '#000'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${agendamento.cliente}">
+                                        ${isMensalista ? '⭐ ' : ''}${agendamento.cliente}
                                     </div>
                                 `;
                             } else {
@@ -741,14 +742,16 @@
             }
         }
 
-        // Funções de Gestão de Mensalistas
+        // Funções de Gestão de Mensalistas (Lançamento direto na tabela agendamentos)
         async function abrirModalMensalista() {
             const modal = document.getElementById("custom-mensalista-modal");
             modal.classList.add("active");
             fecharFormNovoMensalista();
             carregarListaMensalistas();
             
-            // Popular select de horários
+            document.getElementById("mensalista-datainicio").value = new Date().toISOString().split("T")[0];
+            atualizarValorSugeridoMensalista();
+
             const selectHorario = document.getElementById("mensalista-horario");
             selectHorario.innerHTML = "";
             horariosPadrao.forEach(h => {
@@ -774,28 +777,43 @@
             const nome = document.getElementById("mensalista-nome").value.trim();
             const telefone = document.getElementById("mensalista-telefone").value.trim();
             const servico = document.getElementById("mensalista-servico").value;
-            const diaSemana = parseInt(document.getElementById("mensalista-dia").value);
+            const valor = parseFloat(document.getElementById("mensalista-valor").value) || 35;
+            const dataInicioStr = document.getElementById("mensalista-datainicio").value;
             const horario = document.getElementById("mensalista-horario").value;
+            const vezesNoMes = parseInt(document.getElementById("mensalista-vezes").value) || 4;
 
-            if (!nome || !telefone) {
-                alert("Preencha o nome e o telefone do cliente.");
+            if (!nome || !telefone || !dataInicioStr) {
+                alert("Preencha todos os campos obrigatórios.");
                 return;
             }
 
             try {
-                const { error } = await _supabase.from("mensalistas").insert([{
-                    barbeiro: usuarioLogado,
-                    cliente: nome,
-                    telefone: telefone,
-                    servico: servico,
-                    dia_semana: diaSemana,
-                    horario: horario,
-                    ativo: true
-                }]);
+                let dataBase = new Date(dataInicioStr + "T00:00:00");
+                let insercoes = [];
 
+                // Lança as ocorrências na agenda futura conforme o número de vezes no mês
+                for (let i = 0; i < vezesNoMes; i++) {
+                    let d = new Date(dataBase);
+                    d.setDate(dataBase.getDate() + (i * 7)); // Soma 7 dias a cada repetição semanal
+                    let dataIso = d.toISOString().split("T")[0];
+
+                    insercoes.push({
+                        barbeiro: usuarioLogado,
+                        cliente: nome,
+                        telefone: telefone,
+                        servico: servico,
+                        preco_total: valor,
+                        data: dataIso,
+                        horario: horario,
+                        status: 'ativo',
+                        recorrente: true
+                    });
+                }
+
+                const { error } = await _supabase.from("agendamentos").insert(insercoes);
                 if (error) throw error;
 
-                alert("Cliente mensalista cadastrado com sucesso!");
+                alert("Cliente mensalista cadastrado e lançado na agenda futura com sucesso!");
                 fecharFormNovoMensalista();
                 carregarListaMensalistas();
                 carregarAgendaSemanal();
@@ -810,30 +828,40 @@
 
             try {
                 const { data, error } = await _supabase
-                    .from("mensalistas")
+                    .from("agendamentos")
                     .select("*")
                     .eq("barbeiro", usuarioLogado)
-                    .eq("ativo", true);
+                    .eq("recorrente", true)
+                    .eq("status", "ativo")
+                    .order("data", { ascending: true });
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = "<p style='color: #666;'>Nenhum mensalista cadastrado.</p>";
+                // Agrupar por cliente para exibir listagem limpa
+                const unicos = {};
+                (data || []).forEach(item => {
+                    if (!unicos[item.cliente]) {
+                        unicos[item.cliente] = item;
+                    }
+                });
+
+                const listaUnicos = Object.values(unicos);
+
+                if (listaUnicos.length === 0) {
+                    container.innerHTML = "<p style='color: #666;'>Nenhum mensalista ativo.</p>";
                     return;
                 }
 
-                const diasSemanaNomes = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
                 container.innerHTML = "";
-
-                data.forEach(m => {
+                listaUnicos.forEach(m => {
                     const div = document.createElement("div");
                     div.style.cssText = "background: #FFF; border: 1px solid #DDD; padding: 6px; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;";
                     div.innerHTML = `
                         <div>
-                            <strong>${m.cliente}</strong> (${m.telefone})<br>
-                            <span style="color: #666; font-size: 0.75rem;">${diasSemanaNomes[m.dia_semana]} às ${m.horario} - ${m.servico}</span>
+                            <strong>⭐ ${m.cliente}</strong> (${m.telefone})<br>
+                            <span style="color: #666; font-size: 0.7rem;">Início: ${m.data.split('-').reverse().join('/')} às ${m.horario} - R$ ${m.preco_total},00</span>
                         </div>
-                        <button onclick="removerMensalista(${m.id})" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Cancelar</button>
+                        <button onclick="removerMensalista('${m.cliente}')" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Cancelar</button>
                     `;
                     container.appendChild(div);
                 });
@@ -842,10 +870,17 @@
             }
         }
 
-        async function removerMensalista(id) {
-            if (confirm("Deseja realmente cancelar este plano mensalista? O horário será liberado.")) {
+        async function removerMensalista(nomeCliente) {
+            if (confirm(`Deseja cancelar o plano de "${nomeCliente}" e remover os agendamentos futuros?`)) {
                 try {
-                    const { error } = await _supabase.from("mensalistas").update({ ativo: false }).eq("id", id);
+                    const { error } = await _supabase
+                        .from("agendamentos")
+                        .update({ status: 'cancelado' })
+                        .eq("barbeiro", usuarioLogado)
+                        .eq("cliente", nomeCliente)
+                        .eq("recorrente", true)
+                        .eq("status", "ativo");
+
                     if (error) throw error;
                     carregarListaMensalistas();
                     carregarAgendaSemanal();
@@ -870,7 +905,7 @@
                 const precoServico = obterPrecoAgendamento(data);
 
                 detailsBox.innerHTML = `
-                    <strong>Cliente:</strong> ${data.cliente}<br>
+                    <strong>Cliente:</strong> ${data.cliente} ${data.recorrente ? '(Mensalista ⭐)' : ''}<br>
                     <strong>Telefone:</strong> ${data.telefone || 'Não informado'}<br>
                     <strong>Serviço:</strong> ${data.servico}<br>
                     <strong>Valor:</strong> R$ ${precoServico},00<br>
