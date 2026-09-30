@@ -369,11 +369,9 @@
             <!-- Caixa para edição / reagendamento -->
             <div id="edit-box" style="display: none; text-align: left; margin-bottom: 12px; background: #F4F4F9; padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
                 <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Nova Data:</label>
-                <input type="date" id="input-edit-data" onchange="atualizarHorariosEdicaoPorData(this.value)">
-                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin: 6px 0 4px 0;">Novo Horário:</label>
-                <select id="input-edit-horario">
-                    <!-- Preenchido via script -->
-                </select>
+                <input type="date" id="input-edit-data">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin: 6px 0 4px 0;">Novo Horário Livre:</label>
+                <input type="time" id="input-edit-horario">
             </div>
 
             <div class="custom-modal-buttons" id="action-modal-buttons"></div>
@@ -408,12 +406,10 @@
                     <input type="number" id="mensalista-valor" placeholder="Valor em Reais">
 
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
-                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()" onchange="atualizarHorariosMensalistaPorData(this.value)">
+                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
 
-                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário:</label>
-                    <select id="mensalista-horario">
-                        <!-- Preenchido via script -->
-                    </select>
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário Livre:</label>
+                    <input type="time" id="mensalista-horario" value="09:00" required>
 
                     <div style="display: flex; gap: 5px; margin-top: 8px;">
                         <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar e Lançar</button>
@@ -457,7 +453,7 @@
         let usuarioLogado = "";
         let offsetSemana = 0; 
         
-        // Retorna os horários com base no dia da semana (Sexta=5 e Sábado=6 começam às 05:00, os demais às 07:00)
+        // Retorna os horários em blocos de 40 minutos para base visual da agenda
         function obterHorariosParaData(dataString) {
             if (!dataString) return [];
             const partes = dataString.split('-');
@@ -466,9 +462,16 @@
 
             let horarios = [];
             let horaInicio = (diaSemana === 5 || diaSemana === 6) ? 5 : 7;
-
-            for (let h = horaInicio; h <= 21; h++) {
-                horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
+            let horaFim = 21;
+            
+            let currentMin = horaInicio * 60;
+            let endMin = horaFim * 60;
+            
+            while (currentMin <= endMin) {
+                let h = Math.floor(currentMin / 60);
+                let m = currentMin % 60;
+                horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                currentMin += 40; 
             }
             return horarios;
         }
@@ -660,19 +663,8 @@
                 const primeiraData = diasSemana[0].iso;
                 const ultimaData = diasSemana[diasSemana.length - 1].iso;
 
-                const { data: agendamentos } = await _supabase
-                    .from("agendamentos")
-                    .select("*")
-                    .eq("barbeiro", usuarioLogado)
-                    .gte("data", primeiraData)
-                    .lte("data", ultimaData);
-
-                const { data: bloqueios } = await _supabase
-                    .from("bloqueios_agenda")
-                    .select("*")
-                    .eq("barbeiro", usuarioLogado)
-                    .gte("data", primeiraData)
-                    .lte("data", ultimaData);
+                const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", usuarioLogado).gte("data", primeiraData).lte("data", ultimaData);
+                const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", usuarioLogado).gte("data", primeiraData).lte("data", ultimaData);
 
                 container.innerHTML = "";
 
@@ -701,20 +693,38 @@
                         slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.65rem; padding: 10px 0; font-weight: bold;">Bloq.</div>`;
                     } else {
                         const horariosDia = obterHorariosParaData(dia.iso);
-                        horariosDia.forEach(horario => {
-                            const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
-                            const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
+                        const agendamentosDia = (agendamentos || []).filter(a => a.data === dia.iso && a.status !== 'cancelado');
+                        const bloqueiosDia = (bloqueios || []).filter(b => b.data === dia.iso && b.horario !== 'TODOS');
+                        
+                        let itensRenderizacao = [];
+
+                        horariosDia.forEach(h => {
+                            const temAgend = agendamentosDia.some(a => a.horario === h);
+                            const temBloq = bloqueiosDia.some(b => b.horario === h);
+                            if (!temAgend && !temBloq) {
+                                itensRenderizacao.push({ tipo: 'vazio', horario: h });
+                            }
+                        });
+
+                        agendamentosDia.forEach(a => itensRenderizacao.push({ tipo: 'agendamento', horario: a.horario, dado: a }));
+                        bloqueiosDia.forEach(b => itensRenderizacao.push({ tipo: 'bloqueio', horario: b.horario, dado: b }));
+
+                        // Ordena a grade inteira cronologicamente para acomodar horários livres (ex: 15:15)
+                        itensRenderizacao.sort((a, b) => a.horario.localeCompare(b.horario));
+
+                        itensRenderizacao.forEach(item => {
                             const itemSlot = document.createElement("div");
 
-                            if (horarioBloqueado) {
+                            if (item.tipo === 'bloqueio') {
                                 itemSlot.className = "slot-item blocked";
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
+                                        <span style="font-weight:bold;">${item.horario.substring(0,5)}</span>
                                     </div>
-                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
+                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${item.horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
                                 `;
-                            } else if (agendamento) {
+                            } else if (item.tipo === 'agendamento') {
+                                const agendamento = item.dado;
                                 const isConcluido = agendamento.status === 'concluido';
                                 const isMensalista = agendamento.recorrente === true;
                                 
@@ -722,7 +732,7 @@
                                 itemSlot.onclick = () => abrirGerenciadorAgendamento(agendamento.id);
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
+                                        <span style="font-weight:bold;">${item.horario.substring(0,5)}</span>
                                         <span style="font-size: 0.52rem; color: ${isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : '#25D366')}; font-weight: bold;">
                                             ${isMensalista ? 'MENSAL' : (isConcluido ? 'P' : 'C')}
                                         </span>
@@ -735,8 +745,8 @@
                                 itemSlot.className = "slot-item available";
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                        <span style="color:#666;">${horario.substring(0,5)}</span>
-                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', false)" style="background: #F9F9F9; color: #000; border: 1px solid #DDD; padding: 0px 2px; border-radius: 2px; font-size: 0.5rem; cursor: pointer;">X</button>
+                                        <span style="color:#666;">${item.horario.substring(0,5)}</span>
+                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${item.horario}', false)" style="background: #F9F9F9; color: #000; border: 1px solid #DDD; padding: 0px 2px; border-radius: 2px; font-size: 0.5rem; cursor: pointer;">X</button>
                                     </div>
                                 `;
                             }
@@ -746,7 +756,6 @@
                     coluna.appendChild(slotsDiv);
                     container.appendChild(coluna);
                 });
-
                 carregarFaturamentoBarbeiro();
             } catch (err) {
                 console.error("Erro agenda:", err);
@@ -763,16 +772,6 @@
             const hojeIso = new Date().toISOString().split("T")[0];
             document.getElementById("mensalista-datainicio").value = hojeIso;
             atualizarValorSugeridoMensalista();
-            atualizarHorariosMensalistaPorData(hojeIso);
-        }
-
-        function atualizarHorariosMensalistaPorData(dataString) {
-            const selectHorario = document.getElementById("mensalista-horario");
-            selectHorario.innerHTML = "";
-            const horarios = obterHorariosParaData(dataString);
-            horarios.forEach(h => {
-                selectHorario.innerHTML += `<option value="${h}">${h}</option>`;
-            });
         }
 
         function fecharModalMensalista() {
@@ -797,7 +796,7 @@
             const dataInicioStr = document.getElementById("mensalista-datainicio").value;
             const horario = document.getElementById("mensalista-horario").value;
 
-            if (!nome || !telefone || !dataInicioStr) {
+            if (!nome || !telefone || !dataInicioStr || !horario) {
                 alert("Preencha todos os campos obrigatórios.");
                 return;
             }
@@ -969,7 +968,7 @@
                         buttonsBox.innerHTML = "";
 
                         document.getElementById("input-edit-data").value = data.data;
-                        atualizarHorariosEdicaoPorData(data.data, data.horario);
+                        document.getElementById("input-edit-horario").value = data.horario;
 
                         const btnSalvarEdicao = document.createElement("button");
                         btnSalvarEdicao.className = "custom-modal-btn btn-modal-confirmar";
@@ -1042,15 +1041,6 @@
             } catch (err) {
                 mostrarAlertaPersonalizado("Erro", "Erro ao carregar detalhes.");
             }
-        }
-
-        function atualizarHorariosEdicaoPorData(dataString, horarioSelecionado = "") {
-            const selH = document.getElementById("input-edit-horario");
-            selH.innerHTML = "";
-            const horarios = obterHorariosParaData(dataString);
-            horarios.forEach(h => {
-                selH.innerHTML += `<option value="${h}" ${h === horarioSelecionado ? 'selected' : ''}>${h}</option>`;
-            });
         }
 
         async function atualizarStatusAgendamento(id, novoStatus, formaPagamento) {
@@ -1159,7 +1149,10 @@
                 (data || []).forEach(item => {
                     const card = document.createElement("div");
                     card.style.cssText = "background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #EAEAEA; border-left: 4px solid " + (item.status === 'concluido' ? '#3498db' : '#000');
-                    card.innerHTML = `<strong style="font-size:0.85rem;">${item.horario} - ${item.barbeiro}</strong><br><span style="font-size:0.8rem; color:#444;">Cliente: ${item.cliente} | ${item.servico} | R$ ${obterPrecoAgendamento(item)},00</span>`;
+                    
+                    const horarioTexto = item.horario_fim ? `${item.horario} às ${item.horario_fim}` : item.horario;
+
+                    card.innerHTML = `<strong style="font-size:0.85rem;">${horarioTexto} - ${item.barbeiro}</strong><br><span style="font-size:0.8rem; color:#444;">Cliente: ${item.cliente} | ${item.servico} | R$ ${obterPrecoAgendamento(item)},00</span>`;
                     container.appendChild(card);
                 });
             } catch (err) {
