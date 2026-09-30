@@ -75,7 +75,7 @@ function toggleService(element, serviceName, price) {
     checkAvailableTimes();
 }
 
-// Lógica de horários disponíveis conforme o dia da semana (intervalos de 1 em 1 hora)
+// Lógica de horários disponíveis conforme o dia da semana (Seg a Qui 07:00 às 21:00 | Sex e Sáb 05:00 às 21:00)
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
