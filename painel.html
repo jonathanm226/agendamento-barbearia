@@ -31,34 +31,33 @@
             min-height: 100vh;
         }
 
+        /* Removido max-width restritivo para permitir que a tela aproveite 100% do espaço horizontal no mobile */
         .app-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 100%;
             background-color: #FFFFFF;
-            padding: 15px;
-            padding-bottom: 110px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
-            border-left: 1px solid #EAEAEA;
-            border-right: 1px solid #EAEAEA;
+            padding: 8px;
+            padding-bottom: 90px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
         }
 
         .barber-header {
             border-bottom: 1px solid #EAEAEA;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
             text-align: center;
         }
 
         .brand-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             background: #FFFFFF;
             border: 2px solid #000000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 6px auto;
             overflow: hidden;
         }
 
@@ -69,19 +68,19 @@
         }
 
         .barber-header h1 {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: #000000;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             font-weight: 700;
         }
 
         .barber-header p {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #666666;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             font-weight: 500;
         }
 
@@ -90,6 +89,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            padding: 0 15px;
         }
 
         .custom-modal-overlay {
@@ -116,51 +116,50 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
 
-        /* Grade semanal compacta para caber sem zoom ou cortes excessivos */
+        /* Grid ultra compacta para os 6 dias da semana caberem perfeitamente na tela */
         .week-horizontal-container {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            margin-top: 10px;
-            scrollbar-width: thin;
-            scrollbar-color: #000 #EAEAEA;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+            margin-top: 8px;
+            width: 100%;
+            overflow-x: hidden;
         }
         .day-column {
             background: #F9F9F9;
             border: 1px solid #EAEAEA;
-            border-radius: 6px;
-            padding: 6px;
+            border-radius: 4px;
+            padding: 3px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            min-width: 135px;
-            flex: 1;
+            gap: 4px;
+            min-width: 0; /* Garante que os flex/grid itens encolham sem forçar scroll */
         }
         .day-header {
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             color: #000000;
             font-weight: bold;
             border-bottom: 1px solid #EAEAEA;
-            padding-bottom: 4px;
+            padding-bottom: 3px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             text-align: center;
         }
         .slot-item {
             background: #FFFFFF;
-            padding: 6px 8px;
-            border-radius: 5px;
-            font-size: 0.7rem;
+            padding: 4px 3px;
+            border-radius: 3px;
+            font-size: 0.6rem;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
             border: 1px solid #EAEAEA;
-            border-left: 3px solid #CCCCCC;
+            border-left: 2px solid #CCCCCC;
             color: #000000;
             cursor: pointer;
             transition: 0.15s;
+            overflow: hidden;
         }
         .slot-item:hover {
             opacity: 0.85;
@@ -218,18 +217,18 @@
 
         .btn-whatsapp {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background-color: #000000;
             color: #FFFFFF;
             border: none;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             transition: 0.2s;
             text-transform: uppercase;
         }
@@ -269,59 +268,59 @@
         </section>
 
         <section id="dashboard-barbeiro" class="section" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                <h2 id="titulo-agenda-barbeiro" style="font-size: 0.95rem; text-transform: uppercase;">Minha Agenda</h2>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 6px 10px; font-size: 0.75rem; background: #EEEEEE; color: #000; border: 1px solid #CCC;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                <h2 id="titulo-agenda-barbeiro" style="font-size: 0.85rem; text-transform: uppercase;">Minha Agenda</h2>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #EEEEEE; color: #000; border: 1px solid #CCC;">
                         <i class="fa-solid fa-key"></i> Senha
                     </button>
-                    <button onclick="carregarAgendaSemanal(); carregarFaturamentoBarbeiro();" class="btn-whatsapp" style="width: auto; padding: 6px 10px; font-size: 0.75rem; background: #000; color: #FFF;">
+                    <button onclick="carregarAgendaSemanal(); carregarFaturamentoBarbeiro();" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #000; color: #FFF;">
                         <i class="fa-solid fa-rotate"></i> Atualizar
                     </button>
-                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 6px 10px; font-size: 0.75rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
+                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
             </div>
 
-            <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #EAEAEA; padding-bottom: 6px;">
-                    <h3 style="color: #000; font-size: 0.85rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Extrato</h3>
-                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 4px 8px; font-size: 0.75rem; margin: 0; background: #F9F9F9; border: 1px solid #CCC; border-radius: 4px;">
+            <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid #EAEAEA; padding-bottom: 4px;">
+                    <h3 style="color: #000; font-size: 0.75rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Extrato</h3>
+                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 2px 6px; font-size: 0.7rem; margin: 0; background: #F9F9F9; border: 1px solid #CCC; border-radius: 4px;">
                         <option value="dia">Hoje</option>
                         <option value="semana">Semana</option>
                         <option value="mes">Mês</option>
                     </select>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; margin-bottom: 8px;">
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.65rem;">Atendimentos</span>
-                        <strong id="barber-resumo-qtd" style="font-size: 1rem; color: #000;">0</strong>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem; margin-bottom: 6px;">
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px;">
+                        <span style="color: #666; display: block; font-size: 0.6rem;">Atendimentos</span>
+                        <strong id="barber-resumo-qtd" style="font-size: 0.9rem; color: #000;">0</strong>
                     </div>
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.65rem;">Total Recebido</span>
-                        <strong id="barber-resumo-total" style="font-size: 1rem; color: #25D366;">R$ 0,00</strong>
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px;">
+                        <span style="color: #666; display: block; font-size: 0.6rem;">Total Recebido</span>
+                        <strong id="barber-resumo-total" style="font-size: 0.9rem; color: #25D366;">R$ 0,00</strong>
                     </div>
                 </div>
-                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; font-size: 0.75rem; color: #333;" id="barber-detalhes-pagamento">
+                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px; font-size: 0.65rem; color: #333;" id="barber-detalhes-pagamento">
                     <strong>Pagamentos:</strong> Dinheiro: R$ 0,00 | Pix: R$ 0,00
                 </div>
             </div>
 
-            <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
-                <div style="font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Período da Agenda</div>
-                <span id="label-periodo-semana" style="font-weight: bold; color: #000; font-size: 0.85rem; display: block; margin-bottom: 8px;"></span>
-                <div style="display: flex; justify-content: space-between; gap: 8px;">
-                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 6px; font-size: 0.75rem; border: 1px solid #CCC; background: #FFF; color: #000;">
+            <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+                <div style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Período da Agenda</div>
+                <span id="label-periodo-semana" style="font-weight: bold; color: #000; font-size: 0.75rem; display: block; margin-bottom: 6px;"></span>
+                <div style="display: flex; justify-content: space-between; gap: 6px;">
+                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 4px; font-size: 0.65rem; border: 1px solid #CCC; background: #FFF; color: #000;">
                         <i class="fa-solid fa-chevron-left"></i> Anterior
                     </button>
-                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 6px; font-size: 0.75rem; border: 1px solid #CCC; background: #FFF; color: #000;">
+                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 4px; font-size: 0.65rem; border: 1px solid #CCC; background: #FFF; color: #000;">
                         Próxima <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
 
-            <h3 style="font-size: 0.85rem; margin-bottom: 5px; color: #000; text-align: center; text-transform: uppercase;">Visão Geral da Semana</h3>
+            <h3 style="font-size: 0.75rem; margin-bottom: 4px; color: #000; text-align: center; text-transform: uppercase;">Visão Geral da Semana</h3>
             
             <div id="grade-semanal-container" class="week-horizontal-container"></div>
         </section>
@@ -595,7 +594,7 @@
             const container = document.getElementById("grade-semanal-container");
             const lblPeriodo = document.getElementById("label-periodo-semana");
             
-            container.innerHTML = "<p style='color: #666; text-align: center; width: 100%; font-size: 0.8rem;'>Carregando...</p>";
+            container.innerHTML = "<p style='color: #666; text-align: center; width: 100%; font-size: 0.75rem;'>Carregando...</p>";
 
             const diasSemana = obterDiasDaSemana(offsetSemana);
             lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[diasSemana.length - 1].label}`;
@@ -630,8 +629,8 @@
                     coluna.innerHTML = `
                         <div class="day-header">
                             <span>${dia.label}</span>
-                            <button onclick="alternarBloqueioDia('${dia.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFF5F5' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCC'}; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; cursor: pointer;">
-                                ${diaBloqueadoTotal ? 'Desbloquear' : 'Bloquear Dia'}
+                            <button onclick="alternarBloqueioDia('${dia.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFF5F5' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCC'}; padding: 1px 2px; border-radius: 3px; font-size: 0.55rem; cursor: pointer;">
+                                ${diaBloqueadoTotal ? 'Desbloq' : 'Bloq'}
                             </button>
                         </div>
                     `;
@@ -639,10 +638,10 @@
                     const slotsDiv = document.createElement("div");
                     slotsDiv.style.display = "flex"; 
                     slotsDiv.style.flexDirection = "column"; 
-                    slotsDiv.style.gap = "5px";
+                    slotsDiv.style.gap = "3px";
 
                     if (diaBloqueadoTotal) {
-                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.75rem; padding: 15px 0; font-weight: bold;">Bloqueado</div>`;
+                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.65rem; padding: 10px 0; font-weight: bold;">Bloq.</div>`;
                     } else {
                         horariosPadrao.forEach(horario => {
                             const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
@@ -653,10 +652,9 @@
                                 itemSlot.className = "slot-item blocked";
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <strong>${horario}</strong>
-                                        <span style="font-size: 0.65rem; color: #e74c3c;">Bloq.</span>
+                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
                                     </div>
-                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 2px; border-radius: 3px; font-size: 0.6rem; cursor: pointer; text-align:center;">Desbloquear</button>
+                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
                                 `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
@@ -664,12 +662,12 @@
                                 itemSlot.onclick = () => abrirGerenciadorAgendamento(agendamento.id);
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <strong>${horario}</strong>
-                                        <span style="font-size: 0.6rem; color: ${isConcluido ? '#3498db' : '#25D366'}; font-weight: bold;">
-                                            ${isConcluido ? 'PAGO' : 'CONF.'}
+                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
+                                        <span style="font-size: 0.52rem; color: ${isConcluido ? '#3498db' : '#25D366'}; font-weight: bold;">
+                                            ${isConcluido ? 'P' : 'C'}
                                         </span>
                                     </div>
-                                    <div style="font-weight: 600; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <div style="font-weight: 600; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${agendamento.cliente}">
                                         ${agendamento.cliente}
                                     </div>
                                 `;
@@ -677,8 +675,8 @@
                                 itemSlot.className = "slot-item available";
                                 itemSlot.innerHTML = `
                                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                        <span>${horario}</span>
-                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', false)" style="background: #F9F9F9; color: #000; border: 1px solid #DDD; padding: 1px 4px; border-radius: 3px; font-size: 0.6rem; cursor: pointer;">Bloq</button>
+                                        <span style="color:#666;">${horario.substring(0,5)}</span>
+                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', false)" style="background: #F9F9F9; color: #000; border: 1px solid #DDD; padding: 0px 2px; border-radius: 2px; font-size: 0.5rem; cursor: pointer;">X</button>
                                     </div>
                                 `;
                             }
