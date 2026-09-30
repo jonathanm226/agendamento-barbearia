@@ -31,7 +31,6 @@
             min-height: 100vh;
         }
 
-        /* Removido max-width restritivo para permitir que a tela aproveite 100% do espaço horizontal no mobile */
         .app-container {
             width: 100%;
             max-width: 100%;
@@ -116,7 +115,7 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
 
-        /* Grid ultra compacta para os 6 dias da semana caberem perfeitamente na tela */
+        /* Grid ultra compacta para os 6 dias da semana */
         .week-horizontal-container {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -133,7 +132,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-width: 0; /* Garante que os flex/grid itens encolham sem forçar scroll */
+            min-width: 0;
         }
         .day-header {
             font-size: 0.62rem;
@@ -161,25 +160,12 @@
             transition: 0.15s;
             overflow: hidden;
         }
-        .slot-item:hover {
-            opacity: 0.85;
-        }
-        .slot-item.booked {
-            border-left-color: #25D366;
-            background: #F0FFF4;
-        }
-        .slot-item.concluded {
-            border-left-color: #3498db;
-            background: #F0F8FF;
-        }
-        .slot-item.blocked {
-            border-left-color: #e74c3c;
-            background: #FFF5F5;
-        }
-        .slot-item.available {
-            border-left-color: #000000;
-            background: #FFFFFF;
-        }
+        .slot-item:hover { opacity: 0.85; }
+        .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
+        .slot-item.mensalista { border-left-color: #9b59b6; background: #F5EEF8; }
+        .slot-item.concluded { border-left-color: #3498db; background: #F0F8FF; }
+        .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
+        .slot-item.available { border-left-color: #000000; background: #FFFFFF; }
 
         .datetime-inputs, .client-inputs {
             display: flex;
@@ -232,10 +218,7 @@
             transition: 0.2s;
             text-transform: uppercase;
         }
-
-        .btn-whatsapp:hover {
-            background-color: #333333;
-        }
+        .btn-whatsapp:hover { background-color: #333333; }
     </style>
 </head>
 <body>
@@ -271,6 +254,9 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                 <h2 id="titulo-agenda-barbeiro" style="font-size: 0.85rem; text-transform: uppercase;">Minha Agenda</h2>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                    <button onclick="abrirModalMensalista()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #9b59b6; color: #FFF;">
+                        <i class="fa-solid fa-users-rectangle"></i> Mensalistas
+                    </button>
                     <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #EEEEEE; color: #000; border: 1px solid #CCC;">
                         <i class="fa-solid fa-key"></i> Senha
                     </button>
@@ -381,6 +367,44 @@
             </div>
 
             <div class="custom-modal-buttons" id="action-modal-buttons"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Gerenciamento de Mensalistas -->
+    <div id="custom-mensalista-modal" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 450px;">
+            <h3><i class="fa-solid fa-users-rectangle"></i> Clientes Mensalistas</h3>
+            <div style="text-align: left; margin-bottom: 15px;">
+                <button onclick="mostrarFormNovoMensalista()" class="custom-modal-btn btn-modal-confirmar" style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> Novo Mensalista</button>
+                <div id="form-novo-mensalista" style="display: none; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #DDD; margin-bottom: 10px;">
+                    <input type="text" id="mensalista-nome" placeholder="Nome do Cliente">
+                    <input type="text" id="mensalista-telefone" placeholder="Telefone (WhatsApp)">
+                    <select id="mensalista-servico">
+                        <option value="Corte">Corte (R$ 35)</option>
+                        <option value="Corte + Barba">Corte + Barba (R$ 70)</option>
+                        <option value="Barba">Barba (R$ 35)</option>
+                    </select>
+                    <select id="mensalista-dia">
+                        <option value="1">Segunda-feira</option>
+                        <option value="2">Terça-feira</option>
+                        <option value="3">Quarta-feira</option>
+                        <option value="4">Quinta-feira</option>
+                        <option value="5">Sexta-feira</option>
+                        <option value="6">Sábado</option>
+                    </select>
+                    <select id="mensalista-horario">
+                        <!-- Preenchido via script -->
+                    </select>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar</button>
+                        <button onclick="fecharFormNovoMensalista()" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+            <div id="lista-mensalistas-container" style="max-height: 200px; overflow-y: auto; text-align: left; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+                <!-- Lista de mensalistas cadastrados -->
+            </div>
+            <button onclick="fecharModalMensalista()" class="custom-modal-btn btn-modal-cancelar">Fechar</button>
         </div>
     </div>
 
@@ -507,7 +531,8 @@
                 d.setDate(segunda.getDate() + i);
                 const isoString = d.toISOString().split("T")[0];
                 const formatada = d.toLocaleDateString("pt-BR", { weekday: 'short', day: '2-digit', month: '2-digit' });
-                dias.push({ iso: isoString, label: formatada });
+                // getDay(): 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+                dias.push({ iso: isoString, label: formatada, weekDayIndex: d.getDay() });
             }
             return dias;
         }
@@ -617,6 +642,13 @@
                     .gte("data", primeiraData)
                     .lte("data", ultimaData);
 
+                // Buscar mensalistas ativos do barbeiro
+                const { data: mensalistas } = await _supabase
+                    .from("mensalistas")
+                    .select("*")
+                    .eq("barbeiro", usuarioLogado)
+                    .eq("ativo", true);
+
                 container.innerHTML = "";
 
                 diasSemana.forEach(dia => {
@@ -646,6 +678,10 @@
                         horariosPadrao.forEach(horario => {
                             const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
                             const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
+                            
+                            // Verificar se há mensalista para este dia da semana e horário
+                            const mensalistaSlot = (mensalistas || []).find(m => m.dia_semana === dia.weekDayIndex && m.horario === horario);
+
                             const itemSlot = document.createElement("div");
 
                             if (horarioBloqueado) {
@@ -655,6 +691,18 @@
                                         <span style="font-weight:bold;">${horario.substring(0,5)}</span>
                                     </div>
                                     <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
+                                `;
+                            } else if (mensalistaSlot) {
+                                itemSlot.className = "slot-item mensalista";
+                                itemSlot.onclick = () => abrirModalMensalista();
+                                itemSlot.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight:bold;">${horario.substring(0,5)}</span>
+                                        <span style="font-size: 0.52rem; color: #9b59b6; font-weight: bold;">MENSAL</span>
+                                    </div>
+                                    <div style="font-weight: 600; color: #6c3483; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${mensalistaSlot.cliente} (Mensalista)">
+                                        ⭐ ${mensalistaSlot.cliente}
+                                    </div>
                                 `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
@@ -690,6 +738,120 @@
                 carregarFaturamentoBarbeiro();
             } catch (err) {
                 console.error("Erro agenda:", err);
+            }
+        }
+
+        // Funções de Gestão de Mensalistas
+        async function abrirModalMensalista() {
+            const modal = document.getElementById("custom-mensalista-modal");
+            modal.classList.add("active");
+            fecharFormNovoMensalista();
+            carregarListaMensalistas();
+            
+            // Popular select de horários
+            const selectHorario = document.getElementById("mensalista-horario");
+            selectHorario.innerHTML = "";
+            horariosPadrao.forEach(h => {
+                selectHorario.innerHTML += `<option value="${h}">${h}</option>`;
+            });
+        }
+
+        function fecharModalMensalista() {
+            document.getElementById("custom-mensalista-modal").classList.remove("active");
+        }
+
+        function mostrarFormNovoMensalista() {
+            document.getElementById("form-novo-mensalista").style.display = "block";
+            document.getElementById("mensalista-nome").value = "";
+            document.getElementById("mensalista-telefone").value = "";
+        }
+
+        function fecharFormNovoMensalista() {
+            document.getElementById("form-novo-mensalista").style.display = "none";
+        }
+
+        async function salvarMensalista() {
+            const nome = document.getElementById("mensalista-nome").value.trim();
+            const telefone = document.getElementById("mensalista-telefone").value.trim();
+            const servico = document.getElementById("mensalista-servico").value;
+            const diaSemana = parseInt(document.getElementById("mensalista-dia").value);
+            const horario = document.getElementById("mensalista-horario").value;
+
+            if (!nome || !telefone) {
+                alert("Preencha o nome e o telefone do cliente.");
+                return;
+            }
+
+            try {
+                const { error } = await _supabase.from("mensalistas").insert([{
+                    barbeiro: usuarioLogado,
+                    cliente: nome,
+                    telefone: telefone,
+                    servico: servico,
+                    dia_semana: diaSemana,
+                    horario: horario,
+                    ativo: true
+                }]);
+
+                if (error) throw error;
+
+                alert("Cliente mensalista cadastrado com sucesso!");
+                fecharFormNovoMensalista();
+                carregarListaMensalistas();
+                carregarAgendaSemanal();
+            } catch (err) {
+                alert("Erro ao salvar mensalista: " + err.message);
+            }
+        }
+
+        async function carregarListaMensalistas() {
+            const container = document.getElementById("lista-mensalistas-container");
+            container.innerHTML = "Carregando...";
+
+            try {
+                const { data, error } = await _supabase
+                    .from("mensalistas")
+                    .select("*")
+                    .eq("barbeiro", usuarioLogado)
+                    .eq("ativo", true);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = "<p style='color: #666;'>Nenhum mensalista cadastrado.</p>";
+                    return;
+                }
+
+                const diasSemanaNomes = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+                container.innerHTML = "";
+
+                data.forEach(m => {
+                    const div = document.createElement("div");
+                    div.style.cssText = "background: #FFF; border: 1px solid #DDD; padding: 6px; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;";
+                    div.innerHTML = `
+                        <div>
+                            <strong>${m.cliente}</strong> (${m.telefone})<br>
+                            <span style="color: #666; font-size: 0.75rem;">${diasSemanaNomes[m.dia_semana]} às ${m.horario} - ${m.servico}</span>
+                        </div>
+                        <button onclick="removerMensalista(${m.id})" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Cancelar</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = "<p style='color: red;'>Erro ao carregar mensalistas.</p>";
+            }
+        }
+
+        async function removerMensalista(id) {
+            if (confirm("Deseja realmente cancelar este plano mensalista? O horário será liberado.")) {
+                try {
+                    const { error } = await _supabase.from("mensalistas").update({ ativo: false }).eq("id", id);
+                    if (error) throw error;
+                    carregarListaMensalistas();
+                    carregarAgendaSemanal();
+                } catch (err) {
+                    alert("Erro ao cancelar: " + err.message);
+                }
             }
         }
 
