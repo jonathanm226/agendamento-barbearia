@@ -7,11 +7,10 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let selectedBarber = "Willian";
 let selectedServices = []; 
 
-// Controla qual é a chamada mais recente de checkAvailableTimes, para evitar
-// que respostas assíncronas antigas (fora de ordem) dupliquem/tripliquem a lista de horários
+// Controla qual é a chamada mais recente de checkAvailableTimes
 let requisicaoHorariosAtual = 0;
 
-// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial" (Alterado para 19:00)
+// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial"
 const HORARIO_EMERGENCIAL_INICIO = "19:00";
 const VALOR_CORTE_EMERGENCIAL = 50;
 
@@ -20,7 +19,7 @@ function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos (Barba alterada para 20 min)
+// Dicionário com a duração de cada serviço em minutos
 const duracoesServicos = {
     "Corte": 40,
     "Barba": 20,
@@ -76,24 +75,24 @@ function toggleService(element, serviceName, price) {
     checkAvailableTimes();
 }
 
-// Lógica de horários disponíveis (intervalos de 1 em 1 hora)
+// Lógica de horários disponíveis conforme o dia da semana (intervalos de 1 em 1 hora)
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
     const partes = dateString.split('-');
     const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
-    const diaSemana = dataObj.getDay(); 
+    const diaSemana = dataObj.getDay(); // 0 = Domingo, 1 = Segunda, ..., 5 = Sexta, 6 = Sábado
 
     let horarios = [];
 
-    if (diaSemana === 0) { // Domingo
+    if (diaSemana === 0) { // Domingo (Fechado)
         return [];
-    } else if (diaSemana === 6) { // Sábado (08:00 às 13:00 de hora em hora)
-        for (let h = 8; h <= 13; h++) {
+    } else if (diaSemana >= 1 && diaSemana <= 4) { // Segunda a Quinta-feira (07:00 às 21:00)
+        for (let h = 7; h <= 21; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
         }
-    } else { // Segunda a Sexta (08:00 às 21:00 de hora em hora)
-        for (let h = 8; h <= 21; h++) {
+    } else { // Sexta (5) e Sábado (6) (05:00 às 21:00)
+        for (let h = 5; h <= 21; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
         }
     }
@@ -110,7 +109,7 @@ function getTimesForDate(dateString) {
     return horarios;
 }
 
-// Verifica horários livres considerando a duração total dos serviços selecionados (em blocos de 60 min)
+// Verifica horários livres considerando a duração total dos serviços e bloqueios existentes
 async function checkAvailableTimes() {
     const minhaRequisicao = ++requisicaoHorariosAtual;
 
@@ -134,6 +133,7 @@ async function checkAvailableTimes() {
         return;
     }
 
+    // Cada slot representa 60 minutos. Calcula quantos slots o atendimento precisa.
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 60;
     const slotsNeeded = Math.ceil(totalDurationMinutes / 60);
 
@@ -151,7 +151,6 @@ async function checkAvailableTimes() {
             .eq("data", selectedDate);
 
         if (errAgendamentos) throw errAgendamentos;
-
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         const { data: bloqueios, error: errBloqueios } = await _supabase
@@ -161,13 +160,14 @@ async function checkAvailableTimes() {
             .eq("data", selectedDate);
 
         if (errBloqueios) throw errBloqueios;
-
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         let occupiedTimes = [];
         if (agendamentos) {
             agendamentos.filter(a => a.status !== 'cancelado').forEach(a => {
                 occupiedTimes.push(a.horario);
+                
+                // Reorganiza e bloqueia os horários seguintes com base na duração real do serviço já agendado
                 if (a.servico) {
                     let duracaoAntiga = 0;
                     a.servico.split(",").forEach(serv => {
@@ -206,6 +206,7 @@ async function checkAvailableTimes() {
 
             let temConflito = false;
 
+            // Verifica se há espaço suficiente sem conflitos para cobrir todos os slots necessários
             if (index + slotsNeeded > allTimes.length) {
                 temConflito = true;
             } else {
