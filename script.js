@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleService(element, serviceName, price) {
     const icon = element.querySelector(".checkbox-icon");
     const index = selectedServices.findIndex(s => s.name === serviceName);
-    const duration = duracoesServicos[serviceName] || 30;
+    const duration = duracoesServicos[serviceName] || 60;
 
     if (index > -1) {
         selectedServices.splice(index, 1);
@@ -76,7 +76,7 @@ function toggleService(element, serviceName, price) {
     checkAvailableTimes();
 }
 
-// Lógica de horários disponíveis (intervalos de 30 minutos)
+// Lógica de horários disponíveis (intervalos de 1 em 1 hora)
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -88,21 +88,17 @@ function getTimesForDate(dateString) {
 
     if (diaSemana === 0) { // Domingo
         return [];
-    } else if (diaSemana === 6) { // Sábado (05:00 às 13:00)
-        for (let h = 5; h < 13; h++) {
+    } else if (diaSemana === 6) { // Sábado (08:00 às 13:00 de hora em hora)
+        for (let h = 8; h <= 13; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
-            horarios.push(h < 10 ? `0${h}:30` : `${h}:30`);
         }
-        horarios.push("13:00");
-    } else { // Segunda a Sexta (07:00 às 19:00 normal, 19:30 às 21:00 corte emergencial)
-        for (let h = 7; h < 21; h++) {
+    } else { // Segunda a Sexta (08:00 às 21:00 de hora em hora)
+        for (let h = 8; h <= 21; h++) {
             horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
-            horarios.push(h < 10 ? `0${h}:30` : `${h}:30`);
         }
-        horarios.push("21:00");
     }
 
-    // Se a data escolhida for hoje, remove horários que já passaram (com 30 min de margem)
+    // Se a data escolhida for hoje, remove horários que já passaram (com margem de 30 min)
     const agora = new Date();
     const hojeStr = agora.toISOString().split("T")[0];
     if (dateString === hojeStr) {
@@ -114,7 +110,7 @@ function getTimesForDate(dateString) {
     return horarios;
 }
 
-// Verifica horários livres considerando a duração total dos serviços selecionados
+// Verifica horários livres considerando a duração total dos serviços selecionados (em blocos de 60 min)
 async function checkAvailableTimes() {
     const minhaRequisicao = ++requisicaoHorariosAtual;
 
@@ -138,8 +134,9 @@ async function checkAvailableTimes() {
         return;
     }
 
-    const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 30;
-    const slotsNeeded = Math.ceil(totalDurationMinutes / 30);
+    // Cada slot agora representa 60 minutos (1 hora)
+    const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 60;
+    const slotsNeeded = Math.ceil(totalDurationMinutes / 60);
 
     // Feedback visual enquanto consulta o Supabase
     const optionCarregando = document.createElement("option");
@@ -177,9 +174,9 @@ async function checkAvailableTimes() {
                     let duracaoAntiga = 0;
                     a.servico.split(",").forEach(serv => {
                         const nomeS = serv.trim();
-                        duracaoAntiga += duracoesServicos[nomeS] || 30;
+                        duracaoAntiga += duracoesServicos[nomeS] || 60;
                     });
-                    const slotsAntigos = Math.ceil(duracaoAntiga / 30);
+                    const slotsAntigos = Math.ceil(duracaoAntiga / 60);
                     const idxInicio = allTimes.indexOf(a.horario);
                     if (idxInicio !== -1) {
                         for (let k = 1; k < slotsAntigos; k++) {
