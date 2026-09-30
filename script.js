@@ -20,11 +20,11 @@ function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos
+// Dicionário com a duração de cada serviço em minutos (ATUALIZADO)
 const duracoesServicos = {
-    "Corte": 30,
+    "Corte": 40,
     "Barba": 30,
-    "Sobrancelha": 15,
+    "Sobrancelha": 10,
     "Acabamento": 15,
     "Pigmentação": 20,
     "Alisamento": 40,
@@ -413,7 +413,6 @@ async function sendToWhatsapp() {
 
     const formattedDate = date.split("-").reverse().join("/");
     
-    // WHATSAPP ATUALIZADO AQUI:
     const whatsappNumber = "5531975552202";
 
     const avisoEmergencial = emergencial
