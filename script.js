@@ -11,19 +11,19 @@ let selectedServices = [];
 // que respostas assíncronas antigas (fora de ordem) dupliquem/tripliquem a lista de horários
 let requisicaoHorariosAtual = 0;
 
-// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial"
-const HORARIO_EMERGENCIAL_INICIO = "19:30";
+// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial" (Alterado para 19:00)
+const HORARIO_EMERGENCIAL_INICIO = "19:00";
 const VALOR_CORTE_EMERGENCIAL = 50;
 
-// Compara horários no formato "HH:MM" (funciona por comparação de string, pois é zero-padded)
+// Compara horários no formato "HH:MM"
 function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos (ATUALIZADO)
+// Dicionário com a duração de cada serviço em minutos (Barba alterada para 20 min)
 const duracoesServicos = {
     "Corte": 40,
-    "Barba": 30,
+    "Barba": 20,
     "Sobrancelha": 10,
     "Acabamento": 15,
     "Pigmentação": 20,
@@ -134,11 +134,9 @@ async function checkAvailableTimes() {
         return;
     }
 
-    // Cada slot agora representa 60 minutos (1 hora)
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 60;
     const slotsNeeded = Math.ceil(totalDurationMinutes / 60);
 
-    // Feedback visual enquanto consulta o Supabase
     const optionCarregando = document.createElement("option");
     optionCarregando.value = "";
     optionCarregando.textContent = "Carregando horários...";
