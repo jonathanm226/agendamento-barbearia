@@ -94,10 +94,12 @@
         .week-grid { display: grid; gap: 15px; margin-top: 15px; }
         .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
         .day-header { font-size: 0.95rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .slot-item { background: #FFFFFF; padding: 8px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #EAEAEA; border-left: 4px solid #CCCCCC; color: #000000; }
+        
+        /* Ajuste do layout interno dos slots para lembrar blocos compactos verticais */
+        .slot-item { background: #FFFFFF; padding: 10px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 6px; border: 1px solid #EAEAEA; border-left: 4px solid #CCCCCC; color: #000000; }
         .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
         .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
-        .slot-item.available { border-left-color: #000000; }
+        .slot-item.available { border-left-color: #000000; flex-direction: row; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -586,19 +588,29 @@
                             if (horarioBloqueado) {
                                 itemSlot.className = "slot-item blocked";
                                 itemSlot.innerHTML = `
-                                    <span style="font-size: 1rem;"><i class="fa-solid fa-ban" style="color: #e74c3c;"></i> ${horario}</span>
-                                    <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', true)" style="background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Desbloquear</button>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <span style="font-size: 1rem;"><i class="fa-solid fa-ban" style="color: #e74c3c;"></i> ${horario} (Bloqueado)</span>
+                                        <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', true)" style="background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Desbloquear</button>
+                                    </div>
                                 `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
                                 itemSlot.className = "slot-item booked";
                                 itemSlot.style.borderLeftColor = isConcluido ? '#3498db' : '#25D366';
                                 itemSlot.innerHTML = `
-                                    <div>
-                                        <strong style="font-size: 1rem;">${horario}</strong> ${isConcluido ? '<i class="fa-solid fa-check-circle" style="color:#3498db;"></i>' : ''}<br>
-                                        <span style="font-size:0.9rem; color:#444;">${agendamento.cliente}</span>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <strong style="font-size: 1rem; color: #000;"><i class="fa-regular fa-clock"></i> ${horario}</strong>
+                                        <span style="font-size: 0.8rem; font-weight: bold; color: ${isConcluido ? '#3498db' : '#25D366'};">
+                                            ${isConcluido ? 'CONCLUÍDO' : 'AGENDADO'}
+                                        </span>
                                     </div>
-                                    <button onclick="abrirGerenciadorAgendamento('${agendamento.id}')" style="background:${isConcluido ? '#3498db' : '#25D366'}; color:#FFF; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.9rem;"><i class="fa-solid fa-gear"></i> Ações</button>
+                                    <div style="font-size: 0.95rem; font-weight: bold; color: #111;">
+                                        ${agendamento.cliente}
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 2px;">
+                                        <span style="font-size: 0.85rem; color: #555;">${agendamento.servico}</span>
+                                        <button onclick="abrirGerenciadorAgendamento('${agendamento.id}')" style="background:${isConcluido ? '#3498db' : '#25D366'}; color:#FFF; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"><i class="fa-solid fa-gear"></i> Ações</button>
+                                    </div>
                                 `;
                             } else {
                                 itemSlot.className = "slot-item available";
