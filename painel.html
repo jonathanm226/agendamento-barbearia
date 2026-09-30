@@ -369,7 +369,7 @@
             <!-- Caixa para edição / reagendamento -->
             <div id="edit-box" style="display: none; text-align: left; margin-bottom: 12px; background: #F4F4F9; padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
                 <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Nova Data:</label>
-                <input type="date" id="input-edit-data">
+                <input type="date" id="input-edit-data" onchange="atualizarHorariosEdicaoPorData(this.value)">
                 <label style="font-size: 0.8rem; font-weight: bold; display: block; margin: 6px 0 4px 0;">Novo Horário:</label>
                 <select id="input-edit-horario">
                     <!-- Preenchido via script -->
@@ -408,7 +408,7 @@
                     <input type="number" id="mensalista-valor" placeholder="Valor em Reais">
 
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
-                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
+                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()" onchange="atualizarHorariosMensalistaPorData(this.value)">
 
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário:</label>
                     <select id="mensalista-horario">
@@ -457,11 +457,21 @@
         let usuarioLogado = "";
         let offsetSemana = 0; 
         
-        const horariosPadrao = [
-            "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", 
-            "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", 
-            "19:00", "20:00", "21:00"
-        ];
+        // Retorna os horários com base no dia da semana (Sexta=5 e Sábado=6 começam às 05:00, os demais às 07:00)
+        function obterHorariosParaData(dataString) {
+            if (!dataString) return [];
+            const partes = dataString.split('-');
+            const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
+            const diaSemana = dataObj.getDay();
+
+            let horarios = [];
+            let horaInicio = (diaSemana === 5 || diaSemana === 6) ? 5 : 7;
+
+            for (let h = horaInicio; h <= 21; h++) {
+                horarios.push(h < 10 ? `0${h}:00` : `${h}:00`);
+            }
+            return horarios;
+        }
 
         function mostrarAlertaPersonalizado(titulo, mensagem) {
             const modal = document.getElementById("custom-alert-modal");
@@ -690,7 +700,8 @@
                     if (diaBloqueadoTotal) {
                         slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.65rem; padding: 10px 0; font-weight: bold;">Bloq.</div>`;
                     } else {
-                        horariosPadrao.forEach(horario => {
+                        const horariosDia = obterHorariosParaData(dia.iso);
+                        horariosDia.forEach(horario => {
                             const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
                             const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
                             const itemSlot = document.createElement("div");
@@ -742,19 +753,24 @@
             }
         }
 
-        // --- MENSALISTAS (Gera para os próximos 6 meses / 24 semanas) ---
+        // --- MENSALISTAS ---
         async function abrirModalMensalista() {
             const modal = document.getElementById("custom-mensalista-modal");
             modal.classList.add("active");
             fecharFormNovoMensalista();
             carregarListaMensalistas();
             
-            document.getElementById("mensalista-datainicio").value = new Date().toISOString().split("T")[0];
+            const hojeIso = new Date().toISOString().split("T")[0];
+            document.getElementById("mensalista-datainicio").value = hojeIso;
             atualizarValorSugeridoMensalista();
+            atualizarHorariosMensalistaPorData(hojeIso);
+        }
 
+        function atualizarHorariosMensalistaPorData(dataString) {
             const selectHorario = document.getElementById("mensalista-horario");
             selectHorario.innerHTML = "";
-            horariosPadrao.forEach(h => {
+            const horarios = obterHorariosParaData(dataString);
+            horarios.forEach(h => {
                 selectHorario.innerHTML += `<option value="${h}">${h}</option>`;
             });
         }
@@ -789,8 +805,6 @@
             try {
                 let dataBase = new Date(dataInicioStr + "T00:00:00");
                 let insercoes = [];
-
-                // Gera recorrências semanais para os próximos 6 meses (24 semanas seguidas)
                 const totalSemanasFuturas = 24; 
 
                 for (let i = 0; i < totalSemanasFuturas; i++) {
@@ -920,7 +934,6 @@
                 buttonsBox.innerHTML = "";
 
                 if (data.status !== 'concluido') {
-                    // Botão Validar Pagamento
                     const btnAtendido = document.createElement("button");
                     btnAtendido.className = "custom-modal-btn btn-modal-atendido";
                     btnAtendido.innerHTML = '<i class="fa-solid fa-check"></i> Validar como Atendido';
@@ -947,7 +960,6 @@
                         buttonsBox.appendChild(btnVoltar);
                     };
 
-                    // Botão Reagendar / Editar
                     const btnEditar = document.createElement("button");
                     btnEditar.className = "custom-modal-btn btn-modal-editar";
                     btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Reagendar / Editar';
@@ -957,11 +969,7 @@
                         buttonsBox.innerHTML = "";
 
                         document.getElementById("input-edit-data").value = data.data;
-                        const selH = document.getElementById("input-edit-horario");
-                        selH.innerHTML = "";
-                        horariosPadrao.forEach(h => {
-                            selH.innerHTML += `<option value="${h}" ${h === data.horario ? 'selected' : ''}>${h}</option>`;
-                        });
+                        atualizarHorariosEdicaoPorData(data.data, data.horario);
 
                         const btnSalvarEdicao = document.createElement("button");
                         btnSalvarEdicao.className = "custom-modal-btn btn-modal-confirmar";
@@ -986,7 +994,6 @@
                         buttonsBox.appendChild(btnVoltar);
                     };
 
-                    // Botão Enviar Lembrete WhatsApp
                     const btnLembrete = document.createElement("button");
                     btnLembrete.className = "custom-modal-btn";
                     btnLembrete.style.background = "#25D366"; 
@@ -1003,7 +1010,6 @@
                         window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
                     };
 
-                    // Botão Cancelar Agendamento
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
                     btnCancelar.innerHTML = 'Cancelar Agendamento';
@@ -1036,6 +1042,15 @@
             } catch (err) {
                 mostrarAlertaPersonalizado("Erro", "Erro ao carregar detalhes.");
             }
+        }
+
+        function atualizarHorariosEdicaoPorData(dataString, horarioSelecionado = "") {
+            const selH = document.getElementById("input-edit-horario");
+            selH.innerHTML = "";
+            const horarios = obterHorariosParaData(dataString);
+            horarios.forEach(h => {
+                selH.innerHTML += `<option value="${h}" ${h === horarioSelecionado ? 'selected' : ''}>${h}</option>`;
+            });
         }
 
         async function atualizarStatusAgendamento(id, novoStatus, formaPagamento) {
