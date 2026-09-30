@@ -380,7 +380,7 @@
 
     <!-- Modal de Gerenciamento de Mensalistas -->
     <div id="custom-mensalista-modal" class="custom-modal-overlay">
-        <div class="custom-modal" style="max-width: 450px;">
+        <div class="custom-modal" style="max-width: 450px; max-height: 90vh; overflow-y: auto;">
             <h3><i class="fa-solid fa-users-rectangle"></i> Clientes Mensalistas</h3>
             <div style="text-align: left; margin-bottom: 15px;">
                 <button onclick="mostrarFormNovoMensalista()" class="custom-modal-btn btn-modal-confirmar" style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> Novo Mensalista</button>
@@ -408,9 +408,9 @@
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
                     <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
 
-                    <!-- Adicionado campo de Frequência -->
+                    <!-- Caixa de Frequência visível e ajustada -->
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Frequência (Vezes no mês):</label>
-                    <select id="mensalista-frequencia">
+                    <select id="mensalista-frequencia" style="display: block; width: 100%; padding: 10px; background: #FFF; border: 1px solid #DDDDDD; border-radius: 6px; margin-bottom: 12px;">
                         <option value="4">4 vezes (Toda Semana)</option>
                         <option value="2">2 vezes (A cada 15 dias)</option>
                         <option value="1">1 vez (Mensalmente)</option>
@@ -461,7 +461,6 @@
         let usuarioLogado = "";
         let offsetSemana = 0; 
         
-        // Retorna os horários em blocos de 40 minutos para base visual da agenda
         function obterHorariosParaData(dataString) {
             if (!dataString) return [];
             const partes = dataString.split('-');
@@ -717,7 +716,6 @@
                         agendamentosDia.forEach(a => itensRenderizacao.push({ tipo: 'agendamento', horario: a.horario, dado: a }));
                         bloqueiosDia.forEach(b => itensRenderizacao.push({ tipo: 'bloqueio', horario: b.horario, dado: b }));
 
-                        // Ordena a grade inteira cronologicamente para acomodar horários livres (ex: 15:15)
                         itensRenderizacao.sort((a, b) => a.horario.localeCompare(b.horario));
 
                         itensRenderizacao.forEach(item => {
@@ -770,7 +768,6 @@
             }
         }
 
-        // --- MENSALISTAS ---
         async function abrirModalMensalista() {
             const modal = document.getElementById("custom-mensalista-modal");
             modal.classList.add("active");
@@ -814,19 +811,18 @@
                 let dataBase = new Date(dataInicioStr + "T00:00:00");
                 let insercoes = [];
                 
-                // Lógica da Frequência para calcular Ocorrências em 1 Ano Inteiro
                 let totalOcorrencias = 52;
                 let diasIncremento = 7;
                 let incrementoMensal = false;
 
                 if (frequencia === "4") {
-                    totalOcorrencias = 52; // Semanal = 52 vezes no ano
+                    totalOcorrencias = 52; 
                     diasIncremento = 7;
                 } else if (frequencia === "2") {
-                    totalOcorrencias = 26; // Quinzenal = 26 vezes no ano
+                    totalOcorrencias = 26; 
                     diasIncremento = 14;
                 } else if (frequencia === "1") {
-                    totalOcorrencias = 12; // Mensal = 12 vezes no ano
+                    totalOcorrencias = 12; 
                     incrementoMensal = true;
                 }
 
@@ -933,7 +929,6 @@
             }
         }
 
-        // --- GERENCIAMENTO E EDIÇÃO/REAGENDAMENTO DE AGENDAMENTO ---
         async function abrirGerenciadorAgendamento(id) {
             try {
                 const { data, error } = await _supabase.from("agendamentos").select("*").eq("id", id).single();
