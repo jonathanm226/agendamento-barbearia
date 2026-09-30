@@ -20,13 +20,15 @@
         html, body {
             height: 100%;
             overscroll-behavior-y: none;
+            background: #121212;
+            color: #FFF;
         }
         
         .barber-header {
             text-align: center;
             padding: 20px 10px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #EAEAEA;
+            border-bottom: 1px solid #333;
         }
         
         .brand-logo-container {
@@ -35,7 +37,8 @@
             margin: 0 auto 15px auto;
             border-radius: 50%;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(255,102,0,0.2);
+            border: 2px solid #FF6600;
         }
         
         .brand-logo-container img {
@@ -46,7 +49,7 @@
         
         .barber-header h1 {
             font-size: 1.5rem;
-            color: #000;
+            color: #FFF;
             margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -54,7 +57,7 @@
         
         .barber-header p {
             font-size: 0.85rem;
-            color: #666;
+            color: #FF6600;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -68,43 +71,97 @@
         
         .custom-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center;
+            background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center;
             z-index: 9999; opacity: 0; visibility: hidden; transition: 0.2s ease-in-out;
         }
         .custom-modal-overlay.active { opacity: 1; visibility: visible; }
         .custom-modal {
-            background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 8px;
+            background: #1A1A1A; border: 1px solid #333; border-radius: 8px;
             padding: 25px; width: 90%; max-width: 420px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .custom-modal h3 { color: #000000; font-size: 1.1rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-        .custom-modal p { color: #555555; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
+        .custom-modal h3 { color: #FFF; font-size: 1.1rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .custom-modal p { color: #CCC; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
         .custom-modal input, .custom-modal select {
-            width: 100%; padding: 12px; background: #F9F9F9; border: 1px solid #DDDDDD;
-            border-radius: 6px; color: #000000; font-size: 1rem; margin-bottom: 15px; outline: none; transition: 0.2s;
+            width: 100%; padding: 12px; background: #242424; border: 1px solid #444;
+            border-radius: 6px; color: #FFF; font-size: 1rem; margin-bottom: 15px; outline: none;
         }
-        .custom-modal input:focus, .custom-modal select:focus { border-color: #000000; background: #FFFFFF; }
         .custom-modal-buttons { display: flex; gap: 10px; }
-        .custom-modal-btn { flex: 1; padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; transition: 0.2s; }
-        .btn-modal-cancelar { background: #EEEEEE; color: #000000; border: 1px solid #CCCCCC; }
-        .btn-modal-confirmar { background: #000000; color: #FFFFFF; }
-        .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
-        .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
+        .custom-modal-btn { flex: 1; padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; }
+        .btn-modal-cancelar { background: #333; color: #FFF; }
+        .btn-modal-confirmar { background: #FF6600; color: #FFF; }
+        .btn-modal-atendido { background: #25D366; color: #FFF; }
+        .btn-modal-excluir { background: #2C1A1A; color: #e74c3c; border: 1px solid #e74c3c; }
         
-        .week-grid { display: grid; gap: 15px; margin-top: 15px; }
-        .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .day-header { font-size: 0.95rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        
-        /* Ajuste do layout interno dos slots para lembrar blocos compactos verticais */
-        .slot-item { background: #FFFFFF; padding: 10px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 6px; border: 1px solid #EAEAEA; border-left: 4px solid #CCCCCC; color: #000000; }
-        .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
-        .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
-        .slot-item.available { border-left-color: #000000; flex-direction: row; justify-content: space-between; align-items: center; }
+        /* Grade semanal completa com rolagem horizontal no mobile para mostrar todos os dias da semana */
+        .week-horizontal-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-top: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: #FF6600 #1A1A1A;
+        }
+        .day-column {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 180px;
+            flex: 1;
+        }
+        .day-header {
+            font-size: 0.85rem;
+            color: #FFF;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
+        }
+        .slot-item {
+            background: #242424;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            border: 1px solid #333;
+            border-left: 4px solid #555;
+            color: #FFF;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .slot-item:hover {
+            opacity: 0.9;
+        }
+        .slot-item.booked {
+            border-left-color: #25D366;
+            background: #152219;
+        }
+        .slot-item.concluded {
+            border-left-color: #3498db;
+            background: #121c24;
+        }
+        .slot-item.blocked {
+            border-left-color: #e74c3c;
+            background: #2C1A1A;
+        }
+        .slot-item.available {
+            border-left-color: #FF6600;
+            background: #242424;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-container" style="max-width: 1000px;">
+    <div class="app-container" style="max-width: 1200px;">
         
         <header class="barber-header">
             <div class="brand-logo-container">
@@ -117,7 +174,7 @@
         </header>
 
         <section id="login-section" class="section">
-            <h2 style="border-left: 3px solid #000; padding-left: 10px;">ACESSO AO PAINEL</h2>
+            <h2 style="border-left: 3px solid #FF6600; padding-left: 10px;">ACESSO AO PAINEL</h2>
             <div class="datetime-inputs">
                 <div class="input-group">
                     <label for="login-usuario">Login:</label>
@@ -127,7 +184,7 @@
                     <label for="login-senha">Senha:</label>
                     <input type="password" id="login-senha">
                 </div>
-                <button class="btn-primary-action" onclick="fazerLogin()" style="background: #000; color: #FFF; font-weight: bold; letter-spacing: 1px; padding: 15px;">ENTRAR</button>
+                <button class="btn-primary-action" onclick="fazerLogin()" style="background: #FF6600; color: #FFF; font-weight: bold; letter-spacing: 1px; padding: 15px;">ENTRAR</button>
             </div>
         </section>
 
@@ -135,72 +192,71 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <h2 id="titulo-agenda-barbeiro">Minha Agenda Semanal</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #EEEEEE; color: #000; border: 1px solid #CCC;">
+                    <button onclick="abrirModalSenha()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #333; color: #FFF;">
                         <i class="fa-solid fa-key"></i> Senha
                     </button>
-                    <button onclick="carregarAgendaSemanal(); carregarFaturamentoBarbeiro();" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #000; color: #FFF;">
+                    <button onclick="carregarAgendaSemanal(); carregarFaturamentoBarbeiro();" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #FF6600; color: #FFF;">
                         <i class="fa-solid fa-rotate"></i> Atualizar
                     </button>
-                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
+                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 12px; font-size: 0.85rem; background: #2C1A1A; color: #e74c3c; border: 1px solid #e74c3c;">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
             </div>
 
-            <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="color: #000000; font-size: 1rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Meu Extrato de Faturamento</h3>
-                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 6px 10px; font-size: 0.85rem; margin: 0; background: #F9F9F9; border: 1px solid #CCC; border-radius: 6px;">
+            <div style="background: #1A1A1A; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="color: #FFF; font-size: 1rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Meu Extrato de Faturamento</h3>
+                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 6px 10px; font-size: 0.85rem; margin: 0; background: #242424; border: 1px solid #444; border-radius: 6px; color: #FFF;">
                         <option value="dia">Hoje (Dia)</option>
                         <option value="semana">Esta Semana</option>
                         <option value="mes">Este Mês</option>
                     </select>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem; margin-bottom: 12px;">
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.75rem;">Atendimentos Concluídos</span>
-                        <strong id="barber-resumo-qtd" style="font-size: 1.2rem; color: #000;">0</strong>
+                    <div style="background: #242424; border: 1px solid #333; padding: 10px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.75rem;">Atendimentos Concluídos</span>
+                        <strong id="barber-resumo-qtd" style="font-size: 1.2rem; color: #FFF;">0</strong>
                     </div>
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.75rem;">Total Recebido</span>
+                    <div style="background: #242424; border: 1px solid #333; padding: 10px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.75rem;">Total Recebido</span>
                         <strong id="barber-resumo-total" style="font-size: 1.2rem; color: #25D366;">R$ 0,00</strong>
                     </div>
                 </div>
-                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #333;" id="barber-detalhes-pagamento">
+                <div style="background: #242424; border: 1px solid #333; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #DDD;" id="barber-detalhes-pagamento">
                     <strong>Por Forma de Pagamento:</strong><br>
                     💵 Dinheiro: R$ 0,00 | 📱 Pix: R$ 0,00<br>
                     💳 Débito: R$ 0,00 | 💳 Crédito: R$ 0,00
                 </div>
             </div>
 
-            <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 14px; border-radius: 8px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                <div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Período da Agenda</div>
-                <span id="label-periodo-semana" style="font-weight: bold; color: #000000; font-size: 1rem; display: block; margin-bottom: 12px;"></span>
+            <div style="background: #1A1A1A; border: 1px solid #333; padding: 14px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Período da Agenda</div>
+                <span id="label-periodo-semana" style="font-weight: bold; color: #FFF; font-size: 1rem; display: block; margin-bottom: 12px;"></span>
                 <div style="display: flex; justify-content: space-between; gap: 10px;">
-                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #CCC; background: #FFF; color: #000; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #444; background: #242424; color: #FFF; display: flex; align-items: center; justify-content: center; gap: 6px;">
                         <i class="fa-solid fa-chevron-left"></i> Anterior
                     </button>
-                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #CCC; background: #FFF; color: #000; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 10px; font-size: 0.85rem; border: 1px solid #444; background: #242424; color: #FFF; display: flex; align-items: center; justify-content: center; gap: 6px;">
                         Próxima <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
 
-            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000; text-align: center;">Agenda Diária (Clique para Bloquear/Desbloquear)</h3>
+            <h3 style="font-size: 1rem; margin-bottom: 5px; color: #FFF; text-align: center;">Visão Geral da Semana (Clique no horário para gerenciar)</h3>
             
-            <div id="seletor-dias" style="display: flex; gap: 4px; justify-content: space-between; width: 100%; margin-bottom: 15px; box-sizing: border-box;"></div>
-            
-            <div id="grade-semanal-container" class="week-grid" style="grid-template-columns: 1fr;"></div>
+            <!-- Contêiner com a semana lado a lado -->
+            <div id="grade-semanal-container" class="week-horizontal-container"></div>
         </section>
 
         <section id="dashboard-admin" class="section" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2>Resumo Administrativo</h2>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="carregarResumoAdmin()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem; background: #000; color: #FFF;">
+                    <button onclick="carregarResumoAdmin()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem; background: #FF6600; color: #FFF;">
                         <i class="fa-solid fa-rotate"></i> Atualizar
                     </button>
-                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
+                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 8px 15px; font-size: 0.9rem; background: #2C1A1A; color: #e74c3c; border: 1px solid #e74c3c;">
                         <i class="fa-solid fa-right-from-bracket"></i> Sair
                     </button>
                 </div>
@@ -211,22 +267,22 @@
                 <input type="date" id="filter-date-admin" onclick="this.showPicker && this.showPicker()" onchange="carregarResumoAdmin()">
             </div>
 
-            <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 15px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
-                <h3 style="color: #000000; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px;"><i class="fa-solid fa-chart-pie"></i> Fechamento Geral do Dia</h3>
+            <div style="background: #1A1A1A; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 25px;">
+                <h3 style="color: #FFF; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 8px;"><i class="fa-solid fa-chart-pie"></i> Fechamento Geral do Dia</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem; margin-bottom: 15px;">
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 12px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.8rem; margin-bottom: 4px;">Atendimentos Concluídos</span>
-                        <strong id="admin-resumo-qtd" style="font-size: 1.3rem; color: #000;">0</strong>
+                    <div style="background: #242424; border: 1px solid #333; padding: 12px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.8rem; margin-bottom: 4px;">Atendimentos Concluídos</span>
+                        <strong id="admin-resumo-qtd" style="font-size: 1.3rem; color: #FFF;">0</strong>
                     </div>
-                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 12px; border-radius: 6px;">
-                        <span style="color: #666; display: block; font-size: 0.8rem; margin-bottom: 4px;">Faturamento Total</span>
+                    <div style="background: #242424; border: 1px solid #333; padding: 12px; border-radius: 6px;">
+                        <span style="color: #888; display: block; font-size: 0.8rem; margin-bottom: 4px;">Faturamento Total</span>
                         <strong id="admin-resumo-total" style="font-size: 1.3rem; color: #25D366;">R$ 0,00</strong>
                     </div>
                 </div>
-                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 12px; border-radius: 6px; font-size: 0.9rem; color: #333;" id="admin-detalhes-pagamento"></div>
+                <div style="background: #242424; border: 1px solid #333; padding: 12px; border-radius: 6px; font-size: 0.9rem; color: #DDD;" id="admin-detalhes-pagamento"></div>
             </div>
 
-            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #000000;">Visão Geral dos Horários do Dia</h3>
+            <h3 style="font-size: 1rem; margin-bottom: 10px; color: #FFF;">Visão Geral dos Horários do Dia</h3>
             <div id="agendamentos-list-admin" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </section>
 
@@ -236,7 +292,7 @@
     <div id="custom-action-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3><i class="fa-solid fa-user-gear"></i> Gerenciar Atendimento</h3>
-            <div id="action-modal-details" style="text-align: left; background: #F9F9F9; padding: 12px; border-radius: 6px; border: 1px solid #DDDDDD; margin-bottom: 15px; font-size: 0.9rem; color: #333;"></div>
+            <div id="action-modal-details" style="text-align: left; background: #242424; padding: 12px; border-radius: 6px; border: 1px solid #444; margin-bottom: 15px; font-size: 0.9rem; color: #DDD;"></div>
             
             <div id="payment-box" style="display: none; text-align: left; margin-bottom: 15px;">
                 <label style="font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 5px;">Forma de Pagamento:</label>
@@ -255,10 +311,10 @@
 
     <div id="custom-alert-modal" class="custom-modal-overlay">
         <div class="custom-modal">
-            <h3 id="alert-modal-title" style="color: #000000; margin-bottom: 12px;"><i class="fa-solid fa-circle-info"></i> Informação</h3>
-            <p id="alert-modal-message" style="color: #333333; font-size: 0.95rem; line-height: 1.5; text-align: left; background: #F9F9F9; padding: 12px; border-radius: 6px; border: 1px solid #DDDDDD; margin-bottom: 20px; white-space: pre-line;"></p>
+            <h3 id="alert-modal-title" style="color: #FFF; margin-bottom: 12px;"><i class="fa-solid fa-circle-info"></i> Informação</h3>
+            <p id="alert-modal-message" style="color: #DDD; font-size: 0.95rem; line-height: 1.5; text-align: left; background: #242424; padding: 12px; border-radius: 6px; border: 1px solid #444; margin-bottom: 20px; white-space: pre-line;"></p>
             <div class="custom-modal-buttons">
-                <button id="alert-btn-ok" class="custom-modal-btn" style="background: #000000; color: #FFFFFF; width: 100%;">OK</button>
+                <button id="alert-btn-ok" class="custom-modal-btn" style="background: #FF6600; color: #FFF; width: 100%;">OK</button>
             </div>
         </div>
     </div>
@@ -282,7 +338,6 @@
 
         let usuarioLogado = "";
         let offsetSemana = 0; 
-        let diaAtivoIso = null; 
         
         const horariosPadrao = [
             "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
@@ -482,16 +537,11 @@
         async function carregarAgendaSemanal() {
             const container = document.getElementById("grade-semanal-container");
             const lblPeriodo = document.getElementById("label-periodo-semana");
-            const seletorDias = document.getElementById("seletor-dias");
             
-            container.innerHTML = "<p style='color: #666; text-align: center;'>Carregando agenda...</p>";
+            container.innerHTML = "<p style='color: #888; text-align: center; width: 100%;'>Carregando agenda semanal...</p>";
 
             const diasSemana = obterDiasDaSemana(offsetSemana);
             lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[diasSemana.length - 1].label}`;
-
-            if (!diaAtivoIso || !diasSemana.find(d => d.iso === diaAtivoIso)) {
-                diaAtivoIso = diasSemana[0].iso;
-            }
 
             try {
                 const primeiraData = diasSemana[0].iso;
@@ -515,108 +565,72 @@
 
                 if (errBlq && errBlq.code !== '42P01') console.warn("Tabela de bloqueios não encontrada, ignorando...");
 
-                seletorDias.innerHTML = "";
+                container.innerHTML = "";
+
+                // Renderizar cada dia da semana lado a lado em colunas
                 diasSemana.forEach(dia => {
-                    const btnDia = document.createElement("button");
-                    btnDia.innerHTML = dia.label.split(',')[0].toUpperCase(); 
-                    
-                    btnDia.style.flex = "1";
-                    btnDia.style.minWidth = "0"; 
-                    btnDia.style.padding = "10px 0";
-                    btnDia.style.fontSize = "0.7rem";
-                    btnDia.style.borderRadius = "6px";
-                    btnDia.style.border = "1px solid #CCC";
-                    btnDia.style.fontWeight = "bold";
-                    btnDia.style.cursor = "pointer";
-                    btnDia.style.textAlign = "center";
-                    
-                    if (dia.iso === diaAtivoIso) {
-                        btnDia.style.background = "#000";
-                        btnDia.style.color = "#FFF";
-                        btnDia.style.borderColor = "#000";
-                    } else {
-                        btnDia.style.background = "#FFF";
-                        btnDia.style.color = "#000";
-                    }
-
-                    btnDia.onclick = () => {
-                        diaAtivoIso = dia.iso;
-                        renderizarDiaEspecifico(diasSemana, agendamentos || [], bloqueios || []);
-                    };
-                    seletorDias.appendChild(btnDia);
-                });
-
-                function renderizarDiaEspecifico(dias, listaAgendamentos, listaBloqueios) {
-                    container.innerHTML = "";
-                    const diaAtivo = dias.find(d => d.iso === diaAtivoIso);
-                    if (!diaAtivo) return;
-
-                    Array.from(seletorDias.children).forEach((btn, index) => {
-                        if (dias[index].iso === diaAtivoIso) {
-                            btn.style.background = "#000"; btn.style.color = "#FFF"; btn.style.borderColor = "#000";
-                        } else {
-                            btn.style.background = "#FFF"; btn.style.color = "#000"; btn.style.borderColor = "#CCC";
-                        }
-                    });
-
                     const coluna = document.createElement("div");
                     coluna.className = "day-column";
 
-                    const blqDia = listaBloqueios.find(b => b.data === diaAtivo.iso && b.horario === 'TODOS');
+                    const blqDia = (bloqueios || []).find(b => b.data === dia.iso && b.horario === 'TODOS');
                     const diaBloqueadoTotal = !!blqDia;
 
                     coluna.innerHTML = `
-                        <div class="day-header" style="font-size: 1.1rem;">
-                            <span>${diaAtivo.label}</span>
-                            <button onclick="alternarBloqueioDia('${diaAtivo.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFEBEE' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCCCCC'}; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">
-                                <i class="fa-solid ${diaBloqueadoTotal ? 'fa-ban' : 'fa-calendar-xmark'}"></i> ${diaBloqueadoTotal ? 'Desbloquear Dia' : 'Bloquear Dia'}
+                        <div class="day-header">
+                            <span>${dia.label}</span>
+                            <button onclick="alternarBloqueioDia('${dia.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#2C1A1A' : '#242424'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#FFF'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#444'}; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; width: 100%;">
+                                ${diaBloqueadoTotal ? 'Desbloquear Dia' : 'Bloquear Dia'}
                             </button>
                         </div>
                     `;
 
                     const slotsDiv = document.createElement("div");
-                    slotsDiv.style.display = "flex"; slotsDiv.style.flexDirection = "column"; slotsDiv.style.gap = "8px";
+                    slotsDiv.style.display = "flex"; 
+                    slotsDiv.style.flexDirection = "column"; 
+                    slotsDiv.style.gap = "6px";
 
                     if (diaBloqueadoTotal) {
-                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.95rem; padding: 40px 0; font-weight: bold; background: #FFF; border-radius: 8px;"><i class="fa-solid fa-lock"></i> Dia Inteiro Bloqueado</div>`;
+                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.8rem; padding: 20px 0; font-weight: bold;"><i class="fa-solid fa-lock"></i> Bloqueado</div>`;
                     } else {
                         horariosPadrao.forEach(horario => {
-                            const agendamento = listaAgendamentos.find(a => a.data === diaAtivo.iso && a.horario === horario && a.status !== 'cancelado');
-                            const horarioBloqueado = listaBloqueios.find(b => b.data === diaAtivo.iso && b.horario === horario);
+                            const agendamento = (agendamentos || []).find(a => a.data === dia.iso && a.horario === horario && a.status !== 'cancelado');
+                            const horarioBloqueado = (bloqueios || []).find(b => b.data === dia.iso && b.horario === horario);
                             const itemSlot = document.createElement("div");
 
                             if (horarioBloqueado) {
                                 itemSlot.className = "slot-item blocked";
                                 itemSlot.innerHTML = `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                        <span style="font-size: 1rem;"><i class="fa-solid fa-ban" style="color: #e74c3c;"></i> ${horario} (Bloqueado)</span>
-                                        <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', true)" style="background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Desbloquear</button>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong>${horario}</strong>
+                                        <span style="font-size: 0.7rem; color: #e74c3c;">Bloqueado</span>
                                     </div>
+                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', true)" style="background: #2C1A1A; color: #e74c3c; border: 1px solid #e74c3c; padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; margin-top: 2px;">Desbloquear</button>
                                 `;
                             } else if (agendamento) {
                                 const isConcluido = agendamento.status === 'concluido';
-                                itemSlot.className = "slot-item booked";
-                                itemSlot.style.borderLeftColor = isConcluido ? '#3498db' : '#25D366';
+                                itemSlot.className = isConcluido ? "slot-item concluded" : "slot-item booked";
+                                itemSlot.onclick = () => abrirGerenciadorAgendamento(agendamento.id);
                                 itemSlot.innerHTML = `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                        <strong style="font-size: 1rem; color: #000;"><i class="fa-regular fa-clock"></i> ${horario}</strong>
-                                        <span style="font-size: 0.8rem; font-weight: bold; color: ${isConcluido ? '#3498db' : '#25D366'};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <strong>${horario}</strong>
+                                        <span style="font-size: 0.65rem; color: ${isConcluido ? '#3498db' : '#25D366'}; font-weight: bold;">
                                             ${isConcluido ? 'CONCLUÍDO' : 'AGENDADO'}
                                         </span>
                                     </div>
-                                    <div style="font-size: 0.95rem; font-weight: bold; color: #111;">
+                                    <div style="font-weight: bold; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                         ${agendamento.cliente}
                                     </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 2px;">
-                                        <span style="font-size: 0.85rem; color: #555;">${agendamento.servico}</span>
-                                        <button onclick="abrirGerenciadorAgendamento('${agendamento.id}')" style="background:${isConcluido ? '#3498db' : '#25D366'}; color:#FFF; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"><i class="fa-solid fa-gear"></i> Ações</button>
+                                    <div style="font-size: 0.7rem; color: #AAA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        ${agendamento.servico}
                                     </div>
                                 `;
                             } else {
                                 itemSlot.className = "slot-item available";
                                 itemSlot.innerHTML = `
-                                    <span style="font-size: 1rem;"><i class="fa-regular fa-clock"></i> ${horario}</span>
-                                    <button onclick="alternarBloqueioHorario('${diaAtivo.iso}', '${horario}', false)" style="background: #FFFFFF; color: #000; border: 1px solid #CCC; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Bloquear</button>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <span>${horario}</span>
+                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${horario}', false)" style="background: #333; color: #FFF; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; cursor: pointer;">Bloquear</button>
+                                    </div>
                                 `;
                             }
                             slotsDiv.appendChild(itemSlot);
@@ -624,14 +638,13 @@
                     }
                     coluna.appendChild(slotsDiv);
                     container.appendChild(coluna);
-                }
+                });
 
-                renderizarDiaEspecifico(diasSemana, agendamentos || [], bloqueios || []);
                 carregarFaturamentoBarbeiro();
 
             } catch (err) {
                 console.error("Erro ao carregar agenda semanal:", err);
-                container.innerHTML = "<p style='color: #e74c3c; text-align: center; grid-column: span 6;'>Erro ao carregar dados da semana.</p>";
+                container.innerHTML = "<p style='color: #e74c3c; text-align: center; width: 100%;'>Erro ao carregar dados da semana.</p>";
             }
         }
 
@@ -845,7 +858,7 @@
             const lblTotal = document.getElementById("admin-resumo-total");
             const lblDetalhes = document.getElementById("admin-detalhes-pagamento");
 
-            container.innerHTML = "<p style='color: #666; text-align: center;'>Carregando...</p>";
+            container.innerHTML = "<p style='color: #888; text-align: center;'>Carregando...</p>";
 
             try {
                 let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
@@ -880,24 +893,24 @@
                 `;
 
                 if (data.length === 0) {
-                    container.innerHTML = "<p style='color: #666; text-align: center;'>Nenhum registro encontrado para esta data.</p>";
+                    container.innerHTML = "<p style='color: #888; text-align: center;'>Nenhum registro encontrado para esta data.</p>";
                     return;
                 }
 
                 container.innerHTML = "";
                 data.forEach(item => {
                     const card = document.createElement("div");
-                    card.style.background = "#FFFFFF";
+                    card.style.background = "#242424";
                     card.style.padding = "12px 15px";
                     card.style.borderRadius = "8px";
-                    card.style.border = "1px solid #EAEAEA";
-                    card.style.borderLeft = `4px solid ${item.status === 'concluido' ? '#3498db' : '#000000'}`;
+                    card.style.border = "1px solid #333";
+                    card.style.borderLeft = `4px solid ${item.status === 'concluido' ? '#3498db' : '#FF6600'}`;
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <strong style="color: #000;"><i class="fa-regular fa-clock"></i> ${item.horario} - Barbeiro: ${item.barbeiro}</strong>
+                            <strong style="color: #FFF;"><i class="fa-regular fa-clock"></i> ${item.horario} - Barbeiro: ${item.barbeiro}</strong>
                         </div>
-                        <p style="margin: 2px 0; font-size: 0.9rem; color: #444;"><strong>Cliente:</strong> ${item.cliente} (${item.status === 'concluido' ? 'Atendido' : 'Ativo'})</p>
-                        <p style="margin: 2px 0; font-size: 0.9rem; color: #444;"><strong>Serviço:</strong> ${item.servico} | <strong>Pagamento:</strong> ${item.pagamentos || 'Não informado'} <span style="color: #25D366; float: right; font-weight: bold;">R$ ${obterPrecoAgendamento(item)},00</span></p>
+                        <p style="margin: 2px 0; font-size: 0.9rem; color: #DDD;"><strong>Cliente:</strong> ${item.cliente} (${item.status === 'concluido' ? 'Atendido' : 'Ativo'})</p>
+                        <p style="margin: 2px 0; font-size: 0.9rem; color: #DDD;"><strong>Serviço:</strong> ${item.servico} | <strong>Pagamento:</strong> ${item.pagamentos || 'Não informado'} <span style="color: #25D366; float: right; font-weight: bold;">R$ ${obterPrecoAgendamento(item)},00</span></p>
                     `;
                     container.appendChild(card);
                 });
