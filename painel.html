@@ -113,6 +113,7 @@
         .btn-modal-cancelar { background: #EEEEEE; color: #000000; border: 1px solid #CCCCCC; }
         .btn-modal-confirmar { background: #000000; color: #FFFFFF; }
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
+        .btn-modal-editar { background: #3498db; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
 
         .week-horizontal-container {
@@ -365,6 +366,16 @@
                 </select>
             </div>
 
+            <!-- Caixa para edição / reagendamento -->
+            <div id="edit-box" style="display: none; text-align: left; margin-bottom: 12px; background: #F4F4F9; padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Nova Data:</label>
+                <input type="date" id="input-edit-data">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin: 6px 0 4px 0;">Novo Horário:</label>
+                <select id="input-edit-horario">
+                    <!-- Preenchido via script -->
+                </select>
+            </div>
+
             <div class="custom-modal-buttons" id="action-modal-buttons"></div>
         </div>
     </div>
@@ -404,14 +415,6 @@
                         <!-- Preenchido via script -->
                     </select>
 
-                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Vezes no mês (Repetições):</label>
-                    <select id="mensalista-vezes">
-                        <option value="1">1x no mês (Apenas 1 vez)</option>
-                        <option value="2">2x no mês (A cada 2 semanas)</option>
-                        <option value="3">3x no mês</option>
-                        <option value="4" selected>4x no mês (Toda semana)</option>
-                    </select>
-
                     <div style="display: flex; gap: 5px; margin-top: 8px;">
                         <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar e Lançar</button>
                         <button onclick="fecharFormNovoMensalista()" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
@@ -419,7 +422,6 @@
                 </div>
             </div>
             <div id="lista-mensalistas-container" style="max-height: 180px; overflow-y: auto; text-align: left; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
-                <!-- Lista de mensalistas cadastrados -->
             </div>
             <button onclick="fecharModalMensalista()" class="custom-modal-btn btn-modal-cancelar">Fechar</button>
         </div>
@@ -456,11 +458,9 @@
         let offsetSemana = 0; 
         
         const horariosPadrao = [
-            "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", 
-            "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", 
-            "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
-            "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", 
-            "19:00", "19:30", "20:00", "20:30", "21:00"
+            "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", 
+            "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", 
+            "19:00", "20:00", "21:00"
         ];
 
         function mostrarAlertaPersonalizado(titulo, mensagem) {
@@ -742,7 +742,7 @@
             }
         }
 
-        // Funções de Gestão de Mensalistas (Lançamento direto na tabela agendamentos)
+        // --- MENSALISTAS (Gera para os próximos 6 meses / 24 semanas) ---
         async function abrirModalMensalista() {
             const modal = document.getElementById("custom-mensalista-modal");
             modal.classList.add("active");
@@ -780,7 +780,6 @@
             const valor = parseFloat(document.getElementById("mensalista-valor").value) || 35;
             const dataInicioStr = document.getElementById("mensalista-datainicio").value;
             const horario = document.getElementById("mensalista-horario").value;
-            const vezesNoMes = parseInt(document.getElementById("mensalista-vezes").value) || 4;
 
             if (!nome || !telefone || !dataInicioStr) {
                 alert("Preencha todos os campos obrigatórios.");
@@ -791,10 +790,12 @@
                 let dataBase = new Date(dataInicioStr + "T00:00:00");
                 let insercoes = [];
 
-                // Lança as ocorrências na agenda futura conforme o número de vezes no mês
-                for (let i = 0; i < vezesNoMes; i++) {
+                // Gera recorrências semanais para os próximos 6 meses (24 semanas seguidas)
+                const totalSemanasFuturas = 24; 
+
+                for (let i = 0; i < totalSemanasFuturas; i++) {
                     let d = new Date(dataBase);
-                    d.setDate(dataBase.getDate() + (i * 7)); // Soma 7 dias a cada repetição semanal
+                    d.setDate(dataBase.getDate() + (i * 7)); 
                     let dataIso = d.toISOString().split("T")[0];
 
                     insercoes.push({
@@ -813,7 +814,7 @@
                 const { error } = await _supabase.from("agendamentos").insert(insercoes);
                 if (error) throw error;
 
-                alert("Cliente mensalista cadastrado e lançado na agenda futura com sucesso!");
+                alert("Cliente mensalista cadastrado com sucesso! Ele aparecerá nos meses futuros até que você decida cancelá-lo.");
                 fecharFormNovoMensalista();
                 carregarListaMensalistas();
                 carregarAgendaSemanal();
@@ -837,7 +838,6 @@
 
                 if (error) throw error;
 
-                // Agrupar por cliente para exibir listagem limpa
                 const unicos = {};
                 (data || []).forEach(item => {
                     if (!unicos[item.cliente]) {
@@ -890,6 +890,7 @@
             }
         }
 
+        // --- GERENCIAMENTO E EDIÇÃO/REAGENDAMENTO DE AGENDAMENTO ---
         async function abrirGerenciadorAgendamento(id) {
             try {
                 const { data, error } = await _supabase.from("agendamentos").select("*").eq("id", id).single();
@@ -899,6 +900,7 @@
                 const modal = document.getElementById("custom-action-modal");
                 const detailsBox = document.getElementById("action-modal-details");
                 const paymentBox = document.getElementById("payment-box");
+                const editBox = document.getElementById("edit-box");
                 const buttonsBox = document.getElementById("action-modal-buttons");
 
                 const dataFormatada = data.data.split("-").reverse().join("/");
@@ -914,14 +916,17 @@
                 `;
 
                 paymentBox.style.display = "none";
+                editBox.style.display = "none";
                 buttonsBox.innerHTML = "";
 
                 if (data.status !== 'concluido') {
+                    // Botão Validar Pagamento
                     const btnAtendido = document.createElement("button");
                     btnAtendido.className = "custom-modal-btn btn-modal-atendido";
                     btnAtendido.innerHTML = '<i class="fa-solid fa-check"></i> Validar como Atendido';
                     btnAtendido.onclick = () => {
                         paymentBox.style.display = "block";
+                        editBox.style.display = "none";
                         buttonsBox.innerHTML = "";
 
                         const btnSalvarPg = document.createElement("button");
@@ -942,6 +947,46 @@
                         buttonsBox.appendChild(btnVoltar);
                     };
 
+                    // Botão Reagendar / Editar
+                    const btnEditar = document.createElement("button");
+                    btnEditar.className = "custom-modal-btn btn-modal-editar";
+                    btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Reagendar / Editar';
+                    btnEditar.onclick = () => {
+                        editBox.style.display = "block";
+                        paymentBox.style.display = "none";
+                        buttonsBox.innerHTML = "";
+
+                        document.getElementById("input-edit-data").value = data.data;
+                        const selH = document.getElementById("input-edit-horario");
+                        selH.innerHTML = "";
+                        horariosPadrao.forEach(h => {
+                            selH.innerHTML += `<option value="${h}" ${h === data.horario ? 'selected' : ''}>${h}</option>`;
+                        });
+
+                        const btnSalvarEdicao = document.createElement("button");
+                        btnSalvarEdicao.className = "custom-modal-btn btn-modal-confirmar";
+                        btnSalvarEdicao.innerHTML = 'Salvar Novo Horário';
+                        btnSalvarEdicao.onclick = async () => {
+                            const novaData = document.getElementById("input-edit-data").value;
+                            const novoHorario = document.getElementById("input-edit-horario").value;
+                            if (!novaData || !novoHorario) {
+                                alert("Preencha a nova data e horário.");
+                                return;
+                            }
+                            await reagendarAtendimento(id, novaData, novoHorario);
+                            modal.classList.remove("active");
+                        };
+
+                        const btnVoltar = document.createElement("button");
+                        btnVoltar.className = "custom-modal-btn btn-modal-cancelar";
+                        btnVoltar.textContent = "Voltar";
+                        btnVoltar.onclick = () => abrirGerenciadorAgendamento(id);
+
+                        buttonsBox.appendChild(btnSalvarEdicao);
+                        buttonsBox.appendChild(btnVoltar);
+                    };
+
+                    // Botão Enviar Lembrete WhatsApp
                     const btnLembrete = document.createElement("button");
                     btnLembrete.className = "custom-modal-btn";
                     btnLembrete.style.background = "#25D366"; 
@@ -958,6 +1003,7 @@
                         window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
                     };
 
+                    // Botão Cancelar Agendamento
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
                     btnCancelar.innerHTML = 'Cancelar Agendamento';
@@ -974,6 +1020,7 @@
                     btnFechar.onclick = () => modal.classList.remove("active");
 
                     buttonsBox.appendChild(btnAtendido);
+                    buttonsBox.appendChild(btnEditar);
                     buttonsBox.appendChild(btnLembrete);
                     buttonsBox.appendChild(btnCancelar);
                     buttonsBox.appendChild(btnFechar);
@@ -1001,6 +1048,17 @@
                 carregarFaturamentoBarbeiro();
             } catch (err) {
                 mostrarAlertaPersonalizado("Erro", err.message);
+            }
+        }
+
+        async function reagendarAtendimento(id, novaData, novoHorario) {
+            try {
+                const { error } = await _supabase.from("agendamentos").update({ data: novaData, horario: novoHorario }).eq("id", id);
+                if (error) throw error;
+                mostrarAlertaPersonalizado("Sucesso", "Atendimento reagendado com sucesso!");
+                carregarAgendaSemanal();
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", "Erro ao reagendar: " + err.message);
             }
         }
 
