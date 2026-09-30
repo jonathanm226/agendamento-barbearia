@@ -149,7 +149,7 @@ async function checkAvailableTimes() {
     try {
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
-            .select("horario, status, servico, duracao_total")
+            .select("horario, status, servico")
             .eq("barbeiro", selectedBarber)
             .eq("data", selectedDate);
 
@@ -168,7 +168,6 @@ async function checkAvailableTimes() {
         let occupiedTimes = [];
         
         // Bloqueio de Almoço na Sexta-feira (10:00 às 12:00)
-        // Adaptado para bloquear os slots de 40min que caem nesse intervalo
         const dataSelecionadaObj = new Date(selectedDate + "T00:00:00");
         if (dataSelecionadaObj.getDay() === 5) {
             occupiedTimes.push("09:40", "10:20", "11:00", "11:40");
@@ -176,23 +175,21 @@ async function checkAvailableTimes() {
 
         if (agendamentos) {
             agendamentos.filter(a => a.status !== 'cancelado').forEach(a => {
-                let duracaoAgendamento = a.duracao_total || 40;
+                occupiedTimes.push(a.horario);
                 
-                if (!a.duracao_total && a.servico) {
+                if (a.servico) {
                     let duracaoAntiga = 0;
                     a.servico.split(",").forEach(serv => {
-                        duracaoAntiga += duracoesServicos[serv.trim()] || 40;
+                        const nomeS = serv.trim();
+                        duracaoAntiga += duracoesServicos[nomeS] || 40;
                     });
-                    duracaoAgendamento = duracaoAntiga;
-                }
-                
-                let slotsOcupados = Math.ceil(duracaoAgendamento / 40);
-                let startIndex = allTimes.indexOf(a.horario);
-                
-                if (startIndex !== -1) {
-                    for (let i = 0; i < slotsOcupados; i++) {
-                        if (allTimes[startIndex + i]) {
-                            occupiedTimes.push(allTimes[startIndex + i]);
+                    const slotsAntigos = Math.ceil(duracaoAntiga / 40);
+                    const idxInicio = allTimes.indexOf(a.horario);
+                    if (idxInicio !== -1) {
+                        for (let k = 1; k < slotsAntigos; k++) {
+                            if (allTimes[idxInicio + k]) {
+                                occupiedTimes.push(allTimes[idxInicio + k]);
+                            }
                         }
                     }
                 }
@@ -417,7 +414,6 @@ async function sendToWhatsapp() {
         precoTotal = VALOR_CORTE_EMERGENCIAL;
     }
 
-    // Calcula horário final
     const [hora, minuto] = time.split(":").map(Number);
     const dataFim = new Date(0, 0, 0, hora, minuto + duracaoTotal);
     const horarioFim = `${String(dataFim.getHours()).padStart(2, "0")}:${String(dataFim.getMinutes()).padStart(2, "0")}`;
@@ -441,7 +437,6 @@ async function sendToWhatsapp() {
                     barbeiro: selectedBarber,
                     servico: listaNomesServicos,
                     preco_total: precoTotal,
-                    duracao_total: duracaoTotal,
                     horario_fim: horarioFim,
                     data: date,
                     horario: time,
