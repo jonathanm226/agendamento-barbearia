@@ -408,10 +408,18 @@
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
                     <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
 
+                    <!-- Adicionado campo de Frequência -->
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Frequência (Vezes no mês):</label>
+                    <select id="mensalista-frequencia">
+                        <option value="4">4 vezes (Toda Semana)</option>
+                        <option value="2">2 vezes (A cada 15 dias)</option>
+                        <option value="1">1 vez (Mensalmente)</option>
+                    </select>
+
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário Livre:</label>
                     <input type="time" id="mensalista-horario" value="09:00" required>
 
-                    <div style="display: flex; gap: 5px; margin-top: 8px;">
+                    <div style="display: flex; gap: 5px; margin-top: 10px;">
                         <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar e Lançar</button>
                         <button onclick="fecharFormNovoMensalista()" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
                     </div>
@@ -794,6 +802,7 @@
             const servico = document.getElementById("mensalista-servico").value;
             const valor = parseFloat(document.getElementById("mensalista-valor").value) || 35;
             const dataInicioStr = document.getElementById("mensalista-datainicio").value;
+            const frequencia = document.getElementById("mensalista-frequencia").value;
             const horario = document.getElementById("mensalista-horario").value;
 
             if (!nome || !telefone || !dataInicioStr || !horario) {
@@ -804,11 +813,32 @@
             try {
                 let dataBase = new Date(dataInicioStr + "T00:00:00");
                 let insercoes = [];
-                const totalSemanasFuturas = 24; 
+                
+                // Lógica da Frequência para calcular Ocorrências em 1 Ano Inteiro
+                let totalOcorrencias = 52;
+                let diasIncremento = 7;
+                let incrementoMensal = false;
 
-                for (let i = 0; i < totalSemanasFuturas; i++) {
+                if (frequencia === "4") {
+                    totalOcorrencias = 52; // Semanal = 52 vezes no ano
+                    diasIncremento = 7;
+                } else if (frequencia === "2") {
+                    totalOcorrencias = 26; // Quinzenal = 26 vezes no ano
+                    diasIncremento = 14;
+                } else if (frequencia === "1") {
+                    totalOcorrencias = 12; // Mensal = 12 vezes no ano
+                    incrementoMensal = true;
+                }
+
+                for (let i = 0; i < totalOcorrencias; i++) {
                     let d = new Date(dataBase);
-                    d.setDate(dataBase.getDate() + (i * 7)); 
+                    
+                    if (incrementoMensal) {
+                        d.setMonth(dataBase.getMonth() + i);
+                    } else {
+                        d.setDate(dataBase.getDate() + (i * diasIncremento));
+                    }
+                    
                     let dataIso = d.toISOString().split("T")[0];
 
                     insercoes.push({
@@ -827,7 +857,7 @@
                 const { error } = await _supabase.from("agendamentos").insert(insercoes);
                 if (error) throw error;
 
-                alert("Cliente mensalista cadastrado com sucesso! Ele aparecerá nos meses futuros até que você decida cancelá-lo.");
+                alert("Cliente mensalista cadastrado com sucesso por 1 ANO!");
                 fecharFormNovoMensalista();
                 carregarListaMensalistas();
                 carregarAgendaSemanal();
