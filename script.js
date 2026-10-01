@@ -19,7 +19,7 @@ function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos (padronizado com o painel)
+// Dicionário com a duração de cada serviço em minutos (padronizado)
 const duracoesServicos = {
     "corte": 40,
     "corte de cabelo": 40,
@@ -183,7 +183,7 @@ async function checkAvailableTimes() {
                 if (a.horario) {
                     occupiedTimes.push(a.horario);
                     
-                    // Soma a duração exata do serviço agendado (ex: Combo Cabelo + Barba) para bloquear todos os slots que ele ocupa
+                    // Soma a duração exata do serviço agendado (ex: Combo Cabelo + Barba) para bloquear todos os slots seguintes afetados
                     let duracaoAgendadaMinutos = 40;
                     if (a.servico) {
                         duracaoAgendadaMinutos = 0;
