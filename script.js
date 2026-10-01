@@ -58,7 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleService(element, serviceName, price) {
     const icon = element.querySelector(".checkbox-icon");
     const index = selectedServices.findIndex(s => s.name === serviceName);
-    const duration = duracoesServicos[serviceName.toLowerCase()] || 40;
+    
+    const nomeNormalizado = serviceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const duration = duracoesServicos[nomeNormalizado] || duracoesServicos[serviceName.toLowerCase()] || 40;
 
     if (index > -1) {
         selectedServices.splice(index, 1);
@@ -79,7 +81,7 @@ function toggleService(element, serviceName, price) {
     checkAvailableTimes();
 }
 
-// Geração de horários em blocos exatos de 40 minutos
+// Geração de horários base de 40 em 40 minutos
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -118,6 +120,13 @@ function getTimesForDate(dateString) {
     return horarios;
 }
 
+// Transforma string "HH:MM" para número em minutos para cálculo rigoroso de colisões
+function parseTimeStr(timeStr) {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h * 60) + m;
+}
+
 async function checkAvailableTimes() {
     const minhaRequisicao = ++requisicaoHorariosAtual;
 
@@ -141,9 +150,8 @@ async function checkAvailableTimes() {
         return;
     }
 
-    // Calcula os slots necessários para o cliente com base na soma da duração dos serviços selecionados
+    // Calcula total de minutos necessários pelos serviços escolhidos pelo cliente
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
-    const slotsNeeded = Math.ceil(totalDurationMinutes / 40);
 
     const optionCarregando = document.createElement("option");
     optionCarregando.value = "";
@@ -170,46 +178,47 @@ async function checkAvailableTimes() {
         if (errBloqueios) throw errBloqueios;
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
-        let occupiedTimes = [];
+        let occupiedIntervals = [];
         
-        // Bloqueio de Almoço na Sexta-feira (10:00 às 12:00)
+        // Bloqueio de Almoço na Sexta-feira (09:40 até 12:20 = minutos 580 até 740)
         const dataSelecionadaObj = new Date(selectedDate + "T00:00:00");
         if (dataSelecionadaObj.getDay() === 5) {
-            occupiedTimes.push("09:40", "10:20", "11:00", "11:40");
+            occupiedIntervals.push({ start: 580, end: 740 });
         }
 
         if (agendamentos) {
             agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
-                    occupiedTimes.push(a.horario);
-                    
-                    // Soma a duração exata do serviço agendado (ex: Combo Cabelo + Barba) para bloquear todos os slots seguintes afetados
-                    let duracaoAgendadaMinutos = 40;
+                    let duracaoAgendada = 0;
                     if (a.servico) {
-                        duracaoAgendadaMinutos = 0;
                         a.servico.split(",").forEach(serv => {
-                            const nomeS = serv.trim().toLowerCase();
-                            duracaoAgendadaMinutos += duracoesServicos[nomeS] || 40;
+                            const nomeOriginal = serv.trim().toLowerCase();
+                            const nomeNorm = nomeOriginal.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            duracaoAgendada += duracoesServicos[nomeNorm] || duracoesServicos[nomeOriginal] || 40;
                         });
                     }
-                    const slotsOcupados = Math.ceil(duracaoAgendadaMinutos / 40);
-                    const idxInicio = allTimes.indexOf(a.horario);
-                    if (idxInicio !== -1) {
-                        for (let k = 1; k < slotsOcupados; k++) {
-                            if (allTimes[idxInicio + k]) {
-                                occupiedTimes.push(allTimes[idxInicio + k]);
-                            }
-                        }
-                    }
+                    if (duracaoAgendada === 0) duracaoAgendada = 40;
+                    
+                    const startMin = parseTimeStr(a.horario);
+                    occupiedIntervals.push({ start: startMin, end: startMin + duracaoAgendada });
                 }
             });
         }
 
-        const blockedTimes = bloqueios ? bloqueios.map(b => b.horario) : [];
+        if (bloqueios) {
+            bloqueios.forEach(b => {
+                if (b.horario === "TODOS") {
+                    occupiedIntervals.push({ start: 0, end: 1440 });
+                } else if (b.horario) {
+                    const startMin = parseTimeStr(b.horario);
+                    occupiedIntervals.push({ start: startMin, end: startMin + 40 });
+                }
+            });
+        }
 
         timeSelect.innerHTML = "";
 
-        if (blockedTimes.includes("TODOS")) {
+        if (occupiedIntervals.some(i => i.start === 0 && i.end === 1440)) {
             const option = document.createElement("option");
             option.value = "";
             option.textContent = "Agenda fechada neste dia";
@@ -218,22 +227,20 @@ async function checkAvailableTimes() {
             return;
         }
 
-        allTimes.forEach((time, index) => {
+        allTimes.forEach((time) => {
             const option = document.createElement("option");
             option.value = time;
 
+            const slotStart = parseTimeStr(time);
+            const slotEnd = slotStart + totalDurationMinutes;
+
             let temConflito = false;
 
-            // Valida se o intervalo necessário para o novo agendamento cabe sem colidir com horários já ocupados ou bloqueados
-            if (index + slotsNeeded > allTimes.length) {
-                temConflito = true;
-            } else {
-                for (let i = 0; i < slotsNeeded; i++) {
-                    const slotAtual = allTimes[index + i];
-                    if (occupiedTimes.includes(slotAtual) || blockedTimes.includes(slotAtual)) {
-                        temConflito = true;
-                        break;
-                    }
+            // Validação Cruzada: Bloqueia se o tempo exigido pelo cliente encavalar com os minutos de qualquer agendamento existente
+            for (let interval of occupiedIntervals) {
+                if (slotStart < interval.end && slotEnd > interval.start) {
+                    temConflito = true;
+                    break;
                 }
             }
 
