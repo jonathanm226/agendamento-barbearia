@@ -147,6 +147,7 @@ async function checkAvailableTimes() {
     timeSelect.appendChild(optionCarregando);
 
     try {
+        // Busca todos os agendamentos do dia (normais e mensalistas)
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
             .select("horario, status, servico")
@@ -174,7 +175,8 @@ async function checkAvailableTimes() {
         }
 
         if (agendamentos) {
-            agendamentos.filter(a => a.status !== 'cancelado').forEach(a => {
+            // Filtra e pega qualquer agendamento ativo (incluindo mensalistas com status 'ativo')
+            agendamentos.filter(a => a.status && a.status !== 'cancelado').forEach(a => {
                 occupiedTimes.push(a.horario);
                 
                 if (a.servico) {
