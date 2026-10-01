@@ -16,98 +16,21 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #F4F4F9;
-            color: #000000;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 100%;
-            background-color: #FFFFFF;
-            padding: 8px;
-            padding-bottom: 90px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .barber-header {
-            border-bottom: 1px solid #EAEAEA;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-
-        .brand-logo-container {
-            width: 60px;
-            height: 60px;
-            background: #FFFFFF;
-            border: 2px solid #000000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 6px auto;
-            overflow: hidden;
-        }
-
-        .brand-logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .barber-header h1 {
-            font-size: 1.1rem;
-            color: #000000;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
-        .barber-header p {
-            font-size: 0.7rem;
-            color: #666666;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 500;
-        }
-
-        #login-section {
-            min-height: 50vh; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 15px;
-        }
-
-        .custom-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center;
-            z-index: 9999; opacity: 0; visibility: hidden; transition: 0.2s ease-in-out;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #F4F4F9; color: #000000; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 100%; background-color: #FFFFFF; padding: 8px; padding-bottom: 90px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05); }
+        .barber-header { border-bottom: 1px solid #EAEAEA; padding-bottom: 10px; margin-bottom: 12px; text-align: center; }
+        .brand-logo-container { width: 60px; height: 60px; background: #FFFFFF; border: 2px solid #000000; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px auto; overflow: hidden; }
+        .brand-logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .barber-header h1 { font-size: 1.1rem; color: #000000; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .barber-header p { font-size: 0.7rem; color: #666666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+        #login-section { min-height: 50vh; display: flex; flex-direction: column; justify-content: center; padding: 0 15px; }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.2s ease-in-out; }
         .custom-modal-overlay.active { opacity: 1; visibility: visible; }
-        .custom-modal {
-            background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 8px;
-            padding: 20px; width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
+        .custom-modal { background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 8px; padding: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .custom-modal h3 { color: #000000; font-size: 1rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .custom-modal p { color: #555555; font-size: 0.85rem; margin-bottom: 15px; line-height: 1.4; text-align: left; }
-        .custom-modal input, .custom-modal select {
-            width: 100%; padding: 10px; background: #F9F9F9; border: 1px solid #DDDDDD;
-            border-radius: 6px; color: #000000; font-size: 0.95rem; margin-bottom: 12px; outline: none;
-        }
+        .custom-modal input, .custom-modal select { width: 100%; padding: 10px; background: #F9F9F9; border: 1px solid #DDDDDD; border-radius: 6px; color: #000000; font-size: 0.95rem; margin-bottom: 12px; outline: none; }
         .custom-modal-buttons { display: flex; gap: 8px; flex-direction: column; }
         .custom-modal-btn { width: 100%; padding: 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; }
         .btn-modal-cancelar { background: #EEEEEE; color: #000000; border: 1px solid #CCCCCC; }
@@ -115,109 +38,22 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-editar { background: #3498db; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
-
-        .week-horizontal-container {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 3px;
-            margin-top: 8px;
-            width: 100%;
-            overflow-x: hidden;
-        }
-        .day-column {
-            background: #F9F9F9;
-            border: 1px solid #EAEAEA;
-            border-radius: 4px;
-            padding: 3px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
-        }
-        .day-header {
-            font-size: 0.62rem;
-            color: #000000;
-            font-weight: bold;
-            border-bottom: 1px solid #EAEAEA;
-            padding-bottom: 3px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            text-align: center;
-        }
-        .slot-item {
-            background: #FFFFFF;
-            padding: 4px 3px;
-            border-radius: 3px;
-            font-size: 0.6rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            border: 1px solid #EAEAEA;
-            border-left: 2px solid #CCCCCC;
-            color: #000000;
-            cursor: pointer;
-            transition: 0.15s;
-            overflow: hidden;
-        }
+        .week-horizontal-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 8px; width: 100%; overflow-x: hidden; }
+        .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 4px; padding: 3px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .day-header { font-size: 0.62rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 3px; display: flex; flex-direction: column; gap: 2px; text-align: center; }
+        .slot-item { background: #FFFFFF; padding: 4px 3px; border-radius: 3px; font-size: 0.6rem; display: flex; flex-direction: column; gap: 1px; border: 1px solid #EAEAEA; border-left: 2px solid #CCCCCC; color: #000000; cursor: pointer; transition: 0.15s; overflow: hidden; }
         .slot-item:hover { opacity: 0.85; }
         .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
         .slot-item.mensalista { border-left-color: #9b59b6; background: #F5EEF8; }
         .slot-item.concluded { border-left-color: #3498db; background: #F0F8FF; }
         .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
         .slot-item.available { border-left-color: #000000; background: #FFFFFF; }
-
-        .datetime-inputs, .client-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .input-group label {
-            font-size: 0.85rem;
-            color: #555555;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background: #F9F9F9;
-            border: 1px solid #DDDDDD;
-            border-radius: 6px;
-            color: #000000;
-            font-size: 1rem;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        input:focus, select:focus {
-            border-color: #000000;
-            background: #FFFFFF;
-        }
-
-        .btn-whatsapp {
-            width: 100%;
-            padding: 10px;
-            background-color: #000000;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
+        .datetime-inputs, .client-inputs { display: flex; flex-direction: column; gap: 12px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.85rem; color: #555555; }
+        input, select { width: 100%; padding: 12px; background: #F9F9F9; border: 1px solid #DDDDDD; border-radius: 6px; color: #000000; font-size: 1rem; outline: none; transition: 0.2s; }
+        input:focus, select:focus { border-color: #000000; background: #FFFFFF; }
+        .btn-whatsapp { width: 100%; padding: 10px; background-color: #000000; color: #FFFFFF; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s; text-transform: uppercase; }
         .btn-whatsapp:hover { background-color: #333333; }
     </style>
 </head>
@@ -366,7 +202,6 @@
                 </select>
             </div>
 
-            <!-- Caixa para edição / reagendamento -->
             <div id="edit-box" style="display: none; text-align: left; margin-bottom: 12px; background: #F4F4F9; padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
                 <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Nova Data:</label>
                 <input type="date" id="input-edit-data">
@@ -378,7 +213,6 @@
         </div>
     </div>
 
-    <!-- Modal de Gerenciamento de Mensalistas -->
     <div id="custom-mensalista-modal" class="custom-modal-overlay">
         <div class="custom-modal" style="max-width: 450px; max-height: 90vh; overflow-y: auto;">
             <h3><i class="fa-solid fa-users-rectangle"></i> Clientes Mensalistas</h3>
@@ -408,7 +242,6 @@
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
                     <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
 
-                    <!-- Caixa de Frequência visível e ajustada -->
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Frequência (Vezes no mês):</label>
                     <select id="mensalista-frequencia" style="display: block; width: 100%; padding: 10px; background: #FFF; border: 1px solid #DDDDDD; border-radius: 6px; margin-bottom: 12px;">
                         <option value="4">4 vezes (Toda Semana)</option>
@@ -461,6 +294,30 @@
         let usuarioLogado = "";
         let offsetSemana = 0; 
         
+        // NOVO: Dicionário e funções de cálculo idênticos ao script.js para limpar a grade
+        const duracoesServicos = {
+            "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
+            "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
+            "pigmentação": 20, "pigmentacao": 20, "alisamento": 40,
+            "hidratação": 20, "hidratacao": 20, "selagem": 45, "luzes": 60, "platinado": 90
+        };
+
+        function calcularDuracaoServico(servicoStr) {
+            if (!servicoStr) return 40;
+            let total = 0;
+            servicoStr.split(",").forEach(s => {
+                const n = s.trim().toLowerCase();
+                total += duracoesServicos[n] || 40;
+            });
+            return total;
+        }
+
+        function converterHoraParaMinutos(horario) {
+            if (!horario) return 0;
+            const partes = horario.split(":");
+            return parseInt(partes[0]) * 60 + parseInt(partes[1]);
+        }
+
         function obterHorariosParaData(dataString) {
             if (!dataString) return [];
             const partes = dataString.split('-');
@@ -703,13 +560,41 @@
                         const agendamentosDia = (agendamentos || []).filter(a => a.data === dia.iso && a.status !== 'cancelado');
                         const bloqueiosDia = (bloqueios || []).filter(b => b.data === dia.iso && b.horario !== 'TODOS');
                         
+                        // NOVO: Verifica tempo ocupado para não desenhar "horários em branco" no meio de serviços longos
+                        let rangesOcupados = [];
+                        
+                        agendamentosDia.forEach(a => {
+                            let minStart = converterHoraParaMinutos(a.horario);
+                            let dur = calcularDuracaoServico(a.servico);
+                            rangesOcupados.push({ start: minStart, end: minStart + dur });
+                        });
+
+                        bloqueiosDia.forEach(b => {
+                            let minStart = converterHoraParaMinutos(b.horario);
+                            rangesOcupados.push({ start: minStart, end: minStart + 40 });
+                        });
+
                         let itensRenderizacao = [];
 
                         horariosDia.forEach(h => {
-                            const temAgend = agendamentosDia.some(a => a.horario === h);
-                            const temBloq = bloqueiosDia.some(b => b.horario === h);
-                            if (!temAgend && !temBloq) {
-                                itensRenderizacao.push({ tipo: 'vazio', horario: h });
+                            const minAtual = converterHoraParaMinutos(h);
+                            let slotSobreposto = false;
+
+                            // Se este horário de 40 min cai DENTRO de um agendamento longo, esconde ele
+                            for (let range of rangesOcupados) {
+                                if (minAtual > range.start && minAtual < range.end) {
+                                    slotSobreposto = true;
+                                    break;
+                                }
+                            }
+
+                            // Só cria o botão de horário vazio se ele não está encavalado
+                            if (!slotSobreposto) {
+                                // verifica se ele próprio não é o inicio exato de algo, se for, o agendamentoDia já o renderiza.
+                                let ehOInicio = rangesOcupados.some(r => r.start === minAtual);
+                                if(!ehOInicio) {
+                                    itensRenderizacao.push({ tipo: 'vazio', horario: h });
+                                }
                             }
                         });
 
