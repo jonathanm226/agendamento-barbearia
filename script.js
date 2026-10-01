@@ -74,7 +74,7 @@ function toggleService(element, serviceName, price) {
     checkAvailableTimes();
 }
 
-// Geração idêntica à regra do painel do barbeiro (Sexta e Sábado às 05:00, demais dias às 07:00 até 21:00)
+// Geração de horários em blocos exatos de 40 minutos
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -136,6 +136,7 @@ async function checkAvailableTimes() {
         return;
     }
 
+    // Calcula os slots necessários dividindo a duração total do cliente por 40 minutos
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
     const slotsNeeded = Math.ceil(totalDurationMinutes / 40);
 
@@ -175,7 +176,27 @@ async function checkAvailableTimes() {
         if (agendamentos) {
             agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
+                    // Adiciona o horário de início do agendamento existente
                     occupiedTimes.push(a.horario);
+                    
+                    // Calcula com precisão a duração do serviço já agendado para bloquear os slots seguintes ocupados
+                    let duracaoAgendada = 40;
+                    if (a.servico) {
+                        duracaoAgendada = 0;
+                        a.servico.split(",").forEach(serv => {
+                            const nomeS = serv.trim();
+                            duracaoAgendada += duracoesServicos[nomeS] || 40;
+                        });
+                    }
+                    const slotsOcupadosPeloServico = Math.ceil(duracaoAgendada / 40);
+                    const idxInicio = allTimes.indexOf(a.horario);
+                    if (idxInicio !== -1) {
+                        for (let k = 1; k < slotsOcupadosPeloServico; k++) {
+                            if (allTimes[idxInicio + k]) {
+                                occupiedTimes.push(allTimes[idxInicio + k]);
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -199,13 +220,10 @@ async function checkAvailableTimes() {
 
             let temConflito = false;
 
-            // Verifica se o horário exato está ocupado por agendamento ou bloqueio individual
-            if (occupiedTimes.includes(time) || blockedTimes.includes(time)) {
-                temConflito = true;
-            } else if (index + slotsNeeded > allTimes.length) {
+            // Verifica se o espaço exato ou a quantidade de slots necessários ultrapassa o limite ou colide com ocupados/bloqueados
+            if (index + slotsNeeded > allTimes.length) {
                 temConflito = true;
             } else {
-                // Valida se os próximos slots exigidos pela duração estão livres
                 for (let i = 0; i < slotsNeeded; i++) {
                     const slotAtual = allTimes[index + i];
                     if (occupiedTimes.includes(slotAtual) || blockedTimes.includes(slotAtual)) {
