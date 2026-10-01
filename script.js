@@ -19,18 +19,23 @@ function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos
+// Dicionário com a duração de cada serviço em minutos (padronizado com o painel)
 const duracoesServicos = {
-    "Corte": 40,
-    "Barba": 20,
-    "Sobrancelha": 10,
-    "Acabamento": 15,
-    "Pigmentação": 20,
-    "Alisamento": 40,
-    "Hidratação": 20,
-    "Selagem": 45,
-    "Luzes": 60,
-    "Platinado": 90
+    "corte": 40,
+    "corte de cabelo": 40,
+    "barba": 20,
+    "barba completa": 20,
+    "combo cabelo + barba": 60,
+    "sobrancelha": 10,
+    "acabamento": 15,
+    "pigmentação": 20,
+    "pigmentacao": 20,
+    "alisamento": 40,
+    "hidratação": 20,
+    "hidratacao": 20,
+    "selagem": 45,
+    "luzes": 60,
+    "platinado": 90
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -53,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleService(element, serviceName, price) {
     const icon = element.querySelector(".checkbox-icon");
     const index = selectedServices.findIndex(s => s.name === serviceName);
-    const duration = duracoesServicos[serviceName] || 40;
+    const duration = duracoesServicos[serviceName.toLowerCase()] || 40;
 
     if (index > -1) {
         selectedServices.splice(index, 1);
@@ -136,7 +141,7 @@ async function checkAvailableTimes() {
         return;
     }
 
-    // Calcula os slots necessários dividindo a duração total do cliente por 40 minutos
+    // Calcula os slots necessários para o cliente com base na soma da duração dos serviços selecionados
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
     const slotsNeeded = Math.ceil(totalDurationMinutes / 40);
 
@@ -176,22 +181,21 @@ async function checkAvailableTimes() {
         if (agendamentos) {
             agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
-                    // Adiciona o horário de início do agendamento existente
                     occupiedTimes.push(a.horario);
                     
-                    // Calcula com precisão a duração do serviço já agendado para bloquear os slots seguintes ocupados
-                    let duracaoAgendada = 40;
+                    // Soma a duração exata do serviço agendado (ex: Combo Cabelo + Barba) para bloquear todos os slots que ele ocupa
+                    let duracaoAgendadaMinutos = 40;
                     if (a.servico) {
-                        duracaoAgendada = 0;
+                        duracaoAgendadaMinutos = 0;
                         a.servico.split(",").forEach(serv => {
-                            const nomeS = serv.trim();
-                            duracaoAgendada += duracoesServicos[nomeS] || 40;
+                            const nomeS = serv.trim().toLowerCase();
+                            duracaoAgendadaMinutos += duracoesServicos[nomeS] || 40;
                         });
                     }
-                    const slotsOcupadosPeloServico = Math.ceil(duracaoAgendada / 40);
+                    const slotsOcupados = Math.ceil(duracaoAgendadaMinutos / 40);
                     const idxInicio = allTimes.indexOf(a.horario);
                     if (idxInicio !== -1) {
-                        for (let k = 1; k < slotsOcupadosPeloServico; k++) {
+                        for (let k = 1; k < slotsOcupados; k++) {
                             if (allTimes[idxInicio + k]) {
                                 occupiedTimes.push(allTimes[idxInicio + k]);
                             }
@@ -220,7 +224,7 @@ async function checkAvailableTimes() {
 
             let temConflito = false;
 
-            // Verifica se o espaço exato ou a quantidade de slots necessários ultrapassa o limite ou colide com ocupados/bloqueados
+            // Valida se o intervalo necessário para o novo agendamento cabe sem colidir com horários já ocupados ou bloqueados
             if (index + slotsNeeded > allTimes.length) {
                 temConflito = true;
             } else {
