@@ -147,7 +147,7 @@ async function checkAvailableTimes() {
     timeSelect.appendChild(optionCarregando);
 
     try {
-        // Busca todos os agendamentos do dia (normais e mensalistas)
+        // Busca rigida de todos os agendamentos na data e barbeiro selecionados
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
             .select("horario, status, servico")
@@ -175,10 +175,13 @@ async function checkAvailableTimes() {
         }
 
         if (agendamentos) {
-            // Filtra e pega qualquer agendamento ativo (incluindo mensalistas com status 'ativo')
-            agendamentos.filter(a => a.status && a.status !== 'cancelado').forEach(a => {
-                occupiedTimes.push(a.horario);
+            // Assegura que tanto agendamentos normais quanto mensalistas ativos bloqueiem o horário
+            agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
+                if (a.horario) {
+                    occupiedTimes.push(a.horario);
+                }
                 
+                // Trata a duração do serviço para bloquear os slots seguintes se necessário
                 if (a.servico) {
                     let duracaoAntiga = 0;
                     a.servico.split(",").forEach(serv => {
@@ -234,7 +237,7 @@ async function checkAvailableTimes() {
             if (temConflito) {
                 option.textContent = emergencial
                     ? `${time} 🚨 Corte Emergencial - (Indisponível)`
-                    : `${time} - (Indisponível para esta duração)`;
+                    : `${time} - (Indisponível)`;
                 option.disabled = true;
             } else {
                 option.textContent = emergencial
