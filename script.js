@@ -21,21 +21,10 @@ function isHorarioEmergencial(horario) {
 
 // Dicionário com a duração de cada serviço em minutos (padronizado)
 const duracoesServicos = {
-    "corte": 40,
-    "corte de cabelo": 40,
-    "barba": 20,
-    "barba completa": 20,
-    "combo cabelo + barba": 60,
-    "sobrancelha": 10,
-    "acabamento": 15,
-    "pigmentação": 20,
-    "pigmentacao": 20,
-    "alisamento": 40,
-    "hidratação": 20,
-    "hidratacao": 20,
-    "selagem": 45,
-    "luzes": 60,
-    "platinado": 90
+    "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
+    "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
+    "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
+    "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -160,9 +149,10 @@ async function checkAvailableTimes() {
     timeSelect.appendChild(optionCarregando);
 
     try {
+        // Agora o select busca explicitamente o horario_fim do banco de dados
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
-            .select("horario, status, servico")
+            .select("horario, horario_fim, status, servico")
             .eq("barbeiro", selectedBarber)
             .eq("data", selectedDate);
 
@@ -181,7 +171,8 @@ async function checkAvailableTimes() {
         let occupiedIntervals = [];
         
         // Bloqueio de Almoço na Sexta-feira (09:40 até 12:20 = minutos 580 até 740)
-        const dataSelecionadaObj = new Date(selectedDate + "T00:00:00");
+        const [y, m, d] = selectedDate.split("-").map(Number);
+        const dataSelecionadaObj = new Date(y, m - 1, d);
         if (dataSelecionadaObj.getDay() === 5) {
             occupiedIntervals.push({ start: 580, end: 740 });
         }
@@ -189,18 +180,27 @@ async function checkAvailableTimes() {
         if (agendamentos) {
             agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
-                    let duracaoAgendada = 0;
-                    if (a.servico) {
-                        a.servico.split(",").forEach(serv => {
-                            const nomeOriginal = serv.trim().toLowerCase();
-                            const nomeNorm = nomeOriginal.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                            duracaoAgendada += duracoesServicos[nomeNorm] || duracoesServicos[nomeOriginal] || 40;
-                        });
-                    }
-                    if (duracaoAgendada === 0) duracaoAgendada = 40;
-                    
                     const startMin = parseTimeStr(a.horario);
-                    occupiedIntervals.push({ start: startMin, end: startMin + duracaoAgendada });
+                    let endMin;
+                    
+                    // Prioriza o horario_fim gravado no banco (corrige sobreposição dos mensalistas)
+                    if (a.horario_fim) {
+                        endMin = parseTimeStr(a.horario_fim);
+                    } else {
+                        // Fallback caso não tenha horario_fim (agendamentos antigos)
+                        let duracaoAgendada = 0;
+                        if (a.servico) {
+                            a.servico.split(",").forEach(serv => {
+                                const nomeOriginal = serv.trim().toLowerCase();
+                                const nomeNorm = nomeOriginal.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                                duracaoAgendada += duracoesServicos[nomeNorm] || duracoesServicos[nomeOriginal] || 40;
+                            });
+                        }
+                        if (duracaoAgendada === 0) duracaoAgendada = 40;
+                        endMin = startMin + duracaoAgendada;
+                    }
+                    
+                    occupiedIntervals.push({ start: startMin, end: endMin });
                 }
             });
         }
@@ -236,7 +236,7 @@ async function checkAvailableTimes() {
 
             let temConflito = false;
 
-            // Validação Cruzada: Bloqueia se o tempo exigido pelo cliente encavalar com os minutos de qualquer agendamento existente
+            // Validação Cruzada Estrita para detectar encavalamentos
             for (let interval of occupiedIntervals) {
                 if (slotStart < interval.end && slotEnd > interval.start) {
                     temConflito = true;
