@@ -149,10 +149,10 @@ async function checkAvailableTimes() {
     timeSelect.appendChild(optionCarregando);
 
     try {
-        // Agora o select busca explicitamente o horario_fim do banco de dados
+        // Correção: Agora busca "*" para não dar erro se alguma coluna faltar na tabela
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
-            .select("horario, horario_fim, status, servico")
+            .select("*")
             .eq("barbeiro", selectedBarber)
             .eq("data", selectedDate);
 
@@ -178,16 +178,16 @@ async function checkAvailableTimes() {
         }
 
         if (agendamentos) {
-            agendamentos.filter(a => a.status && a.status.toLowerCase() !== 'cancelado').forEach(a => {
+            // CORREÇÃO CRÍTICA: Trata agendamentos com status vazio/nulo (como os antigos mensalistas)
+            agendamentos.filter(a => !a.status || a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
                     const startMin = parseTimeStr(a.horario);
                     let endMin;
                     
-                    // Prioriza o horario_fim gravado no banco (corrige sobreposição dos mensalistas)
                     if (a.horario_fim) {
                         endMin = parseTimeStr(a.horario_fim);
                     } else {
-                        // Fallback caso não tenha horario_fim (agendamentos antigos)
+                        // Fallback dinâmico (Calcula a duração se a coluna não existir no banco)
                         let duracaoAgendada = 0;
                         if (a.servico) {
                             a.servico.split(",").forEach(serv => {
@@ -454,7 +454,6 @@ async function sendToWhatsapp() {
                     barbeiro: selectedBarber,
                     servico: listaNomesServicos,
                     preco_total: precoTotal,
-                    horario_fim: horarioFim,
                     data: date,
                     horario: time,
                     status: 'ativo'
