@@ -562,11 +562,9 @@
                         
                         let rangesOcupados = [];
                         
-                        // Cálculo estrito do tempo que o agendamento já bloqueia
                         agendamentosDia.forEach(a => {
                             let minStart = converterHoraParaMinutos(a.horario);
                             let dur = 40;
-                            // Respeita o horário de fim, se existir (agora mensalistas têm isso)
                             if (a.horario_fim) {
                                 dur = converterHoraParaMinutos(a.horario_fim) - minStart;
                             } else {
@@ -587,7 +585,6 @@
                             let slotSobreposto = false;
 
                             for (let range of rangesOcupados) {
-                                // Esconde o slot VAZIO se ele invadir/se sobrepor a qualquer agendamento já existente
                                 if (minAtual < range.end && (minAtual + 40) > range.start) {
                                     slotSobreposto = true;
                                     break;
@@ -712,13 +709,6 @@
                     incrementoMensal = true;
                 }
 
-                // Cálculo explícito do horário final para travar a agenda com precisão
-                let duracao = calcularDuracaoServico(servico);
-                let minFim = converterHoraParaMinutos(horario) + duracao;
-                let hFim = Math.floor(minFim / 60);
-                let mFim = minFim % 60;
-                let horarioFimCalculado = `${String(hFim).padStart(2, '0')}:${String(mFim).padStart(2, '0')}`;
-
                 for (let i = 0; i < totalOcorrencias; i++) {
                     let d = new Date(dataBase);
                     
@@ -738,7 +728,7 @@
                         preco_total: valor,
                         data: dataIso,
                         horario: horario,
-                        horario_fim: horarioFimCalculado, // Agora inserido perfeitamente no banco!
+                        // horario_fim: REMOVIDO para não crashar caso não exista no banco
                         status: 'ativo',
                         recorrente: true
                     });
