@@ -294,20 +294,20 @@
         let usuarioLogado = "";
         let offsetSemana = 0; 
         
-        // NOVO: Dicionário e funções de cálculo idênticos ao script.js para limpar a grade
+        // Dicionário padronizado correspondente exatamente aos serviços
         const duracoesServicos = {
             "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
             "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
-            "pigmentação": 20, "pigmentacao": 20, "alisamento": 40,
-            "hidratação": 20, "hidratacao": 20, "selagem": 45, "luzes": 60, "platinado": 90
+            "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
+            "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90
         };
 
         function calcularDuracaoServico(servicoStr) {
             if (!servicoStr) return 40;
             let total = 0;
             servicoStr.split(",").forEach(s => {
-                const n = s.trim().toLowerCase();
-                total += duracoesServicos[n] || 40;
+                const nomeNorm = s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                total += duracoesServicos[nomeNorm] || 40;
             });
             return total;
         }
@@ -560,12 +560,18 @@
                         const agendamentosDia = (agendamentos || []).filter(a => a.data === dia.iso && a.status !== 'cancelado');
                         const bloqueiosDia = (bloqueios || []).filter(b => b.data === dia.iso && b.horario !== 'TODOS');
                         
-                        // NOVO: Verifica tempo ocupado para não desenhar "horários em branco" no meio de serviços longos
                         let rangesOcupados = [];
                         
+                        // Cálculo estrito do tempo que o agendamento já bloqueia
                         agendamentosDia.forEach(a => {
                             let minStart = converterHoraParaMinutos(a.horario);
-                            let dur = calcularDuracaoServico(a.servico);
+                            let dur = 40;
+                            // Respeita o horário de fim, se existir (agora mensalistas têm isso)
+                            if (a.horario_fim) {
+                                dur = converterHoraParaMinutos(a.horario_fim) - minStart;
+                            } else {
+                                dur = calcularDuracaoServico(a.servico);
+                            }
                             rangesOcupados.push({ start: minStart, end: minStart + dur });
                         });
 
@@ -580,21 +586,16 @@
                             const minAtual = converterHoraParaMinutos(h);
                             let slotSobreposto = false;
 
-                            // Se este horário de 40 min cai DENTRO de um agendamento longo, esconde ele
                             for (let range of rangesOcupados) {
-                                if (minAtual > range.start && minAtual < range.end) {
+                                // Esconde o slot VAZIO se ele invadir/se sobrepor a qualquer agendamento já existente
+                                if (minAtual < range.end && (minAtual + 40) > range.start) {
                                     slotSobreposto = true;
                                     break;
                                 }
                             }
 
-                            // Só cria o botão de horário vazio se ele não está encavalado
                             if (!slotSobreposto) {
-                                // verifica se ele próprio não é o inicio exato de algo, se for, o agendamentoDia já o renderiza.
-                                let ehOInicio = rangesOcupados.some(r => r.start === minAtual);
-                                if(!ehOInicio) {
-                                    itensRenderizacao.push({ tipo: 'vazio', horario: h });
-                                }
+                                itensRenderizacao.push({ tipo: 'vazio', horario: h });
                             }
                         });
 
@@ -711,6 +712,13 @@
                     incrementoMensal = true;
                 }
 
+                // Cálculo explícito do horário final para travar a agenda com precisão
+                let duracao = calcularDuracaoServico(servico);
+                let minFim = converterHoraParaMinutos(horario) + duracao;
+                let hFim = Math.floor(minFim / 60);
+                let mFim = minFim % 60;
+                let horarioFimCalculado = `${String(hFim).padStart(2, '0')}:${String(mFim).padStart(2, '0')}`;
+
                 for (let i = 0; i < totalOcorrencias; i++) {
                     let d = new Date(dataBase);
                     
@@ -730,6 +738,7 @@
                         preco_total: valor,
                         data: dataIso,
                         horario: horario,
+                        horario_fim: horarioFimCalculado, // Agora inserido perfeitamente no banco!
                         status: 'ativo',
                         recorrente: true
                     });
