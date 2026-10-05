@@ -234,6 +234,9 @@
                         <option value="Selagem">Selagem</option>
                         <option value="Luzes">Luzes</option>
                         <option value="Platinado">Platinado</option>
+                        <option value="Corte e Sobrancelha">Corte e Sobrancelha</option>
+                        <option value="Corte e Pintura - tinta da casa">Corte e Pintura - tinta da casa</option>
+                        <option value="Corte e Pintura - tinta do cliente">Corte e Pintura - tinta do cliente</option>
                     </select>
 
                     <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Valor (R$):</label>
@@ -299,7 +302,10 @@
             "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
             "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
             "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
-            "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90
+            "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90,
+            "corte e sobrancelha": 60,
+            "corte e pintura - tinta da casa": 80,
+            "corte e pintura - tinta do cliente": 80
         };
 
         function calcularDuracaoServico(servicoStr) {
@@ -434,7 +440,10 @@
             "corte de cabelo": 45, "corte": 35, "barba completa": 35, "barba": 35,
             "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
             "pigmentacao": 35, "alisamento": 35, "hidratacao": 35,
-            "selagem": 70, "luzes": 90, "platinado": 120
+            "selagem": 70, "luzes": 90, "platinado": 120,
+            "corte e sobrancelha": 50,
+            "corte e pintura - tinta da casa": 70,
+            "corte e pintura - tinta do cliente": 50
         };
 
         function calcularPrecoServico(nomeServico) {
