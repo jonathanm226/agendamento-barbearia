@@ -141,6 +141,13 @@ async function checkAvailableTimes() {
 
     // Calcula total de minutos necessários pelos serviços escolhidos pelo cliente
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
+    
+    // Calcula o valor dinâmico para apresentar no option
+    let precoEmergencialCalculado = VALOR_CORTE_EMERGENCIAL;
+    let temSobrancelhaSelecionada = selectedServices.some(s => s.name.toLowerCase() === "sobrancelha");
+    if (temSobrancelhaSelecionada) {
+        precoEmergencialCalculado += 20;
+    }
 
     const optionCarregando = document.createElement("option");
     optionCarregando.value = "";
@@ -149,7 +156,6 @@ async function checkAvailableTimes() {
     timeSelect.appendChild(optionCarregando);
 
     try {
-        // Correção: Agora busca "*" para não dar erro se alguma coluna faltar na tabela
         const { data: agendamentos, error: errAgendamentos } = await _supabase
             .from("agendamentos")
             .select("*")
@@ -170,7 +176,7 @@ async function checkAvailableTimes() {
 
         let occupiedIntervals = [];
         
-        // Bloqueio de Almoço na Sexta-feira (09:40 até 12:20 = minutos 580 até 740)
+        // Bloqueio de Almoço na Sexta-feira
         const [y, m, d] = selectedDate.split("-").map(Number);
         const dataSelecionadaObj = new Date(y, m - 1, d);
         if (dataSelecionadaObj.getDay() === 5) {
@@ -178,7 +184,6 @@ async function checkAvailableTimes() {
         }
 
         if (agendamentos) {
-            // CORREÇÃO CRÍTICA: Trata agendamentos com status vazio/nulo (como os antigos mensalistas)
             agendamentos.filter(a => !a.status || a.status.toLowerCase() !== 'cancelado').forEach(a => {
                 if (a.horario) {
                     const startMin = parseTimeStr(a.horario);
@@ -187,7 +192,6 @@ async function checkAvailableTimes() {
                     if (a.horario_fim) {
                         endMin = parseTimeStr(a.horario_fim);
                     } else {
-                        // Fallback dinâmico (Calcula a duração se a coluna não existir no banco)
                         let duracaoAgendada = 0;
                         if (a.servico) {
                             a.servico.split(",").forEach(serv => {
@@ -236,7 +240,6 @@ async function checkAvailableTimes() {
 
             let temConflito = false;
 
-            // Validação Cruzada Estrita para detectar encavalamentos
             for (let interval of occupiedIntervals) {
                 if (slotStart < interval.end && slotEnd > interval.start) {
                     temConflito = true;
@@ -253,7 +256,7 @@ async function checkAvailableTimes() {
                 option.disabled = true;
             } else {
                 option.textContent = emergencial
-                    ? `${time} 🚨 Corte Emergencial (R$ ${VALOR_CORTE_EMERGENCIAL},00)`
+                    ? `${time} 🚨 Corte Emergencial (R$ ${precoEmergencialCalculado},00)`
                     : time;
             }
 
@@ -356,14 +359,25 @@ function abrirModalConfirmacao() {
     }
 
     let precoTotal = 0;
+    let temSobrancelha = false;
+    
     const servicosNomes = selectedServices.map(s => {
-        precoTotal += s.price;
+        if (s.name.toLowerCase() === "sobrancelha") {
+            temSobrancelha = true;
+        }
         return s.name;
     });
 
     const emergencial = isHorarioEmergencial(time);
+    
+    // Regra Emergencial com Sobrancelha (+R$ 20)
     if (emergencial) {
         precoTotal = VALOR_CORTE_EMERGENCIAL;
+        if (temSobrancelha) {
+            precoTotal += 20;
+        }
+    } else {
+        precoTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
     }
 
     const formattedDate = date.split("-").reverse().join("/");
@@ -373,7 +387,7 @@ function abrirModalConfirmacao() {
         resumoDiv.innerHTML = `
             <div style="margin-bottom: 8px;"><strong>Barbeiro:</strong> ${selectedBarber}</div>
             <div style="margin-bottom: 8px;"><strong>Data:</strong> ${formattedDate} às ${time}</div>
-            <div style="margin-bottom: 8px;"><strong>Serviços:</strong> ${servicosNomes.join(", ")}${emergencial ? " 🚨 (Corte Emergencial)" : ""}</div>
+            <div style="margin-bottom: 8px;"><strong>Serviços:</strong> ${servicosNomes.join(", ")}${emergencial ? " 🚨 (Horário Emergencial)" : ""}</div>
             <div style="margin-top: 12px; border-top: 1px solid #EAEAEA; padding-top: 8px; font-size: 1.1rem;">
                 <strong>Total Estimado:</strong> <span style="color: #25D366; font-weight: bold;">R$ ${precoTotal.toFixed(2).replace('.', ',')}</span>
             </div>
@@ -419,17 +433,29 @@ async function sendToWhatsapp() {
 
     let precoTotal = 0;
     let duracaoTotal = 0;
+    let temSobrancelha = false;
     
-    let listaNomesServicos = selectedServices.map(s => {
-        precoTotal += s.price;
+    let arrayNomesServicos = selectedServices.map(s => {
         duracaoTotal += s.duration;
+        if (s.name.toLowerCase() === "sobrancelha") {
+            temSobrancelha = true;
+        }
         return s.name;
-    }).join(", ");
+    });
 
     const emergencial = isHorarioEmergencial(time);
+    
+    // Regra Emergencial com Sobrancelha (+R$ 20)
     if (emergencial) {
         precoTotal = VALOR_CORTE_EMERGENCIAL;
+        if (temSobrancelha) {
+            precoTotal += 20;
+        }
+    } else {
+        precoTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
     }
+    
+    let listaNomesServicos = arrayNomesServicos.join(", ");
 
     const [hora, minuto] = time.split(":").map(Number);
     const dataFim = new Date(0, 0, 0, hora, minuto + duracaoTotal);
@@ -453,7 +479,7 @@ async function sendToWhatsapp() {
                     nascimento: nascimento,
                     barbeiro: selectedBarber,
                     servico: listaNomesServicos,
-                    preco_total: precoTotal,
+                    preco_total: precoTotal, // Agora armazena R$ 70,00 no banco se for com sobrancelha
                     data: date,
                     horario: time,
                     status: 'ativo'
