@@ -24,8 +24,67 @@ const duracoesServicos = {
     "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
     "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
     "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
-    "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90
+    "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90,
+    // Combos
+    "corte e sobrancelha": 60,
+    "corte e pintura - tinta da casa": 80,
+    "corte e pintura - tinta do cliente": 80
 };
+
+// Combos (pacotes com valor próprio) e os serviços que cada um já inclui.
+// Ao marcar um combo, o que ele já contém é desmarcado (evita cobrar e ocupar tempo em dobro).
+const CONFLITOS_COMBOS = {
+    "Corte e Sobrancelha": ["Corte", "Sobrancelha", "Corte e Pintura - tinta da casa", "Corte e Pintura - tinta do cliente"],
+    "Corte e Pintura - tinta da casa": ["Corte", "Corte e Sobrancelha", "Corte e Pintura - tinta do cliente"],
+    "Corte e Pintura - tinta do cliente": ["Corte", "Corte e Sobrancelha", "Corte e Pintura - tinta da casa"]
+};
+
+function nomeSemAcento(nome) {
+    return String(nome || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Lista (simétrica) dos serviços que não podem ficar marcados junto com "nome"
+function conflitosDe(nome) {
+    const lista = new Set(CONFLITOS_COMBOS[nome] || []);
+    Object.keys(CONFLITOS_COMBOS).forEach(combo => {
+        if (CONFLITOS_COMBOS[combo].includes(nome)) lista.add(combo);
+    });
+    return Array.from(lista);
+}
+
+function desmarcarServicoPorNome(nome) {
+    const idx = selectedServices.findIndex(s => s.name === nome);
+    if (idx === -1) return;
+    selectedServices.splice(idx, 1);
+
+    document.querySelectorAll(".service-card").forEach(card => {
+        const m = (card.getAttribute("onclick") || "").match(/toggleService\(this,\s*'([^']+)'/);
+        if (m && m[1] === nome) {
+            card.classList.remove("active");
+            const icon = card.querySelector(".checkbox-icon");
+            if (icon) {
+                icon.classList.remove("fa-solid", "fa-square-check");
+                icon.classList.add("fa-regular", "fa-square");
+            }
+        }
+    });
+}
+
+// Total do atendimento (usado na lista de horários, no resumo e na mensagem do WhatsApp)
+function calcularTotal(horario) {
+    const soma = selectedServices.reduce((acc, s) => acc + s.price, 0);
+    if (!isHorarioEmergencial(horario)) return soma;
+
+    // Regra emergencial: base R$ 50 + R$ 20 se incluir sobrancelha (avulsa ou no combo)
+    let emergencial = VALOR_CORTE_EMERGENCIAL;
+    if (selectedServices.some(s => nomeSemAcento(s.name).includes("sobrancelha"))) {
+        emergencial += 20;
+    }
+
+    // Combos nunca ficam mais baratos no emergencial do que no horário normal
+    const temCombo = selectedServices.some(s => CONFLITOS_COMBOS[s.name]);
+    return temCombo ? Math.max(emergencial, soma) : emergencial;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("date");
@@ -59,6 +118,7 @@ function toggleService(element, serviceName, price) {
             icon.classList.add("fa-regular", "fa-square");
         }
     } else {
+        conflitosDe(serviceName).forEach(desmarcarServicoPorNome);
         selectedServices.push({ name: serviceName, price: price, duration: duration });
         element.classList.add("active");
         if (icon) {
@@ -142,13 +202,6 @@ async function checkAvailableTimes() {
     // Calcula total de minutos necessários pelos serviços escolhidos pelo cliente
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
     
-    // Calcula o valor dinâmico para apresentar no option
-    let precoEmergencialCalculado = VALOR_CORTE_EMERGENCIAL;
-    let temSobrancelhaSelecionada = selectedServices.some(s => s.name.toLowerCase() === "sobrancelha");
-    if (temSobrancelhaSelecionada) {
-        precoEmergencialCalculado += 20;
-    }
-
     const optionCarregando = document.createElement("option");
     optionCarregando.value = "";
     optionCarregando.textContent = "Carregando horários...";
@@ -256,7 +309,7 @@ async function checkAvailableTimes() {
                 option.disabled = true;
             } else {
                 option.textContent = emergencial
-                    ? `${time} 🚨 Corte Emergencial (R$ ${precoEmergencialCalculado},00)`
+                    ? `${time} 🚨 Corte Emergencial (R$ ${calcularTotal(time)},00)`
                     : time;
             }
 
@@ -358,27 +411,9 @@ function abrirModalConfirmacao() {
         return;
     }
 
-    let precoTotal = 0;
-    let temSobrancelha = false;
-    
-    const servicosNomes = selectedServices.map(s => {
-        if (s.name.toLowerCase() === "sobrancelha") {
-            temSobrancelha = true;
-        }
-        return s.name;
-    });
-
+    const servicosNomes = selectedServices.map(s => s.name);
     const emergencial = isHorarioEmergencial(time);
-    
-    // Regra Emergencial com Sobrancelha (+R$ 20)
-    if (emergencial) {
-        precoTotal = VALOR_CORTE_EMERGENCIAL;
-        if (temSobrancelha) {
-            precoTotal += 20;
-        }
-    } else {
-        precoTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
-    }
+    const precoTotal = calcularTotal(time);
 
     const formattedDate = date.split("-").reverse().join("/");
 
@@ -431,29 +466,14 @@ async function sendToWhatsapp() {
         btnAgendar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A agendar...';
     }
 
-    let precoTotal = 0;
     let duracaoTotal = 0;
-    let temSobrancelha = false;
-    
     let arrayNomesServicos = selectedServices.map(s => {
         duracaoTotal += s.duration;
-        if (s.name.toLowerCase() === "sobrancelha") {
-            temSobrancelha = true;
-        }
         return s.name;
     });
 
     const emergencial = isHorarioEmergencial(time);
-    
-    // Regra Emergencial com Sobrancelha (+R$ 20)
-    if (emergencial) {
-        precoTotal = VALOR_CORTE_EMERGENCIAL;
-        if (temSobrancelha) {
-            precoTotal += 20;
-        }
-    } else {
-        precoTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
-    }
+    const precoTotal = calcularTotal(time);
     
     let listaNomesServicos = arrayNomesServicos.join(", ");
 
