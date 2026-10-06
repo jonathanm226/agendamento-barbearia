@@ -99,13 +99,13 @@
             </div>
         </section>
 
-        <!-- Resumo Flutuante Dinâmico -->
-        <div id="resumo-flutuante" style="display: none; background: #242424; border: 1px solid #FF6600; border-radius: 8px; padding: 12px 15px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
+        <!-- Resumo Flutuante Dinâmico CORRIGIDO (Tema Claro) -->
+        <div id="resumo-flutuante" style="display: none; background: #FFFFFF; border: 1px solid #000000; border-radius: 8px; padding: 12px 15px; margin-bottom: 20px; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
             <div>
-                <span id="resumo-qtd-servicos" style="font-size: 0.85rem; color: #AAA; display: block;">Nenhum serviço selecionado</span>
-                <strong id="resumo-valor-total" style="font-size: 1.1rem; color: #FF6600;">R$ 0,00</strong>
+                <span id="resumo-qtd-servicos" style="font-size: 0.85rem; color: #666666; display: block;">Nenhum serviço selecionado</span>
+                <strong id="resumo-valor-total" style="font-size: 1.1rem; color: #000000;">R$ 0,00</strong>
             </div>
-            <span id="resumo-duracao" style="font-size: 0.8rem; color: #25D366; background: #152219; padding: 4px 8px; border-radius: 4px; border: 1px solid #25D366;">0 min</span>
+            <span id="resumo-duracao" style="font-size: 0.8rem; color: #FFFFFF; background: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold;">0 min</span>
         </div>
 
         <!-- Seleção de Data e Horário -->
@@ -130,16 +130,16 @@
 
         <!-- Identificação do Cliente -->
         <section class="section">
-            <h2>3. Seus Dados</h2>
+            <h2>3. Os Seus Dados</h2>
             <div class="client-inputs">
                 <div class="input-group">
                     <label for="client-phone">WhatsApp / Telefone:</label>
-                    <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required onblur="buscarClientePorTelefone()">
+                    <input type="tel" id="client-phone" placeholder="O seu WhatsApp (com indicativo regional)" required onblur="buscarClientePorTelefone()">
                 </div>
 
                 <div class="input-group">
                     <label for="client-name">Nome Completo:</label>
-                    <input type="text" id="client-name" placeholder="Seu Nome Completo" required>
+                    <input type="text" id="client-name" placeholder="O seu Nome Completo" required>
                 </div>
                 
                 <div class="input-group" id="group-nascimento">
@@ -171,7 +171,7 @@
             </div>
             
             <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
-                Revise os dados acima. Ao confirmar, o seu horário será reservado e será direcionado ao WhatsApp.
+                Reveja os dados acima. Ao confirmar, o seu horário será reservado e será direcionado ao WhatsApp.
             </p>
             
             <div style="display: flex; gap: 10px; flex-direction: column;">
