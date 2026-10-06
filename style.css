@@ -6,7 +6,7 @@
 }
 
 body {
-    background-color: #F4F4F9; /* Fundo levemente cinza para destacar o app */
+    background-color: #F4F4F9;
     color: #000000;
     display: flex;
     justify-content: center;
@@ -18,8 +18,8 @@ body {
     max-width: 480px;
     background-color: #FFFFFF;
     padding: 20px;
-    padding-bottom: 130px; /* Mantém o espaço para o botão fixo não cobrir os campos */
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08); /* Sombra suave escura */
+    padding-bottom: 130px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
     border-left: 1px solid #EAEAEA;
     border-right: 1px solid #EAEAEA;
 }
@@ -135,6 +135,11 @@ body {
     cursor: pointer;
     transition: 0.2s;
     gap: 8px;
+    pointer-events: auto !important;
+}
+
+.service-card * {
+    pointer-events: none; /* Garante que o clique passe direto para o card principal sem falhas */
 }
 
 .service-card.active {
@@ -244,112 +249,4 @@ input:focus, select:focus {
 
 .btn-whatsapp:hover {
     background-color: #333333;
-}
-
-/* Estilos específicos para a Landing Page */
-.landing-container {
-    text-align: center;
-    padding-bottom: 40px;
-}
-
-.landing-header {
-    padding: 30px 0 20px 0;
-    border-bottom: 1px solid #EAEAEA;
-    margin-bottom: 25px;
-}
-
-.landing-header h1 {
-    font-size: 1.8rem;
-    color: #000000;
-    margin-bottom: 5px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-}
-
-.tagline {
-    font-size: 0.8rem;
-    color: #666666;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}
-
-.about-section {
-    text-align: left;
-    background: #F9F9F9;
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    border: 1px solid #EAEAEA;
-}
-
-.about-section p {
-    font-size: 0.9rem;
-    color: #444444;
-    line-height: 1.5;
-}
-
-.info-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 30px;
-}
-
-.info-card {
-    background: #F9F9F9;
-    padding: 12px 15px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    text-align: left;
-    border: 1px solid #EAEAEA;
-}
-
-.info-card i {
-    font-size: 1.4rem;
-    color: #000000;
-}
-
-.info-card h3 {
-    font-size: 0.95rem;
-    color: #000000;
-    margin-bottom: 3px;
-}
-
-.info-card p {
-    font-size: 0.8rem;
-    color: #666666;
-}
-
-.landing-action {
-    margin-top: 20px;
-}
-
-.btn-primary-action {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 16px;
-    background-color: #000000;
-    color: #FFFFFF;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 1.05rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.2s;
-}
-
-.btn-primary-action:hover {
-    background-color: #333333;
-}
-
-.landing-footer {
-    margin-top: 30px;
-    font-size: 0.75rem;
-    color: #888888;
 }
