@@ -50,8 +50,8 @@ function desmarcarServicoPorNome(nome) {
     selectedServices.splice(idx, 1);
 
     document.querySelectorAll(".service-card").forEach(card => {
-        const m = (card.getAttribute("onclick") || "").match(/toggleService\(this,\s*'([^']+)'/);
-        if (m && m[1] === nome) {
+        const onclickAttr = card.getAttribute("onclick") || "";
+        if (onclickAttr.includes(`'${nome}'`) || onclickAttr.includes(`"${nome}"`)) {
             card.classList.remove("active");
             const icon = card.querySelector(".checkbox-icon") || card.querySelector("i");
             if (icon) {
@@ -115,32 +115,40 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAvailableTimes();
 });
 
+// FUNÇÃO DE SELEÇÃO CORRIGIDA À PROVA DE FALHAS
 function toggleService(element, serviceName, price) {
-    const icon = element.querySelector(".checkbox-icon") || element.querySelector("i");
-    const index = selectedServices.findIndex(s => s.name === serviceName);
-    
-    const nomeNormalizado = serviceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const duration = duracoesServicos[nomeNormalizado] || duracoesServicos[serviceName.toLowerCase()] || 40;
+    try {
+        const card = element.closest ? element.closest('.service-card') : element;
+        if (!card) return;
 
-    if (index > -1) {
-        selectedServices.splice(index, 1);
-        element.classList.remove("active");
-        if (icon) {
-            icon.classList.remove("fa-solid", "fa-square-check");
-            icon.classList.add("fa-regular", "fa-square");
+        const icon = card.querySelector(".checkbox-icon") || card.querySelector("i");
+        const index = selectedServices.findIndex(s => s.name === serviceName);
+        
+        const nomeNormalizado = String(serviceName).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const duration = duracoesServicos[nomeNormalizado] || duracoesServicos[String(serviceName).toLowerCase()] || 40;
+
+        if (index > -1) {
+            selectedServices.splice(index, 1);
+            card.classList.remove("active");
+            if (icon) {
+                icon.classList.remove("fa-solid", "fa-square-check");
+                icon.classList.add("fa-regular", "fa-square");
+            }
+        } else {
+            conflitosDe(serviceName).forEach(desmarcarServicoPorNome);
+            selectedServices.push({ name: serviceName, price: price, duration: duration });
+            card.classList.add("active");
+            if (icon) {
+                icon.classList.remove("fa-regular", "fa-square");
+                icon.classList.add("fa-solid", "fa-square-check");
+            }
         }
-    } else {
-        conflitosDe(serviceName).forEach(desmarcarServicoPorNome);
-        selectedServices.push({ name: serviceName, price: price, duration: duration });
-        element.classList.add("active");
-        if (icon) {
-            icon.classList.remove("fa-regular", "fa-square");
-            icon.classList.add("fa-solid", "fa-square-check");
-        }
+        
+        atualizarResumoFlutuante();
+        checkAvailableTimes();
+    } catch (erro) {
+        console.error("Erro na seleção do serviço:", erro);
     }
-    
-    atualizarResumoFlutuante();
-    checkAvailableTimes();
 }
 
 function getTimesForDate(dateString) {
@@ -401,13 +409,13 @@ function abrirModalConfirmacao() {
     const time = timeSelect ? timeSelect.value : "";
 
     if (!name || !phone) {
-        alert("Por favor, digite o seu nome e WhatsApp antes de prosseguir.");
+        alert("Por favor, introduza o seu nome e WhatsApp antes de prosseguir.");
         return;
     }
 
     const telefoneDigitos = phone.replace(/\D/g, '');
     if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
-        alert("Por favor, digite um WhatsApp válido, com indicativo regional (ex: 31 99999-9999).");
+        alert("Por favor, introduza um WhatsApp válido, com indicativo regional (ex: 31 99999-9999).");
         return;
     }
 
@@ -511,7 +519,7 @@ async function sendToWhatsapp() {
 
         if (error) {
             console.error("Erro no Supabase:", error);
-            alert("Atenção: O seu agendamento foi direcionado para o WhatsApp, mas houve um problema ao guardar no banco de dados.");
+            alert("Atenção: O seu agendamento foi direcionado para o WhatsApp, mas ocorreu um problema ao guardar no banco de dados.");
         } else if (resultado && resultado.ok === false) {
             alert(resultado.mensagem || "Ops! Este horário acabou de ser reservado por outra pessoa.");
             if (btnAgendar) {
