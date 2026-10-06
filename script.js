@@ -22,14 +22,12 @@ const duracoesServicos = {
     "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
     "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90,
     "corte e sobrancelha": 60,
-    "corte e pintura - tinta da casa": 80,
-    "corte e pintura - tinta do cliente": 80
+    "corte e pigmentação": 80
 };
 
 const CONFLITOS_COMBOS = {
-    "Corte e Sobrancelha": ["Corte", "Sobrancelha", "Corte e Pintura - tinta da casa", "Corte e Pintura - tinta do cliente"],
-    "Corte e Pintura - tinta da casa": ["Corte", "Corte e Sobrancelha", "Corte e Pintura - tinta do cliente"],
-    "Corte e Pintura - tinta do cliente": ["Corte", "Corte e Sobrancelha", "Corte e Pintura - tinta da casa"]
+    "Corte e Sobrancelha": ["Corte", "Sobrancelha", "Corte e Pigmentação"],
+    "Corte e Pigmentação": ["Corte", "Corte e Sobrancelha", "Pigmentação"]
 };
 
 function nomeSemAcento(nome) {
