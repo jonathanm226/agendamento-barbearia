@@ -38,7 +38,6 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-editar { background: #3498db; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
-        /* CORREÇÃO: Restaurado para 6 colunas (Segunda a Sábado) */
         .week-horizontal-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 8px; width: 100%; overflow-x: hidden; }
         .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 4px; padding: 3px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
         .day-header { font-size: 0.62rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 3px; display: flex; flex-direction: column; gap: 2px; text-align: center; }
@@ -324,6 +323,7 @@
             return parseInt(partes[0]) * 60 + parseInt(partes[1]);
         }
 
+        // ATUALIZADO: Sábado (6) inicia às 5h, Quinta-feira (4) inicia às 05:30 (5.5h) e os demais às 7h[cite: 19]
         function obterHorariosParaData(dataString) {
             if (!dataString) return [];
             const partes = dataString.split('-');
@@ -334,11 +334,10 @@
             if (diaSemana === 0 || diaSemana === 1) return [];
 
             let horarios = [];
-            // Sábado(6) inicia às 5h. Os demais dias iniciam às 7h
-            let horaInicio = (diaSemana === 6) ? 5 : 7;
+            let horaInicio = (diaSemana === 6) ? 5 : (diaSemana === 4 ? 5.5 : 7);
             let horaFim = 21;
             
-            let currentMin = horaInicio * 60;
+            let currentMin = Math.round(horaInicio * 60);
             let endMin = horaFim * 60;
             
             while (currentMin <= endMin) {
@@ -428,27 +427,20 @@
             carregarAgendaSemanal();
         }
 
-        // CORREÇÃO: Restaurada a lógica original de pegar 6 dias (Segunda a Sábado) 
-        // e totalmente ajustada para evitar o deslocamento do Fuso Horário noturno
         function obterDiasDaSemana(offset) {
             const dias = [];
             const hoje = new Date();
-            
-            // Zera as horas para impedir deslocamento causado pela UTC (Problema de dias empurrados)
             hoje.setHours(0, 0, 0, 0); 
             
             const diaSemana = hoje.getDay(); 
-            // Calcula distância para a Segunda-feira
             const diffParaSegunda = (diaSemana === 0 ? -6 : 1) - diaSemana + (offset * 7);
             const segunda = new Date(hoje);
             segunda.setDate(hoje.getDate() + diffParaSegunda);
 
-            // Adiciona 6 dias (Segunda até Sábado)
             for (let i = 0; i < 6; i++) { 
                 const d = new Date(segunda);
                 d.setDate(segunda.getDate() + i);
                 
-                // Formata ISO manual garantindo que seja o dia real
                 const yyyy = d.getFullYear();
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
                 const dd = String(d.getDate()).padStart(2, '0');
@@ -456,7 +448,6 @@
                 
                 const formatada = d.toLocaleDateString("pt-BR", { weekday: 'short', day: '2-digit', month: '2-digit' });
                 
-                // Marca se o dia for Segunda-Feira (i === 0)
                 dias.push({ iso: isoString, label: formatada, isSegunda: (i === 0) });
             }
             return dias;
@@ -578,11 +569,8 @@
                     coluna.className = "day-column";
 
                     const blqDia = (bloqueios || []).find(b => b.data === dia.iso && b.horario === 'TODOS');
-                    
-                    // CORREÇÃO: Força bloqueio caso seja Segunda-Feira
                     const diaBloqueadoTotal = !!blqDia || dia.isSegunda;
                     
-                    // Exibe apenas a flag "Fechado" na segunda-feira em vez do botão de Desbloq
                     let botaoHtml = "";
                     if (dia.isSegunda) {
                         botaoHtml = `<span style="font-size: 0.55rem; color: #e74c3c; font-weight: bold; background: #FFF5F5; padding: 2px 4px; border-radius: 3px;">Fechado</span>`;
@@ -746,7 +734,6 @@
             }
 
             try {
-                // Instancia garantindo que é no fuso local sem converter pra UTC errada
                 let partesData = dataInicioStr.split('-');
                 let dataBase = new Date(partesData[0], partesData[1] - 1, partesData[2]);
                 let insercoes = [];
@@ -853,7 +840,19 @@
         }
 
         async function removerMensalista(nomeCliente) {
-            if (confirm(`Deseja cancelar o plano de "${nomeCliente}" e remover os agendamentos futuros?`)) {
+            // Substituição do confirm nativo pelo modal customizado
+            const modalAlerta = document.getElementById("custom-alert-modal");
+            document.getElementById("alert-modal-title").textContent = "Confirmação";
+            document.getElementById("alert-modal-message").textContent = `Deseja cancelar o plano de "${nomeCliente}" e remover os agendamentos futuros?`;
+            modalAlerta.classList.add("active");
+
+            const btnOk = document.getElementById("alert-btn-ok");
+            const novoBtnOk = btnOk.cloneNode(true);
+            btnOk.parentNode.replaceChild(novoBtnOk, btnOk);
+            
+            novoBtnOk.textContent = "Sim, Cancelar";
+            novoBtnOk.addEventListener("click", async () => {
+                modalAlerta.classList.remove("active");
                 try {
                     const { error } = await _supabase
                         .from("agendamentos")
@@ -869,7 +868,7 @@
                 } catch (err) {
                     alert("Erro ao cancelar: " + err.message);
                 }
-            }
+            });
         }
 
         async function abrirGerenciadorAgendamento(id) {
@@ -980,11 +979,23 @@
                     const btnCancelar = document.createElement("button");
                     btnCancelar.className = "custom-modal-btn btn-modal-excluir";
                     btnCancelar.innerHTML = 'Cancelar Agendamento';
-                    btnCancelar.onclick = async () => {
-                        if (confirm("Deseja realmente cancelar? O horário será liberado.")) {
+                    btnCancelar.onclick = () => {
+                        // Substituição do confirm nativo pelo modal customizado para cancelamento
+                        const modalAlerta = document.getElementById("custom-alert-modal");
+                        document.getElementById("alert-modal-title").textContent = "Confirmação";
+                        document.getElementById("alert-modal-message").textContent = "Deseja realmente cancelar? O horário será liberado.";
+                        modalAlerta.classList.add("active");
+
+                        const btnOk = document.getElementById("alert-btn-ok");
+                        const novoBtnOk = btnOk.cloneNode(true);
+                        btnOk.parentNode.replaceChild(novoBtnOk, btnOk);
+                        
+                        novoBtnOk.textContent = "Sim, Cancelar";
+                        novoBtnOk.addEventListener("click", async () => {
+                            modalAlerta.classList.remove("active");
                             await atualizarStatusAgendamento(id, 'cancelado', null);
                             modal.classList.remove("active");
-                        }
+                        });
                     };
 
                     const btnFechar = document.createElement("button");
