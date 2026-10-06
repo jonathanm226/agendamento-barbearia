@@ -53,7 +53,7 @@ function desmarcarServicoPorNome(nome) {
         const m = (card.getAttribute("onclick") || "").match(/toggleService\(this,\s*'([^']+)'/);
         if (m && m[1] === nome) {
             card.classList.remove("active");
-            const icon = card.querySelector(".checkbox-icon");
+            const icon = card.querySelector(".checkbox-icon") || card.querySelector("i");
             if (icon) {
                 icon.classList.remove("fa-solid", "fa-square-check");
                 icon.classList.add("fa-regular", "fa-square");
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function toggleService(element, serviceName, price) {
-    const icon = element.querySelector(".checkbox-icon");
+    const icon = element.querySelector(".checkbox-icon") || element.querySelector("i");
     const index = selectedServices.findIndex(s => s.name === serviceName);
     
     const nomeNormalizado = serviceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -213,7 +213,7 @@ async function checkAvailableTimes() {
     
     const optionCarregando = document.createElement("option");
     optionCarregando.value = "";
-    optionCarregando.textContent = "Carregando horários...";
+    optionCarregando.textContent = "A carregar horários...";
     optionCarregando.disabled = true;
     timeSelect.appendChild(optionCarregando);
 
@@ -331,7 +331,7 @@ async function checkAvailableTimes() {
             timeSelect.innerHTML = "";
             const optionErro = document.createElement("option");
             optionErro.value = "";
-            optionErro.textContent = "Erro ao carregar horários. Verifique sua internet e tente novamente.";
+            optionErro.textContent = "Erro ao carregar horários. Verifique a sua ligação e tente novamente.";
             optionErro.disabled = true;
             timeSelect.appendChild(optionErro);
         }
@@ -384,7 +384,7 @@ async function buscarClientePorTelefone() {
             if (groupNasc) groupNasc.style.display = "block";
         }
     } catch (err) {
-        console.error("Erro ao buscar cliente:", err);
+        console.error("Erro ao procurar cliente:", err);
         if (groupNasc) groupNasc.style.display = "block";
     }
 }
@@ -407,7 +407,7 @@ function abrirModalConfirmacao() {
 
     const telefoneDigitos = phone.replace(/\D/g, '');
     if (telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
-        alert("Por favor, digite um WhatsApp válido, com DDD (ex: 31 99999-9999).");
+        alert("Por favor, digite um WhatsApp válido, com indicativo regional (ex: 31 99999-9999).");
         return;
     }
 
