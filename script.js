@@ -99,23 +99,30 @@ function atualizarResumoFlutuante() {
     document.getElementById("resumo-duracao").textContent = `${totalDuracao} min`;
 }
 
+// CORREÇÃO: Usar a data local correta em vez de UTC para evitar deslocamento à noite
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("date");
     if (dateInput) {
         const todayObj = new Date();
-        const todayStr = todayObj.toISOString().split("T")[0];
+        const yyyy = todayObj.getFullYear();
+        const mm = String(todayObj.getMonth() + 1).padStart(2, '0');
+        const dd = String(todayObj.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
         
         dateInput.min = todayStr;
+        
         const maxDateObj = new Date();
         maxDateObj.setDate(todayObj.getDate() + 21);
-        dateInput.max = maxDateObj.toISOString().split("T")[0];
+        const maxY = maxDateObj.getFullYear();
+        const maxM = String(maxDateObj.getMonth() + 1).padStart(2, '0');
+        const maxD = String(maxDateObj.getDate()).padStart(2, '0');
+        dateInput.max = `${maxY}-${maxM}-${maxD}`;
 
         dateInput.value = todayStr;
     }
     checkAvailableTimes();
 });
 
-// FUNÇÃO DE SELEÇÃO CORRIGIDA À PROVA DE FALHAS
 function toggleService(element, serviceName, price) {
     try {
         const card = element.closest ? element.closest('.service-card') : element;
@@ -151,6 +158,7 @@ function toggleService(element, serviceName, price) {
     }
 }
 
+// CORREÇÃO: Bloqueio efetivo de Domingo e Segunda + Início correto aos Sábados
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -160,10 +168,12 @@ function getTimesForDate(dateString) {
 
     let horarios = [];
 
-    if (diaSemana === 0) {
+    // 0 = Domingo | 1 = Segunda-feira
+    if (diaSemana === 0 || diaSemana === 1) {
         return [];
     } else { 
-        let horaInicio = (diaSemana === 5 || diaSemana === 6) ? 5 : 7;
+        // Apenas Sábado (6) inicia às 5h. Terça a Sexta inicia às 7h.
+        let horaInicio = (diaSemana === 6) ? 5 : 7;
         let horaFim = 21;
         
         let currentMin = horaInicio * 60;
@@ -178,7 +188,11 @@ function getTimesForDate(dateString) {
     }
 
     const agora = new Date();
-    const hojeStr = agora.toISOString().split("T")[0];
+    const yyyy = agora.getFullYear();
+    const mm = String(agora.getMonth() + 1).padStart(2, '0');
+    const dd = String(agora.getDate()).padStart(2, '0');
+    const hojeStr = `${yyyy}-${mm}-${dd}`;
+    
     if (dateString === hojeStr) {
         const limite = new Date(agora.getTime() + 40 * 60000);
         const horaLimite = `${String(limite.getHours()).padStart(2, "0")}:${String(limite.getMinutes()).padStart(2, "0")}`;
@@ -248,6 +262,8 @@ async function checkAvailableTimes() {
         
         const [y, m, d] = selectedDate.split("-").map(Number);
         const dataSelecionadaObj = new Date(y, m - 1, d);
+        
+        // Bloqueio fixo na Sexta-feira
         if (dataSelecionadaObj.getDay() === 5) {
             occupiedIntervals.push({ start: 580, end: 740 });
         }
