@@ -7,32 +7,25 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let selectedBarber = "Willian";
 let selectedServices = []; 
 
-// Controla qual é a chamada mais recente de checkAvailableTimes
 let requisicaoHorariosAtual = 0;
 
-// A partir deste horário (inclusive), o agendamento é considerado "Corte Emergencial"
 const HORARIO_EMERGENCIAL_INICIO = "19:00";
 const VALOR_CORTE_EMERGENCIAL = 50;
 
-// Compara horários no formato "HH:MM"
 function isHorarioEmergencial(horario) {
     return !!horario && horario >= HORARIO_EMERGENCIAL_INICIO;
 }
 
-// Dicionário com a duração de cada serviço em minutos (padronizado)
 const duracoesServicos = {
     "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
     "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
     "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
     "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90,
-    // Combos
     "corte e sobrancelha": 60,
     "corte e pintura - tinta da casa": 80,
     "corte e pintura - tinta do cliente": 80
 };
 
-// Combos (pacotes com valor próprio) e os serviços que cada um já inclui.
-// Ao marcar um combo, o que ele já contém é desmarcado (evita cobrar e ocupar tempo em dobro).
 const CONFLITOS_COMBOS = {
     "Corte e Sobrancelha": ["Corte", "Sobrancelha", "Corte e Pintura - tinta da casa", "Corte e Pintura - tinta do cliente"],
     "Corte e Pintura - tinta da casa": ["Corte", "Corte e Sobrancelha", "Corte e Pintura - tinta do cliente"],
@@ -43,7 +36,6 @@ function nomeSemAcento(nome) {
     return String(nome || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-// Lista (simétrica) dos serviços que não podem ficar marcados junto com "nome"
 function conflitosDe(nome) {
     const lista = new Set(CONFLITOS_COMBOS[nome] || []);
     Object.keys(CONFLITOS_COMBOS).forEach(combo => {
@@ -70,20 +62,41 @@ function desmarcarServicoPorNome(nome) {
     });
 }
 
-// Total do atendimento (usado na lista de horários, no resumo e na mensagem do WhatsApp)
+function formatarBRL(valor) {
+    return "R$ " + Number(valor).toFixed(2).replace(".", ",");
+}
+
 function calcularTotal(horario) {
     const soma = selectedServices.reduce((acc, s) => acc + s.price, 0);
     if (!isHorarioEmergencial(horario)) return soma;
 
-    // Regra emergencial: base R$ 50 + R$ 20 se incluir sobrancelha (avulsa ou no combo)
     let emergencial = VALOR_CORTE_EMERGENCIAL;
     if (selectedServices.some(s => nomeSemAcento(s.name).includes("sobrancelha"))) {
         emergencial += 20;
     }
 
-    // Combos nunca ficam mais baratos no emergencial do que no horário normal
     const temCombo = selectedServices.some(s => CONFLITOS_COMBOS[s.name]);
     return temCombo ? Math.max(emergencial, soma) : emergencial;
+}
+
+function atualizarResumoFlutuante() {
+    let containerResumo = document.getElementById("resumo-flutuante");
+    if (!containerResumo) return;
+
+    if (!selectedServices || selectedServices.length === 0) {
+        containerResumo.style.display = "none";
+        return;
+    }
+
+    containerResumo.style.display = "flex";
+    const timeSelect = document.getElementById("time");
+    const horarioAtual = timeSelect ? timeSelect.value : "";
+    const totalPreco = calcularTotal(horarioAtual);
+    const totalDuracao = selectedServices.reduce((acc, s) => acc + (s.duration || 40), 0);
+
+    document.getElementById("resumo-qtd-servicos").textContent = `${selectedServices.length} serviço(s) selecionado(s)`;
+    document.getElementById("resumo-valor-total").textContent = formatarBRL(totalPreco);
+    document.getElementById("resumo-duracao").textContent = `${totalDuracao} min`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -92,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const todayObj = new Date();
         const todayStr = todayObj.toISOString().split("T")[0];
         
-        // Define a data mínima como hoje e máxima de 3 semanas (21 dias)
         dateInput.min = todayStr;
         const maxDateObj = new Date();
         maxDateObj.setDate(todayObj.getDate() + 21);
@@ -127,10 +139,10 @@ function toggleService(element, serviceName, price) {
         }
     }
     
+    atualizarResumoFlutuante();
     checkAvailableTimes();
 }
 
-// Geração de horários base de 40 em 40 minutos
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -140,7 +152,7 @@ function getTimesForDate(dateString) {
 
     let horarios = [];
 
-    if (diaSemana === 0) { // Domingo (Fechado)
+    if (diaSemana === 0) {
         return [];
     } else { 
         let horaInicio = (diaSemana === 5 || diaSemana === 6) ? 5 : 7;
@@ -157,7 +169,6 @@ function getTimesForDate(dateString) {
         }
     }
 
-    // Remove horários que já passaram hoje (margem de 40 min)
     const agora = new Date();
     const hojeStr = agora.toISOString().split("T")[0];
     if (dateString === hojeStr) {
@@ -169,7 +180,6 @@ function getTimesForDate(dateString) {
     return horarios;
 }
 
-// Transforma string "HH:MM" para número em minutos para cálculo rigoroso de colisões
 function parseTimeStr(timeStr) {
     if (!timeStr) return 0;
     const [h, m] = timeStr.split(':').map(Number);
@@ -199,7 +209,6 @@ async function checkAvailableTimes() {
         return;
     }
 
-    // Calcula total de minutos necessários pelos serviços escolhidos pelo cliente
     const totalDurationMinutes = selectedServices.reduce((acc, s) => acc + s.duration, 0) || 40;
     
     const optionCarregando = document.createElement("option");
@@ -229,7 +238,6 @@ async function checkAvailableTimes() {
 
         let occupiedIntervals = [];
         
-        // Bloqueio de Almoço na Sexta-feira
         const [y, m, d] = selectedDate.split("-").map(Number);
         const dataSelecionadaObj = new Date(y, m - 1, d);
         if (dataSelecionadaObj.getDay() === 5) {
@@ -315,6 +323,8 @@ async function checkAvailableTimes() {
 
             timeSelect.appendChild(option);
         });
+
+        atualizarResumoFlutuante();
     } catch (err) {
         console.error("Erro ao buscar disponibilidade:", err);
         if (minhaRequisicao === requisicaoHorariosAtual) {
@@ -490,25 +500,26 @@ async function sendToWhatsapp() {
     const link = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
     try {
-        const { error } = await _supabase
-            .from("agendamentos")
-            .insert([
-                {
-                    cliente: name,
-                    telefone: phone,
-                    nascimento: nascimento,
-                    barbeiro: selectedBarber,
-                    servico: listaNomesServicos,
-                    preco_total: precoTotal, // Agora armazena R$ 70,00 no banco se for com sobrancelha
-                    data: date,
-                    horario: time,
-                    status: 'ativo'
-                }
-            ]);
+        const { data: resultado, error } = await _supabase.rpc("criar_agendamento", {
+            p_cliente: name,
+            p_telefone: phone,
+            p_barbeiro: selectedBarber,
+            p_servicos: arrayNomesServicos,
+            p_data: date,
+            p_horario: time
+        });
 
         if (error) {
             console.error("Erro no Supabase:", error);
             alert("Atenção: O seu agendamento foi direcionado para o WhatsApp, mas houve um problema ao guardar no banco de dados.");
+        } else if (resultado && resultado.ok === false) {
+            alert(resultado.mensagem || "Ops! Este horário acabou de ser reservado por outra pessoa.");
+            if (btnAgendar) {
+                btnAgendar.disabled = false;
+                btnAgendar.innerHTML = 'Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>';
+            }
+            await checkAvailableTimes();
+            return;
         }
     } catch (err) {
         console.error(err);
