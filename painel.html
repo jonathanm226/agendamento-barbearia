@@ -38,7 +38,8 @@
         .btn-modal-atendido { background: #25D366; color: #FFFFFF; }
         .btn-modal-editar { background: #3498db; color: #FFFFFF; }
         .btn-modal-excluir { background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; }
-        .week-horizontal-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 8px; width: 100%; overflow-x: hidden; }
+        /* CORREÇÃO: Restaurado para 6 colunas (Segunda a Sábado) */
+        .week-horizontal-container { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 8px; width: 100%; overflow-x: hidden; }
         .day-column { background: #F9F9F9; border: 1px solid #EAEAEA; border-radius: 4px; padding: 3px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
         .day-header { font-size: 0.62rem; color: #000000; font-weight: bold; border-bottom: 1px solid #EAEAEA; padding-bottom: 3px; display: flex; flex-direction: column; gap: 2px; text-align: center; }
         .slot-item { background: #FFFFFF; padding: 4px 3px; border-radius: 3px; font-size: 0.6rem; display: flex; flex-direction: column; gap: 1px; border: 1px solid #EAEAEA; border-left: 2px solid #CCCCCC; color: #000000; cursor: pointer; transition: 0.15s; overflow: hidden; }
@@ -107,4 +108,573 @@
 
             <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid #EAEAEA; padding-bottom: 4px;">
-                    <h3 style="color: #000; font-size: 0.75rem; margin: 0;"><i class
+                    <h3 style="color: #000; font-size: 0.75rem; margin: 0;"><i class="fa-solid fa-wallet"></i> Extrato</h3>
+                    <select id="select-periodo-faturamento" onchange="carregarFaturamentoBarbeiro()" style="width: auto; padding: 2px 6px; font-size: 0.7rem; margin: 0; background: #F9F9F9; border: 1px solid #CCC; border-radius: 4px;">
+                        <option value="dia">Hoje</option>
+                        <option value="semana">Semana</option>
+                        <option value="mes">Mês</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.75rem; margin-bottom: 6px;">
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px;">
+                        <span style="color: #666; display: block; font-size: 0.6rem;">Atendimentos</span>
+                        <strong id="barber-resumo-qtd" style="font-size: 0.9rem; color: #000;">0</strong>
+                    </div>
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px;">
+                        <span style="color: #666; display: block; font-size: 0.6rem;">Total Recebido</span>
+                        <strong id="barber-resumo-total" style="font-size: 0.9rem; color: #25D366;">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 6px; border-radius: 4px; font-size: 0.65rem; color: #333;" id="barber-detalhes-pagamento">
+                    <strong>Pagamentos:</strong> Dinheiro: R$ 0,00 | Pix: R$ 0,00
+                </div>
+            </div>
+
+            <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+                <div style="font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Período da Agenda</div>
+                <span id="label-periodo-semana" style="font-weight: bold; color: #000; font-size: 0.75rem; display: block; margin-bottom: 6px;"></span>
+                <div style="display: flex; justify-content: space-between; gap: 6px;">
+                    <button onclick="mudarSemana(-1)" class="btn-whatsapp" style="flex: 1; padding: 4px; font-size: 0.65rem; border: 1px solid #CCC; background: #FFF; color: #000;">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <button onclick="mudarSemana(1)" class="btn-whatsapp" style="flex: 1; padding: 4px; font-size: 0.65rem; border: 1px solid #CCC; background: #FFF; color: #000;">
+                        Próxima <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <h3 style="font-size: 0.75rem; margin-bottom: 4px; color: #000; text-align: center; text-transform: uppercase;">Visão Geral da Semana</h3>
+            
+            <div id="grade-semanal-container" class="week-horizontal-container"></div>
+        </section>
+
+        <section id="dashboard-admin" class="section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="font-size: 1rem;">Resumo Administrativo</h2>
+                <div style="display: flex; gap: 6px;">
+                    <button onclick="carregarResumoAdmin()" class="btn-whatsapp" style="width: auto; padding: 6px 12px; font-size: 0.8rem; background: #000; color: #FFF;">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                    <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 6px 12px; font-size: 0.8rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label for="filter-date-admin">Selecionar Data:</label>
+                <input type="date" id="filter-date-admin" onchange="carregarResumoAdmin()">
+            </div>
+
+            <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: #000; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 6px;">Fechamento Geral</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem; margin-bottom: 10px;">
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px;">
+                        <span style="color: #666; display: block; font-size: 0.7rem;">Atendimentos</span>
+                        <strong id="admin-resumo-qtd" style="font-size: 1.1rem; color: #000;">0</strong>
+                    </div>
+                    <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px;">
+                        <span style="color: #666; display: block; font-size: 0.7rem;">Faturamento</span>
+                        <strong id="admin-resumo-total" style="font-size: 1.1rem; color: #25D366;">R$ 0,00</strong>
+                    </div>
+                </div>
+                <div style="background: #F9F9F9; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; font-size: 0.8rem; color: #333;" id="admin-detalhes-pagamento"></div>
+            </div>
+
+            <h3 style="font-size: 0.9rem; margin-bottom: 8px; color: #000;">Horários do Dia</h3>
+            <div id="agendamentos-list-admin" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </section>
+
+    </div>
+
+    <!-- Modais -->
+    <div id="custom-action-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h3>Gerenciar Atendimento</h3>
+            <div id="action-modal-details" style="text-align: left; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #DDDDDD; margin-bottom: 12px; font-size: 0.85rem; color: #333;"></div>
+            
+            <div id="payment-box" style="display: none; text-align: left; margin-bottom: 12px;">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Forma de Pagamento:</label>
+                <select id="select-forma-pagamento">
+                    <option value="Pix">Pix</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Débito">Débito</option>
+                    <option value="Crédito">Crédito</option>
+                </select>
+            </div>
+
+            <div id="edit-box" style="display: none; text-align: left; margin-bottom: 12px; background: #F4F4F9; padding: 10px; border-radius: 6px; border: 1px solid #CCC;">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Nova Data:</label>
+                <input type="date" id="input-edit-data">
+                <label style="font-size: 0.8rem; font-weight: bold; display: block; margin: 6px 0 4px 0;">Novo Horário Livre:</label>
+                <input type="time" id="input-edit-horario">
+            </div>
+
+            <div class="custom-modal-buttons" id="action-modal-buttons"></div>
+        </div>
+    </div>
+
+    <div id="custom-mensalista-modal" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 450px; max-height: 90vh; overflow-y: auto;">
+            <h3><i class="fa-solid fa-users-rectangle"></i> Clientes Mensalistas</h3>
+            <div style="text-align: left; margin-bottom: 15px;">
+                <button onclick="mostrarFormNovoMensalista()" class="custom-modal-btn btn-modal-confirmar" style="margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> Novo Mensalista</button>
+                <div id="form-novo-mensalista" style="display: none; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #DDD; margin-bottom: 10px;">
+                    <input type="text" id="mensalista-nome" placeholder="Nome do Cliente (ex: Fulano)">
+                    <input type="text" id="mensalista-telefone" placeholder="Telefone / WhatsApp">
+                    
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Serviço:</label>
+                    <select id="mensalista-servico" onchange="atualizarValorSugeridoMensalista()">
+                        <option value="Corte de Cabelo">Corte de Cabelo</option>
+                        <option value="Barba Completa">Barba Completa</option>
+                        <option value="Combo Cabelo + Barba">Combo Cabelo + Barba</option>
+                        <option value="Sobrancelha">Sobrancelha</option>
+                        <option value="PIGMENTACAO">Pigmentação</option>
+                        <option value="Alisamento">Alisamento</option>
+                        <option value="Hidratacao">Hidratação</option>
+                        <option value="Selagem">Selagem</option>
+                        <option value="Luzes">Luzes</option>
+                        <option value="Platinado">Platinado</option>
+                        <option value="Corte e Sobrancelha">Corte e Sobrancelha</option>
+                        <option value="Corte e Pintura - tinta da casa">Corte e Pintura - tinta da casa</option>
+                        <option value="Corte e Pintura - tinta do cliente">Corte e Pintura - tinta do cliente</option>
+                    </select>
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Valor (R$):</label>
+                    <input type="number" id="mensalista-valor" placeholder="Valor em Reais">
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Data de Início:</label>
+                    <input type="date" id="mensalista-datainicio" onclick="this.showPicker && this.showPicker()">
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Frequência (Vezes no mês):</label>
+                    <select id="mensalista-frequencia" style="display: block; width: 100%; padding: 10px; background: #FFF; border: 1px solid #DDDDDD; border-radius: 6px; margin-bottom: 12px;">
+                        <option value="4">4 vezes (Toda a Semana)</option>
+                        <option value="2">2 vezes (A cada 15 dias)</option>
+                        <option value="1">1 vez (Mensalmente)</option>
+                    </select>
+
+                    <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 3px;">Horário Livre:</label>
+                    <input type="time" id="mensalista-horario" value="09:00" required>
+
+                    <div style="display: flex; gap: 5px; margin-top: 10px;">
+                        <button onclick="salvarMensalista()" class="custom-modal-btn btn-modal-confirmar">Salvar e Lançar</button>
+                        <button onclick="fecharFormNovoMensalista()" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+            <div id="lista-mensalistas-container" style="max-height: 180px; overflow-y: auto; text-align: left; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.8rem;">
+            </div>
+            <button onclick="fecharModalMensalista()" class="custom-modal-btn btn-modal-cancelar">Fechar</button>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h3 id="alert-modal-title">Informação</h3>
+            <p id="alert-modal-message"></p>
+            <div class="custom-modal-buttons">
+                <button id="alert-btn-ok" class="custom-modal-btn btn-modal-confirmar">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-password-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h3>Alterar Senha</h3>
+            <p id="password-modal-user" style="text-align: center;">Nova senha:</p>
+            <input type="password" id="input-nova-senha" placeholder="Nova senha">
+            <div class="custom-modal-buttons" style="flex-direction: row;">
+                <button id="pass-btn-cancelar" class="custom-modal-btn btn-modal-cancelar">Cancelar</button>
+                <button id="pass-btn-salvar" class="custom-modal-btn btn-modal-confirmar">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let usuarioLogado = "";
+        let offsetSemana = 0; 
+        
+        const duracoesServicos = {
+            "corte": 40, "corte de cabelo": 40, "barba": 20, "barba completa": 20,
+            "combo cabelo + barba": 60, "sobrancelha": 10, "acabamento": 15,
+            "pigmentacao": 20, "pigmentação": 20, "alisamento": 40,
+            "hidratacao": 20, "hidratação": 20, "selagem": 45, "luzes": 60, "platinado": 90,
+            "corte e sobrancelha": 60,
+            "corte e pintura - tinta da casa": 80,
+            "corte e pintura - tinta do cliente": 80
+        };
+
+        function calcularDuracaoServico(servicoStr) {
+            if (!servicoStr) return 40;
+            let total = 0;
+            servicoStr.split(",").forEach(s => {
+                const nomeNorm = s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                total += duracoesServicos[nomeNorm] || 40;
+            });
+            return total;
+        }
+
+        function converterHoraParaMinutos(horario) {
+            if (!horario) return 0;
+            const partes = horario.split(":");
+            return parseInt(partes[0]) * 60 + parseInt(partes[1]);
+        }
+
+        function obterHorariosParaData(dataString) {
+            if (!dataString) return [];
+            const partes = dataString.split('-');
+            const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
+            const diaSemana = dataObj.getDay();
+
+            // Retorna vazio se for Domingo(0) ou Segunda(1)
+            if (diaSemana === 0 || diaSemana === 1) return [];
+
+            let horarios = [];
+            // Sábado(6) inicia às 5h. Os demais dias iniciam às 7h
+            let horaInicio = (diaSemana === 6) ? 5 : 7;
+            let horaFim = 21;
+            
+            let currentMin = horaInicio * 60;
+            let endMin = horaFim * 60;
+            
+            while (currentMin <= endMin) {
+                let h = Math.floor(currentMin / 60);
+                let m = currentMin % 60;
+                horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                currentMin += 40; 
+            }
+            return horarios;
+        }
+
+        function mostrarAlertaPersonalizado(titulo, mensagem) {
+            const modal = document.getElementById("custom-alert-modal");
+            document.getElementById("alert-modal-title").textContent = titulo;
+            document.getElementById("alert-modal-message").textContent = mensagem;
+            modal.classList.add("active");
+
+            const btnOk = document.getElementById("alert-btn-ok");
+            const novoBtnOk = btnOk.cloneNode(true);
+            btnOk.parentNode.replaceChild(novoBtnOk, btnOk);
+            novoBtnOk.addEventListener("click", () => modal.classList.remove("active"));
+        }
+
+        function obterSenhaUsuario(user) {
+            const senhaSalva = localStorage.getItem(`senha_${user.toLowerCase()}`);
+            if (senhaSalva) return senhaSalva;
+            if (user.toLowerCase() === 'admin') return 'admin123';
+            return user.toLowerCase() + '123';
+        }
+
+        function fazerLogin() {
+            const usuarioInput = document.getElementById("login-usuario").value.trim();
+            const senhaInput = document.getElementById("login-senha").value;
+
+            if (!usuarioInput || !senhaInput) {
+                mostrarAlertaPersonalizado("Atenção", "Preencha o login e a senha.");
+                return;
+            }
+
+            const userLower = usuarioInput.toLowerCase();
+            const senhaCorreta = obterSenhaUsuario(usuarioInput);
+
+            if (senhaInput !== senhaCorreta) {
+                mostrarAlertaPersonalizado("Erro", "Login ou senha incorretos!");
+                return;
+            }
+
+            document.getElementById("login-usuario").value = "";
+            document.getElementById("login-senha").value = "";
+
+            if (userLower === 'admin') {
+                usuarioLogado = "Admin";
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("dashboard-barbeiro").style.display = "none";
+                document.getElementById("dashboard-admin").style.display = "block";
+                
+                const agora = new Date();
+                const yyyy = agora.getFullYear();
+                const mm = String(agora.getMonth() + 1).padStart(2, '0');
+                const dd = String(agora.getDate()).padStart(2, '0');
+                document.getElementById("filter-date-admin").value = `${yyyy}-${mm}-${dd}`;
+                
+                carregarResumoAdmin();
+            } else if (userLower === 'willian') {
+                usuarioLogado = 'Willian';
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("dashboard-admin").style.display = "none";
+                document.getElementById("dashboard-barbeiro").style.display = "block";
+                document.getElementById("titulo-agenda-barbeiro").textContent = `Agenda: ${usuarioLogado}`;
+                offsetSemana = 0;
+                carregarAgendaSemanal();
+                carregarFaturamentoBarbeiro();
+            } else {
+                mostrarAlertaPersonalizado("Erro", "Usuário não encontrado!");
+            }
+        }
+
+        function fazerLogout() {
+            usuarioLogado = "";
+            document.getElementById("dashboard-barbeiro").style.display = "none";
+            document.getElementById("dashboard-admin").style.display = "none";
+            document.getElementById("login-section").style.display = "block";
+        }
+
+        function mudarSemana(direcao) {
+            offsetSemana += direcao;
+            carregarAgendaSemanal();
+        }
+
+        // CORREÇÃO: Restaurada a lógica original de pegar 6 dias (Segunda a Sábado) 
+        // e totalmente ajustada para evitar o deslocamento do Fuso Horário noturno
+        function obterDiasDaSemana(offset) {
+            const dias = [];
+            const hoje = new Date();
+            
+            // Zera as horas para impedir deslocamento causado pela UTC (Problema de dias empurrados)
+            hoje.setHours(0, 0, 0, 0); 
+            
+            const diaSemana = hoje.getDay(); 
+            // Calcula distância para a Segunda-feira
+            const diffParaSegunda = (diaSemana === 0 ? -6 : 1) - diaSemana + (offset * 7);
+            const segunda = new Date(hoje);
+            segunda.setDate(hoje.getDate() + diffParaSegunda);
+
+            // Adiciona 6 dias (Segunda até Sábado)
+            for (let i = 0; i < 6; i++) { 
+                const d = new Date(segunda);
+                d.setDate(segunda.getDate() + i);
+                
+                // Formata ISO manual garantindo que seja o dia real
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const isoString = `${yyyy}-${mm}-${dd}`;
+                
+                const formatada = d.toLocaleDateString("pt-BR", { weekday: 'short', day: '2-digit', month: '2-digit' });
+                
+                // Marca se o dia for Segunda-Feira (i === 0)
+                dias.push({ iso: isoString, label: formatada, isSegunda: (i === 0) });
+            }
+            return dias;
+        }
+
+        const precosTabela = {
+            "corte de cabelo": 45, "corte": 35, "barba completa": 35, "barba": 35,
+            "combo cabelo + barba": 70, "sobrancelha": 15, "acabamento": 15,
+            "pigmentacao": 35, "alisamento": 35, "hidratacao": 35,
+            "selagem": 70, "luzes": 90, "platinado": 120,
+            "corte e sobrancelha": 50,
+            "corte e pintura - tinta da casa": 70,
+            "corte e pintura - tinta do cliente": 50
+        };
+
+        function calcularPrecoServico(nomeServico) {
+            if (!nomeServico) return 35;
+            const nomeNorm = nomeServico.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            if (precosTabela[nomeNorm]) return precosTabela[nomeNorm];
+            let total = 0;
+            nomeServico.split(",").forEach(parte => {
+                total += precosTabela[parte.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()] || 35;
+            });
+            return total > 0 ? total : 35;
+        }
+
+        function obterPrecoAgendamento(item) {
+            if (item && item.preco_total !== null && item.preco_total !== undefined) {
+                return Number(item.preco_total);
+            }
+            return calcularPrecoServico(item ? item.servico : null);
+        }
+
+        function atualizarValorSugeridoMensalista() {
+            const servico = document.getElementById("mensalista-servico").value;
+            const preco = calcularPrecoServico(servico);
+            document.getElementById("mensalista-valor").value = preco;
+        }
+
+        async function carregarFaturamentoBarbeiro() {
+            const periodo = document.getElementById("select-periodo-faturamento").value;
+            const lblQtd = document.getElementById("barber-resumo-qtd");
+            const lblTotal = document.getElementById("barber-resumo-total");
+            const lblDetalhes = document.getElementById("barber-detalhes-pagamento");
+
+            const hoje = new Date();
+            let primeiraData, ultimaData;
+
+            if (periodo === 'dia') {
+                const yyyy = hoje.getFullYear();
+                const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dd = String(hoje.getDate()).padStart(2, '0');
+                primeiraData = ultimaData = `${yyyy}-${mm}-${dd}`;
+            } else if (periodo === 'semana') {
+                const diasSemanaAtual = obterDiasDaSemana(offsetSemana);
+                primeiraData = diasSemanaAtual[0].iso;
+                ultimaData = diasSemanaAtual[diasSemanaAtual.length - 1].iso;
+            } else if (periodo === 'mes') {
+                const ano = hoje.getFullYear();
+                const mes = hoje.getMonth();
+                const primeiroDia = new Date(ano, mes, 1);
+                const ultimoDia = new Date(ano, mes + 1, 0);
+                
+                primeiraData = `${primeiroDia.getFullYear()}-${String(primeiroDia.getMonth() + 1).padStart(2, '0')}-01`;
+                ultimaData = `${ultimoDia.getFullYear()}-${String(ultimoDia.getMonth() + 1).padStart(2, '0')}-${String(ultimoDia.getDate()).padStart(2, '0')}`;
+            }
+
+            try {
+                const { data, error } = await _supabase
+                    .from("agendamentos")
+                    .select("*")
+                    .eq("barbeiro", usuarioLogado)
+                    .gte("data", primeiraData)
+                    .lte("data", ultimaData)
+                    .eq("status", "concluido");
+
+                if (error) throw error;
+
+                let qtd = 0, total = 0;
+                let totaisPagamento = { Dinheiro: 0, Pix: 0, Débito: 0, Crédito: 0 };
+
+                (data || []).forEach(item => {
+                    qtd++;
+                    const preco = obterPrecoAgendamento(item);
+                    total += preco;
+                    if (item.pagamentos && totaisPagamento[item.pagamentos] !== undefined) {
+                        totaisPagamento[item.pagamentos] += preco;
+                    }
+                });
+
+                lblQtd.textContent = qtd;
+                lblTotal.textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+                lblDetalhes.innerHTML = `<strong>Pagamentos:</strong> Dinheiro: R$ ${totaisPagamento.Dinheiro.toFixed(2).replace(".", ",")} | Pix: R$ ${totaisPagamento.Pix.toFixed(2).replace(".", ",")}`;
+            } catch (err) {
+                console.error("Erro faturamento:", err);
+            }
+        }
+
+        async function carregarAgendaSemanal() {
+            const container = document.getElementById("grade-semanal-container");
+            const lblPeriodo = document.getElementById("label-periodo-semana");
+            
+            container.innerHTML = "<p style='color: #666; text-align: center; width: 100%; font-size: 0.75rem;'>A carregar...</p>";
+
+            const diasSemana = obterDiasDaSemana(offsetSemana);
+            lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[diasSemana.length - 1].label}`;
+
+            try {
+                const primeiraData = diasSemana[0].iso;
+                const ultimaData = diasSemana[diasSemana.length - 1].iso;
+
+                const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", usuarioLogado).gte("data", primeiraData).lte("data", ultimaData);
+                const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", usuarioLogado).gte("data", primeiraData).lte("data", ultimaData);
+
+                container.innerHTML = "";
+
+                diasSemana.forEach(dia => {
+                    const coluna = document.createElement("div");
+                    coluna.className = "day-column";
+
+                    const blqDia = (bloqueios || []).find(b => b.data === dia.iso && b.horario === 'TODOS');
+                    
+                    // CORREÇÃO: Força bloqueio caso seja Segunda-Feira
+                    const diaBloqueadoTotal = !!blqDia || dia.isSegunda;
+                    
+                    // Exibe apenas a flag "Fechado" na segunda-feira em vez do botão de Desbloq
+                    let botaoHtml = "";
+                    if (dia.isSegunda) {
+                        botaoHtml = `<span style="font-size: 0.55rem; color: #e74c3c; font-weight: bold; background: #FFF5F5; padding: 2px 4px; border-radius: 3px;">Fechado</span>`;
+                    } else {
+                        botaoHtml = `<button onclick="alternarBloqueioDia('${dia.iso}',${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFF5F5' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCC'}; padding: 1px 2px; border-radius: 3px; font-size: 0.55rem; cursor: pointer;">
+                            ${diaBloqueadoTotal ? 'Desbloq' : 'Bloq'}
+                        </button>`;
+                    }
+
+                    coluna.innerHTML = `
+                        <div class="day-header">
+                            <span>${dia.label}</span>${botaoHtml}
+                        </div>
+                    `;
+
+                    const slotsDiv = document.createElement("div");
+                    slotsDiv.style.display = "flex"; 
+                    slotsDiv.style.flexDirection = "column"; 
+                    slotsDiv.style.gap = "3px";
+
+                    if (diaBloqueadoTotal) {
+                        slotsDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; font-size: 0.65rem; padding: 10px 0; font-weight: bold;">Bloq.</div>`;
+                    } else {
+                        const horariosDia = obterHorariosParaData(dia.iso);
+                        const agendamentosDia = (agendamentos || []).filter(a => a.data === dia.iso && a.status !== 'cancelado');
+                        const bloqueiosDia = (bloqueios || []).filter(b => b.data === dia.iso && b.horario !== 'TODOS');
+                        
+                        let rangesOcupados = [];
+                        
+                        agendamentosDia.forEach(a => {
+                            let minStart = converterHoraParaMinutos(a.horario);
+                            let dur = 40;
+                            if (a.horario_fim) {
+                                dur = converterHoraParaMinutos(a.horario_fim) - minStart;
+                            } else {
+                                dur = calcularDuracaoServico(a.servico);
+                            }
+                            rangesOcupados.push({ start: minStart, end: minStart + dur });
+                        });
+
+                        bloqueiosDia.forEach(b => {
+                            let minStart = converterHoraParaMinutos(b.horario);
+                            rangesOcupados.push({ start: minStart, end: minStart + 40 });
+                        });
+
+                        let itensRenderizacao = [];
+
+                        horariosDia.forEach(h => {
+                            const minAtual = converterHoraParaMinutos(h);
+                            let slotSobreposto = false;
+
+                            for (let range of rangesOcupados) {
+                                if (minAtual < range.end && (minAtual + 40) > range.start) {
+                                    slotSobreposto = true;
+                                    break;
+                                }
+                            }
+
+                            if (!slotSobreposto) {
+                                itensRenderizacao.push({ tipo: 'vazio', horario: h });
+                            }
+                        });
+
+                        agendamentosDia.forEach(a => itensRenderizacao.push({ tipo: 'agendamento', horario: a.horario, dado: a }));
+                        bloqueiosDia.forEach(b => itensRenderizacao.push({ tipo: 'bloqueio', horario: b.horario, dado: b }));
+
+                        itensRenderizacao.sort((a, b) => a.horario.localeCompare(b.horario));
+
+                        itensRenderizacao.forEach(item => {
+                            const itemSlot = document.createElement("div");
+
+                            if (item.tipo === 'bloqueio') {
+                                itemSlot.className = "slot-item blocked";
+                                itemSlot.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight:bold;">${item.horario.substring(0,5)}</span>
+                                    </div>
+                                    <button onclick="alternarBloqueioHorario('${dia.iso}', '${item.horario}', true)" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 1px; border-radius: 2px; font-size: 0.5rem; cursor: pointer; text-align:center;">Desbloq</button>
+                                `;
+                            } else if (item.tipo === 'agendamento') {
+                                const agendamento = item.dado;
+                                const isConcluido = agendamento.status === 'concluido';
+                                const isMensalista = agendamento.recorrente === true;
+                                
+                                itemSlot.className = isMensalista ? "slot-item mensalista" : (isConcluido ? "slot-item concluded" : "slot-item booked");
+                                itemSlot.onclick = () => abrirGerenciadorAgendamento(agendamento.id);
+                                itemSlot.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight:bold;">${item.horario.substring(0,5)}</span>
+                                        <span style="font-size: 0.52rem; color: ${isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : '#25D366')}; font-weight: bold;">
+                                            ${isMensalista ? 'MENSAL' : (isConcluido ? 'P' : 'C')}
+                                        </span>
+                                    </div>
+                                    <div style="font-weight: 600; color: ${isMensalista ? '#6c3483' : '#000'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${agendamento.cliente}">
+                                        ${
