@@ -1,4 +1,4 @@
-// === CONFIGURAÇÃO DO SUPABASE ===
+// === CONFIGURAÇÃO DO SUPABASE (WILLIAN CORTES) ===
 const SUPABASE_URL = "https://doecoosuqibzdsyadsyg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 
@@ -64,13 +64,11 @@ function formatarBRL(valor) {
     return "R$ " + Number(valor).toFixed(2).replace(".", ",");
 }
 
-// CORREÇÃO DA LÓGICA DE VALOR EMERGENCIAL
 function calcularTotal(horario) {
     const somaServicos = selectedServices.reduce((acc, s) => acc + s.price, 0);
     
     if (!isHorarioEmergencial(horario)) return somaServicos;
 
-    // Se for horário emergencial, a base do corte/serviço principal é R$ 50,00
     let baseEmergencial = VALOR_CORTE_EMERGENCIAL;
     let adicionalExtra = 0;
 
@@ -79,14 +77,11 @@ function calcularTotal(horario) {
         if (nomeNorm.includes("sobrancelha")) {
             adicionalExtra += 20;
         } else if (!nomeNorm.includes("corte") && !nomeNorm.includes("barba") && !nomeNorm.includes("combo")) {
-            // Outros serviços adicionais somam o seu valor integral ao período emergencial
             adicionalExtra += s.price;
         }
     });
 
     let totalCalculado = baseEmergencial + adicionalExtra;
-    
-    // Garante que o valor nunca seja menor que a soma normal dos serviços caso o cliente escolha algo superior
     return Math.max(totalCalculado, somaServicos);
 }
 
@@ -133,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAvailableTimes();
 });
 
-// CORREÇÃO: Tratamento de clique garantido no card de serviço sem afetar outros elementos
 function toggleService(element, serviceName, price) {
     try {
         const card = element.closest ? element.closest('.service-card') : element;
@@ -169,6 +163,7 @@ function toggleService(element, serviceName, price) {
     }
 }
 
+// ATUALIZADO: Quinta-feira (4) inicia às 05:30 (5.5) e Sábado (6) às 05:00 (5)[cite: 19]
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -181,10 +176,10 @@ function getTimesForDate(dateString) {
     if (diaSemana === 0 || diaSemana === 1) {
         return [];
     } else { 
-        let horaInicio = (diaSemana === 6) ? 5 : 7;
+        let horaInicio = (diaSemana === 6) ? 5 : (diaSemana === 4 ? 5.5 : 7);
         let horaFim = 21;
         
-        let currentMin = horaInicio * 60;
+        let currentMin = Math.round(horaInicio * 60);
         let endMin = horaFim * 60;
         
         while (currentMin <= endMin) {
