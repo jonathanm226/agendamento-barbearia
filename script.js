@@ -64,17 +64,30 @@ function formatarBRL(valor) {
     return "R$ " + Number(valor).toFixed(2).replace(".", ",");
 }
 
+// CORREÇÃO DA LÓGICA DE VALOR EMERGENCIAL
 function calcularTotal(horario) {
-    const soma = selectedServices.reduce((acc, s) => acc + s.price, 0);
-    if (!isHorarioEmergencial(horario)) return soma;
+    const somaServicos = selectedServices.reduce((acc, s) => acc + s.price, 0);
+    
+    if (!isHorarioEmergencial(horario)) return somaServicos;
 
-    let emergencial = VALOR_CORTE_EMERGENCIAL;
-    if (selectedServices.some(s => nomeSemAcento(s.name).includes("sobrancelha"))) {
-        emergencial += 20;
-    }
+    // Se for horário emergencial, a base do corte/serviço principal é R$ 50,00
+    let baseEmergencial = VALOR_CORTE_EMERGENCIAL;
+    let adicionalExtra = 0;
 
-    const temCombo = selectedServices.some(s => CONFLITOS_COMBOS[s.name]);
-    return temCombo ? Math.max(emergencial, soma) : emergencial;
+    selectedServices.forEach(s => {
+        const nomeNorm = nomeSemAcento(s.name);
+        if (nomeNorm.includes("sobrancelha")) {
+            adicionalExtra += 20;
+        } else if (!nomeNorm.includes("corte") && !nomeNorm.includes("barba") && !nomeNorm.includes("combo")) {
+            // Outros serviços adicionais somam o seu valor integral ao período emergencial
+            adicionalExtra += s.price;
+        }
+    });
+
+    let totalCalculado = baseEmergencial + adicionalExtra;
+    
+    // Garante que o valor nunca seja menor que a soma normal dos serviços caso o cliente escolha algo superior
+    return Math.max(totalCalculado, somaServicos);
 }
 
 function atualizarResumoFlutuante() {
@@ -120,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkAvailableTimes();
 });
 
+// CORREÇÃO: Tratamento de clique garantido no card de serviço sem afetar outros elementos
 function toggleService(element, serviceName, price) {
     try {
         const card = element.closest ? element.closest('.service-card') : element;
