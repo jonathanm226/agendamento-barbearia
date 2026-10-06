@@ -587,14 +587,15 @@
                     if (dia.isSegunda) {
                         botaoHtml = `<span style="font-size: 0.55rem; color: #e74c3c; font-weight: bold; background: #FFF5F5; padding: 2px 4px; border-radius: 3px;">Fechado</span>`;
                     } else {
-                        botaoHtml = `<button onclick="alternarBloqueioDia('${dia.iso}',${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFF5F5' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCC'}; padding: 1px 2px; border-radius: 3px; font-size: 0.55rem; cursor: pointer;">
+                        botaoHtml = `<button onclick="alternarBloqueioDia('${dia.iso}', ${diaBloqueadoTotal})" style="background: ${diaBloqueadoTotal ? '#FFF5F5' : '#FFFFFF'}; color: ${diaBloqueadoTotal ? '#e74c3c' : '#000'}; border: 1px solid ${diaBloqueadoTotal ? '#e74c3c' : '#CCC'}; padding: 1px 2px; border-radius: 3px; font-size: 0.55rem; cursor: pointer;">
                             ${diaBloqueadoTotal ? 'Desbloq' : 'Bloq'}
                         </button>`;
                     }
 
                     coluna.innerHTML = `
                         <div class="day-header">
-                            <span>${dia.label}</span>${botaoHtml}
+                            <span>${dia.label}</span>
+                            ${botaoHtml}
                         </div>
                     `;
 
@@ -677,4 +678,455 @@
                                         </span>
                                     </div>
                                     <div style="font-weight: 600; color: ${isMensalista ? '#6c3483' : '#000'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${agendamento.cliente}">
-                                        ${
+                                        ${isMensalista ? '⭐ ' : ''}${agendamento.cliente}
+                                    </div>
+                                `;
+                            } else {
+                                itemSlot.className = "slot-item available";
+                                itemSlot.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <span style="color:#666;">${item.horario.substring(0,5)}</span>
+                                        <button onclick="alternarBloqueioHorario('${dia.iso}', '${item.horario}', false)" style="background: #F9F9F9; color: #000; border: 1px solid #DDD; padding: 0px 2px; border-radius: 2px; font-size: 0.5rem; cursor: pointer;">X</button>
+                                    </div>
+                                `;
+                            }
+                            slotsDiv.appendChild(itemSlot);
+                        });
+                    }
+                    coluna.appendChild(slotsDiv);
+                    container.appendChild(coluna);
+                });
+                carregarFaturamentoBarbeiro();
+            } catch (err) {
+                console.error("Erro agenda:", err);
+            }
+        }
+
+        async function abrirModalMensalista() {
+            const modal = document.getElementById("custom-mensalista-modal");
+            modal.classList.add("active");
+            fecharFormNovoMensalista();
+            carregarListaMensalistas();
+            
+            const hoje = new Date();
+            const y = hoje.getFullYear();
+            const m = String(hoje.getMonth() + 1).padStart(2, '0');
+            const d = String(hoje.getDate()).padStart(2, '0');
+            document.getElementById("mensalista-datainicio").value = `${y}-${m}-${d}`;
+            
+            atualizarValorSugeridoMensalista();
+        }
+
+        function fecharModalMensalista() {
+            document.getElementById("custom-mensalista-modal").classList.remove("active");
+        }
+
+        function mostrarFormNovoMensalista() {
+            document.getElementById("form-novo-mensalista").style.display = "block";
+            document.getElementById("mensalista-nome").value = "";
+            document.getElementById("mensalista-telefone").value = "";
+        }
+
+        function fecharFormNovoMensalista() {
+            document.getElementById("form-novo-mensalista").style.display = "none";
+        }
+
+        async function salvarMensalista() {
+            const nome = document.getElementById("mensalista-nome").value.trim();
+            const telefone = document.getElementById("mensalista-telefone").value.trim();
+            const servico = document.getElementById("mensalista-servico").value;
+            const valor = parseFloat(document.getElementById("mensalista-valor").value) || 35;
+            const dataInicioStr = document.getElementById("mensalista-datainicio").value;
+            const frequencia = document.getElementById("mensalista-frequencia").value;
+            const horario = document.getElementById("mensalista-horario").value;
+
+            if (!nome || !telefone || !dataInicioStr || !horario) {
+                alert("Preencha todos os campos obrigatórios.");
+                return;
+            }
+
+            try {
+                // Instancia garantindo que é no fuso local sem converter pra UTC errada
+                let partesData = dataInicioStr.split('-');
+                let dataBase = new Date(partesData[0], partesData[1] - 1, partesData[2]);
+                let insercoes = [];
+                
+                let totalOcorrencias = 52;
+                let diasIncremento = 7;
+                let incrementoMensal = false;
+
+                if (frequencia === "4") {
+                    totalOcorrencias = 52; 
+                    diasIncremento = 7;
+                } else if (frequencia === "2") {
+                    totalOcorrencias = 26; 
+                    diasIncremento = 14;
+                } else if (frequencia === "1") {
+                    totalOcorrencias = 12; 
+                    incrementoMensal = true;
+                }
+
+                for (let i = 0; i < totalOcorrencias; i++) {
+                    let d = new Date(dataBase);
+                    
+                    if (incrementoMensal) {
+                        d.setMonth(dataBase.getMonth() + i);
+                    } else {
+                        d.setDate(dataBase.getDate() + (i * diasIncremento));
+                    }
+                    
+                    const y = d.getFullYear();
+                    const m = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    let dataIso = `${y}-${m}-${day}`;
+
+                    insercoes.push({
+                        barbeiro: usuarioLogado,
+                        cliente: nome,
+                        telefone: telefone,
+                        servico: servico,
+                        preco_total: valor,
+                        data: dataIso,
+                        horario: horario,
+                        status: 'ativo',
+                        recorrente: true
+                    });
+                }
+
+                const { error } = await _supabase.from("agendamentos").insert(insercoes);
+                if (error) throw error;
+
+                alert("Cliente mensalista cadastrado com sucesso por 1 ANO!");
+                fecharFormNovoMensalista();
+                carregarListaMensalistas();
+                carregarAgendaSemanal();
+            } catch (err) {
+                alert("Erro ao salvar mensalista: " + err.message);
+            }
+        }
+
+        async function carregarListaMensalistas() {
+            const container = document.getElementById("lista-mensalistas-container");
+            container.innerHTML = "A carregar...";
+
+            try {
+                const { data, error } = await _supabase
+                    .from("agendamentos")
+                    .select("*")
+                    .eq("barbeiro", usuarioLogado)
+                    .eq("recorrente", true)
+                    .eq("status", "ativo")
+                    .order("data", { ascending: true });
+
+                if (error) throw error;
+
+                const unicos = {};
+                (data || []).forEach(item => {
+                    if (!unicos[item.cliente]) {
+                        unicos[item.cliente] = item;
+                    }
+                });
+
+                const listaUnicos = Object.values(unicos);
+
+                if (listaUnicos.length === 0) {
+                    container.innerHTML = "<p style='color: #666;'>Nenhum mensalista ativo.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+                listaUnicos.forEach(m => {
+                    const div = document.createElement("div");
+                    div.style.cssText = "background: #FFF; border: 1px solid #DDD; padding: 6px; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;";
+                    div.innerHTML = `
+                        <div>
+                            <strong>⭐ ${m.cliente}</strong> (${m.telefone})<br>
+                            <span style="color: #666; font-size: 0.7rem;">Início: ${m.data.split('-').reverse().join('/')} às ${m.horario} - R$ ${m.preco_total},00</span>
+                        </div>
+                        <button onclick="removerMensalista('${m.cliente}')" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Cancelar</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                container.innerHTML = "<p style='color: red;'>Erro ao carregar mensalistas.</p>";
+            }
+        }
+
+        async function removerMensalista(nomeCliente) {
+            if (confirm(`Deseja cancelar o plano de "${nomeCliente}" e remover os agendamentos futuros?`)) {
+                try {
+                    const { error } = await _supabase
+                        .from("agendamentos")
+                        .update({ status: 'cancelado' })
+                        .eq("barbeiro", usuarioLogado)
+                        .eq("cliente", nomeCliente)
+                        .eq("recorrente", true)
+                        .eq("status", "ativo");
+
+                    if (error) throw error;
+                    carregarListaMensalistas();
+                    carregarAgendaSemanal();
+                } catch (err) {
+                    alert("Erro ao cancelar: " + err.message);
+                }
+            }
+        }
+
+        async function abrirGerenciadorAgendamento(id) {
+            try {
+                const { data, error } = await _supabase.from("agendamentos").select("*").eq("id", id).single();
+                if (error) throw error;
+                if (!data) return;
+
+                const modal = document.getElementById("custom-action-modal");
+                const detailsBox = document.getElementById("action-modal-details");
+                const paymentBox = document.getElementById("payment-box");
+                const editBox = document.getElementById("edit-box");
+                const buttonsBox = document.getElementById("action-modal-buttons");
+
+                const dataFormatada = data.data.split("-").reverse().join("/");
+                const precoServico = obterPrecoAgendamento(data);
+
+                detailsBox.innerHTML = `
+                    <strong>Cliente:</strong> ${data.cliente} ${data.recorrente ? '(Mensalista ⭐)' : ''}<br>
+                    <strong>Telefone:</strong> ${data.telefone || 'Não informado'}<br>
+                    <strong>Serviço:</strong> ${data.servico}<br>
+                    <strong>Valor:</strong> R$ ${precoServico},00<br>
+                    <strong>Horário:</strong> ${data.horario} (${dataFormatada})<br>
+                    <strong>Status:</strong> ${data.status === 'concluido' ? 'Concluído (' + (data.pagamentos || 'Pix') + ')' : 'Ativo'}
+                `;
+
+                paymentBox.style.display = "none";
+                editBox.style.display = "none";
+                buttonsBox.innerHTML = "";
+
+                if (data.status !== 'concluido') {
+                    const btnAtendido = document.createElement("button");
+                    btnAtendido.className = "custom-modal-btn btn-modal-atendido";
+                    btnAtendido.innerHTML = '<i class="fa-solid fa-check"></i> Validar como Atendido';
+                    btnAtendido.onclick = () => {
+                        paymentBox.style.display = "block";
+                        editBox.style.display = "none";
+                        buttonsBox.innerHTML = "";
+
+                        const btnSalvarPg = document.createElement("button");
+                        btnSalvarPg.className = "custom-modal-btn btn-modal-confirmar";
+                        btnSalvarPg.innerHTML = 'Confirmar Pagamento';
+                        btnSalvarPg.onclick = async () => {
+                            const formaPagamento = document.getElementById("select-forma-pagamento").value;
+                            await atualizarStatusAgendamento(id, 'concluido', formaPagamento);
+                            modal.classList.remove("active");
+                        };
+
+                        const btnVoltar = document.createElement("button");
+                        btnVoltar.className = "custom-modal-btn btn-modal-cancelar";
+                        btnVoltar.textContent = "Voltar";
+                        btnVoltar.onclick = () => abrirGerenciadorAgendamento(id);
+
+                        buttonsBox.appendChild(btnSalvarPg);
+                        buttonsBox.appendChild(btnVoltar);
+                    };
+
+                    const btnEditar = document.createElement("button");
+                    btnEditar.className = "custom-modal-btn btn-modal-editar";
+                    btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Reagendar / Editar';
+                    btnEditar.onclick = () => {
+                        editBox.style.display = "block";
+                        paymentBox.style.display = "none";
+                        buttonsBox.innerHTML = "";
+
+                        document.getElementById("input-edit-data").value = data.data;
+                        document.getElementById("input-edit-horario").value = data.horario;
+
+                        const btnSalvarEdicao = document.createElement("button");
+                        btnSalvarEdicao.className = "custom-modal-btn btn-modal-confirmar";
+                        btnSalvarEdicao.innerHTML = 'Salvar Novo Horário';
+                        btnSalvarEdicao.onclick = async () => {
+                            const novaData = document.getElementById("input-edit-data").value;
+                            const novoHorario = document.getElementById("input-edit-horario").value;
+                            if (!novaData || !novoHorario) {
+                                alert("Preencha a nova data e horário.");
+                                return;
+                            }
+                            await reagendarAtendimento(id, novaData, novoHorario);
+                            modal.classList.remove("active");
+                        };
+
+                        const btnVoltar = document.createElement("button");
+                        btnVoltar.className = "custom-modal-btn btn-modal-cancelar";
+                        btnVoltar.textContent = "Voltar";
+                        btnVoltar.onclick = () => abrirGerenciadorAgendamento(id);
+
+                        buttonsBox.appendChild(btnSalvarEdicao);
+                        buttonsBox.appendChild(btnVoltar);
+                    };
+
+                    const btnLembrete = document.createElement("button");
+                    btnLembrete.className = "custom-modal-btn";
+                    btnLembrete.style.background = "#25D366"; 
+                    btnLembrete.style.color = "#FFFFFF";
+                    btnLembrete.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Enviar Lembrete';
+                    btnLembrete.onclick = () => {
+                        if (!data.telefone) {
+                            mostrarAlertaPersonalizado("Erro", "Cliente sem telefone.");
+                            return;
+                        }
+                        let numero = data.telefone.replace(/\D/g, '');
+                        if (!numero.startsWith('55')) numero = '55' + numero;
+                        const msg = encodeURIComponent(`Olá, ${data.cliente}! Passando para lembrar do seu agendamento na Willian Cortes, dia ${dataFormatada} às ${data.horario}.`);
+                        window.open(`https://wa.me/${numero}?text=${msg}`, '_blank');
+                    };
+
+                    const btnCancelar = document.createElement("button");
+                    btnCancelar.className = "custom-modal-btn btn-modal-excluir";
+                    btnCancelar.innerHTML = 'Cancelar Agendamento';
+                    btnCancelar.onclick = async () => {
+                        if (confirm("Deseja realmente cancelar? O horário será liberado.")) {
+                            await atualizarStatusAgendamento(id, 'cancelado', null);
+                            modal.classList.remove("active");
+                        }
+                    };
+
+                    const btnFechar = document.createElement("button");
+                    btnFechar.className = "custom-modal-btn btn-modal-cancelar";
+                    btnFechar.textContent = "Fechar";
+                    btnFechar.onclick = () => modal.classList.remove("active");
+
+                    buttonsBox.appendChild(btnAtendido);
+                    buttonsBox.appendChild(btnEditar);
+                    buttonsBox.appendChild(btnLembrete);
+                    buttonsBox.appendChild(btnCancelar);
+                    buttonsBox.appendChild(btnFechar);
+                } else {
+                    const btnFechar = document.createElement("button");
+                    btnFechar.className = "custom-modal-btn btn-modal-confirmar";
+                    btnFechar.textContent = "Fechar";
+                    btnFechar.onclick = () => modal.classList.remove("active");
+                    buttonsBox.appendChild(btnFechar);
+                }
+
+                modal.classList.add("active");
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", "Erro ao carregar detalhes.");
+            }
+        }
+
+        async function atualizarStatusAgendamento(id, novoStatus, formaPagamento) {
+            try {
+                const dados = { status: novoStatus };
+                if (formaPagamento) dados.pagamentos = formaPagamento;
+                const { error } = await _supabase.from("agendamentos").update(dados).eq("id", id);
+                if (error) throw error;
+                carregarAgendaSemanal();
+                carregarFaturamentoBarbeiro();
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", err.message);
+            }
+        }
+
+        async function reagendarAtendimento(id, novaData, novoHorario) {
+            try {
+                const { error } = await _supabase.from("agendamentos").update({ data: novaData, horario: novoHorario }).eq("id", id);
+                if (error) throw error;
+                mostrarAlertaPersonalizado("Sucesso", "Atendimento reagendado com sucesso!");
+                carregarAgendaSemanal();
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", "Erro ao reagendar: " + err.message);
+            }
+        }
+
+        async function alternarBloqueioDia(dataIso, estaBloqueado) {
+            try {
+                if (estaBloqueado) {
+                    await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", usuarioLogado).eq("data", dataIso).eq("horario", "TODOS");
+                } else {
+                    await _supabase.from("bloqueios_agenda").upsert({ barbeiro: usuarioLogado, data: dataIso, horario: "TODOS", tipo: "dia_todo" }, { onConflict: 'barbeiro,data,horario' });
+                }
+                carregarAgendaSemanal();
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", err.message);
+            }
+        }
+
+        async function alternarBloqueioHorario(dataIso, horario, estaBloqueado) {
+            try {
+                if (estaBloqueado) {
+                    await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", usuarioLogado).eq("data", dataIso).eq("horario", horario);
+                } else {
+                    await _supabase.from("bloqueios_agenda").upsert({ barbeiro: usuarioLogado, data: dataIso, horario: horario, tipo: "horario" }, { onConflict: 'barbeiro,data,horario' });
+                }
+                carregarAgendaSemanal();
+            } catch (err) {
+                mostrarAlertaPersonalizado("Erro", err.message);
+            }
+        }
+
+        function abrirModalSenha() {
+            const modal = document.getElementById("custom-password-modal");
+            document.getElementById("input-nova-senha").value = "";
+            modal.classList.add("active");
+
+            const btnSalvar = document.getElementById("pass-btn-salvar");
+            const btnCancelar = document.getElementById("pass-btn-cancelar");
+
+            const novoSalvar = btnSalvar.cloneNode(true);
+            const novoCancelar = btnCancelar.cloneNode(true);
+            btnSalvar.parentNode.replaceChild(novoSalvar, btnSalvar);
+            btnCancelar.parentNode.replaceChild(novoCancelar, btnCancelar);
+
+            novoSalvar.onclick = () => {
+                const nova = document.getElementById("input-nova-senha").value.trim();
+                if (nova) {
+                    localStorage.setItem(`senha_${usuarioLogado.toLowerCase()}`, nova);
+                    modal.classList.remove("active");
+                    mostrarAlertaPersonalizado("Sucesso", "Senha alterada!");
+                } else {
+                    mostrarAlertaPersonalizado("Atenção", "Digite uma senha válida.");
+                }
+            };
+            novoCancelar.onclick = () => modal.classList.remove("active");
+        }
+
+        async function carregarResumoAdmin() {
+            const dataFiltro = document.getElementById("filter-date-admin").value;
+            const container = document.getElementById("agendamentos-list-admin");
+            container.innerHTML = "<p style='color: #666; text-align: center; font-size: 0.85rem;'>Carregando...</p>";
+
+            try {
+                let query = _supabase.from("agendamentos").select("*").order("horario", { ascending: true });
+                if (dataFiltro) query = query.eq("data", dataFiltro);
+
+                const { data } = await query;
+                let total = 0, qtd = 0;
+                let pagamentos = { Dinheiro: 0, Pix: 0, Débito: 0, Crédito: 0 };
+
+                (data || []).forEach(item => {
+                    if (item.status === 'concluido') {
+                        qtd++;
+                        const preco = obterPrecoAgendamento(item);
+                        total += preco;
+                        if (item.pagamentos && pagamentos[item.pagamentos] !== undefined) pagamentos[item.pagamentos] += preco;
+                    }
+                });
+
+                document.getElementById("admin-resumo-qtd").textContent = qtd;
+                document.getElementById("admin-resumo-total").textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+                document.getElementById("admin-detalhes-pagamento").innerHTML = `Dinheiro: R$ ${pagamentos.Dinheiro.toFixed(2).replace(".", ",")} | Pix: R$ ${pagamentos.Pix.toFixed(2).replace(".", ",")}`;
+
+                container.innerHTML = "";
+                (data || []).forEach(item => {
+                    const card = document.createElement("div");
+                    card.style.cssText = "background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #EAEAEA; border-left: 4px solid " + (item.status === 'concluido' ? '#3498db' : '#000');
+                    
+                    const horarioTexto = item.horario_fim ? `${item.horario} às ${item.horario_fim}` : item.horario;
+
+                    card.innerHTML = `<strong style="font-size:0.85rem;">${horarioTexto} - ${item.barbeiro}</strong><br><span style="font-size:0.8rem; color:#444;">Cliente: ${item.cliente} | ${item.servico} | R$ ${obterPrecoAgendamento(item)},00</span>`;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                container.innerHTML = "<p style='color: #e74c3c; text-align: center; font-size: 0.85rem;'>Erro ao carregar dados.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
