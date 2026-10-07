@@ -163,7 +163,6 @@ function toggleService(element, serviceName, price) {
     }
 }
 
-// ATUALIZADO: Quinta-feira (4) inicia às 05:30 (5.5) e Sábado (6) às 05:00 (5)[cite: 19]
 function getTimesForDate(dateString) {
     if (!dateString) return [];
     
@@ -262,13 +261,6 @@ async function checkAvailableTimes() {
         if (minhaRequisicao !== requisicaoHorariosAtual) return;
 
         let occupiedIntervals = [];
-        
-        const [y, m, d] = selectedDate.split("-").map(Number);
-        const dataSelecionadaObj = new Date(y, m - 1, d);
-        
-        if (dataSelecionadaObj.getDay() === 5) {
-            occupiedIntervals.push({ start: 580, end: 740 });
-        }
 
         if (agendamentos) {
             agendamentos.filter(a => !a.status || a.status.toLowerCase() !== 'cancelado').forEach(a => {
