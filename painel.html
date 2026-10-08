@@ -49,6 +49,8 @@
         .slot-item:hover { opacity: 0.85; }
         .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
         .slot-item.concluded { border-left-color: #3498db; background: #F0F8FF; }
+        /* COR ROXA RESTAURADA PARA MENSALISTAS */
+        .slot-item.mensalista { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.1); }
         .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
         .slot-item.available { border-left-color: #000000; background: #FFFFFF; }
 
@@ -61,7 +63,6 @@
         .btn-whatsapp { width: 100%; padding: 10px; background-color: #000000; color: #FFFFFF; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s; text-transform: uppercase; }
         .btn-whatsapp:hover { background-color: #333333; }
 
-        /* Estilo para seletores de serviços em formato Pills */
         .servicos-selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; max-height: 150px; overflow-y: auto; background: #F9F9F9; padding: 6px; border-radius: 6px; border: 1px solid #DDD; }
         .servico-pill { background: #FFFFFF; border: 1px solid #DDD; border-radius: 6px; padding: 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; text-align: left; }
         .servico-pill.selected { background: #EAEAEA; border-color: #000; }
@@ -104,14 +105,18 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
                 <h2 id="titulo-agenda-barbeiro" style="font-size: 0.85rem; text-transform: uppercase;">A Minha Agenda</h2>
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                    <button onclick="abrirModalAgendamentoManual()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #25D366; color: #FFF;">
+                    <button onclick="abrirModalAgendamentoManual()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #25D366; color: #FFF;" title="Agendamento Avulso ou Encaixe">
                         <i class="fa-solid fa-plus"></i> Novo
                     </button>
+                    <!-- BOTÃO DE MENSALISTA RESTAURADO -->
+                    <button onclick="abrirModalMensalista()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #9b59b6; color: #FFF;" title="Cadastrar Mensalista Recorrente">
+                        <i class="fa-solid fa-star"></i> Mensalista
+                    </button>
                     <button onclick="carregarAgendaSemanal()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #000; color: #FFF;">
-                        <i class="fa-solid fa-rotate"></i> Atualizar
+                        <i class="fa-solid fa-rotate"></i>
                     </button>
                     <button onclick="fazerLogout()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c;">
-                        <i class="fa-solid fa-right-from-bracket"></i> Sair
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
             </div>
@@ -177,7 +182,6 @@
                 <label style="font-size: 0.8rem; font-weight: bold; display: block; margin-bottom: 4px;">Adicionar Serviços Extras:</label>
                 <div id="extras-servicos-container"></div>
 
-                <!-- Exibição dinâmica do valor total atualizado em tempo real -->
                 <div style="background: #F9F9F9; border: 1px solid #DDD; padding: 8px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.8rem; font-weight: bold;">Valor Total Atualizado:</span>
                     <strong id="valor-total-atualizado" style="color: #25D366; font-size: 1rem;">R$ 0,00</strong>
@@ -203,10 +207,10 @@
         </div>
     </div>
 
-    <!-- Modal de Agendamento Manual -->
+    <!-- Modal de Agendamento Manual / Mensalista -->
     <div id="modal-agendamento-manual" class="custom-modal-overlay">
         <div class="custom-modal">
-            <h3>Agendamento Avulso</h3>
+            <h3 id="titulo-modal-manual">Agendamento Avulso</h3>
             <div style="text-align: left;">
                 <label style="font-size: 0.75rem; color: #555;">Nome do Cliente:</label>
                 <input type="text" id="manual-cliente" placeholder="Nome do Cliente">
@@ -217,13 +221,21 @@
                 <label style="font-size: 0.75rem; color: #555;">Serviços:</label>
                 <div id="manual-servicos-container"></div>
 
-                <label for="manual-encaixe" style="margin-bottom: 12px; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #000; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="manual-encaixe" style="width: 18px; height: 18px; accent-color: #000; cursor: pointer;" onchange="alternarModoEncaixe()">
-                    <div>
-                        <span style="font-size: 0.8rem; color: #000; font-weight: bold; display: block;">Modo Encaixe</span>
-                        <span style="font-size: 0.68rem; color: #666; display: block;">Permite inserir em qualquer horário sem conflitos.</span>
-                    </div>
-                </label>
+                <!-- Bloco exclusivo de recorrência para Mensalista -->
+                <div id="bloco-mensalista-opcoes" style="display: none; margin-bottom: 10px; background: #FAF5FF; padding: 10px; border-radius: 6px; border: 1px solid #9b59b6;">
+                    <label style="font-size: 0.8rem; color: #9b59b6; font-weight: bold; display: block; margin-bottom: 4px;">Repetir por quantas semanas?</label>
+                    <input type="number" id="manual-recorrencia-semanas" value="4" min="1" max="12" style="background: #FFF;">
+                </div>
+
+                <div id="bloco-encaixe-check">
+                    <label for="manual-encaixe" style="margin-bottom: 12px; background: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #000; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="manual-encaixe" style="width: 18px; height: 18px; accent-color: #000; cursor: pointer;" onchange="alternarModoEncaixe()">
+                        <div>
+                            <span style="font-size: 0.8rem; color: #000; font-weight: bold; display: block;">Modo Encaixe</span>
+                            <span style="font-size: 0.68rem; color: #666; display: block;">Permite inserir em qualquer horário sem conflitos.</span>
+                        </div>
+                    </label>
+                </div>
 
                 <label style="font-size: 0.75rem; color: #555;">Data:</label>
                 <input type="date" id="manual-data" onchange="atualizarHorariosManuaisDisponiveis()">
