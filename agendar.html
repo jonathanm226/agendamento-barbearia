@@ -3,174 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willian Cortes | Agendamento</title>
+    <title>Agendamento | Agenda Pro</title>
+
+    <!-- Ícone e Manifesto PWA -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0072FF">
+
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary-color: #0072FF; 
+            --bg-dark: #0B132B;
+            --card-bg: #1C2541;
+            --text-light: #FFFFFF;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        .app-container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        .barber-header { text-align: center; margin-bottom: 20px; }
+        .brand-logo-container { width: 80px; height: 80px; margin: 0 auto 10px auto; border: 2px solid var(--primary-color); border-radius: 50%; overflow: hidden; background: var(--card-bg); }
+        .brand-logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        .brand-info h1 { font-size: 1.5rem; margin: 0 0 5px 0; }
+        .brand-info p { color: var(--primary-color); font-size: 0.9rem; margin: 0; }
+        
+        .section { margin-bottom: 25px; }
+        .section h2 { border-left: 3px solid var(--primary-color); padding-left: 10px; font-size: 1.1rem; margin-bottom: 15px; color: var(--primary-color); }
+        
+        .barbers-grid, .services-grid { display: grid; gap: 10px; }
+        .barbers-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+        .barber-card, .service-card { background: var(--card-bg); border: 1px solid #2B3A67; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .service-card { display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .barber-card.active, .service-card.active { border-color: var(--primary-color); background: #24305E; }
+        .price { color: var(--primary-color); font-weight: bold; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        .input-group input, .input-group select { padding: 12px; background: var(--card-bg); border: 1px solid #2B3A67; border-radius: 6px; color: #FFF; outline: none; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary-color); }
+        
+        .btn-whatsapp { width: 100%; padding: 15px; background: var(--primary-color); color: #FFF; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        
+        #modal-confirmacao { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-content { background: var(--card-bg); border: 1px solid #2B3A67; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; }
+    </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container" id="agendar-container">
         
-        <!-- Cabeçalho com a Logo -->
         <header class="barber-header">
             <div class="brand-info">
-                <div class="brand-logo-container" style="width: 50px; height: 50px; margin-bottom: 0;">
-                    <img src="logo.jpg.jpg" alt="Willian Cortes Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <div class="brand-logo-container">
+                    <img id="tenant-logo" src="" alt="Logo" style="display:none;">
                 </div>
                 <div>
-                    <h1>Willian Cortes</h1>
-                    <p>Desde 2019</p>
+                    <h1 id="tenant-name">Carregando...</h1>
+                    <p id="tenant-slogan">Sistema de Agendamento</p>
                 </div>
             </div>
         </header>
 
-        <!-- Seleção de Serviços -->
         <section class="section">
-            <h2>1. Escolha os Serviços</h2>
-            <div class="services-grid">
-                
-                <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte (40 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Barba (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (10 min)</h3></div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Corte e Sobrancelha', 50)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Sobrancelha (60 min)</h3></div>
-                    <span class="price">R$ 50,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Corte e Pigmentação', 70)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Pigmentação (1h20)</h3></div>
-                    <span class="price">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
-                    <span class="price">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
-                    <span class="price">R$ 90,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
-                    <span class="price">R$ 120,00</span>
-                </div>
-
-            </div>
+            <h2>1. Escolha o Profissional</h2>
+            <div id="barbers-grid" class="barbers-grid"></div>
         </section>
 
-        <!-- Resumo Flutuante Dinâmico -->
-        <div id="resumo-flutuante" style="display: none; background: #FFFFFF; border: 1px solid #000000; border-radius: 8px; padding: 12px 15px; margin-bottom: 20px; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <section class="section">
+            <h2>2. Escolha os Serviços</h2>
+            <div id="services-grid" class="services-grid"></div>
+        </section>
+
+        <div id="resumo-flutuante" style="display: none; background: #1C2541; border: 1px solid #2B3A67; border-radius: 8px; padding: 12px 15px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
             <div>
-                <span id="resumo-qtd-servicos" style="font-size: 0.85rem; color: #666666; display: block;">Nenhum serviço selecionado</span>
-                <strong id="resumo-valor-total" style="font-size: 1.1rem; color: #000000;">R$ 0,00</strong>
+                <span id="resumo-qtd-servicos" style="font-size: 0.85rem; color: #AAAAAA; display: block;">Nenhum serviço selecionado</span>
+                <strong id="resumo-valor-total" style="font-size: 1.1rem; color: #FFFFFF;">R$ 0,00</strong>
             </div>
-            <span id="resumo-duracao" style="font-size: 0.8rem; color: #FFFFFF; background: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold;">0 min</span>
+            <span id="resumo-duracao" style="font-size: 0.8rem; color: #FFF; background: #2B3A67; padding: 4px 8px; border-radius: 4px; font-weight: bold;">0 min</span>
         </div>
 
-        <!-- Seleção de Data e Horário -->
         <section class="section">
-            <h2>2. Data e Horário</h2>
-            <p style="font-size: 0.8rem; color: #666; margin: -5px 0 12px 0;">
-                <i class="fa-solid fa-circle-info"></i> Horários a partir das 19:00 são emergenciais (Corte/Base: R$ 50,00 | Adicional Sobrancelha: R$ 20,00).
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="input-group" style="width: 100%;">
-                    <label for="date">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; box-sizing: border-box;">
-                </div>
-                <div class="input-group" style="width: 100%;">
-                    <label for="time">Horário:</label>
-                    <select id="time" style="width: 100%; box-sizing: border-box;">
-                        <!-- Carregado dinamicamente via script.js -->
-                    </select>
-                </div>
+            <h2>3. Data e Horário</h2>
+            <div class="input-group">
+                <label for="date">Data:</label>
+                <input type="date" id="date" onchange="checkAvailableTimes()">
+            </div>
+            <div class="input-group">
+                <label for="time">Horário:</label>
+                <select id="time"></select>
             </div>
         </section>
 
-        <!-- Identificação do Cliente -->
         <section class="section">
-            <h2>3. Os Seus Dados</h2>
-            <div class="client-inputs">
-                <div class="input-group">
-                    <label for="client-phone">WhatsApp / Telefone:</label>
-                    <input type="tel" id="client-phone" placeholder="O seu WhatsApp (com indicativo regional)" required onblur="buscarClientePorTelefone()">
-                </div>
-
-                <div class="input-group">
-                    <label for="client-name">Nome Completo:</label>
-                    <input type="text" id="client-name" placeholder="O seu Nome Completo" required>
-                </div>
+            <h2>4. Os Seus Dados</h2>
+            <div class="input-group">
+                <label for="client-phone">WhatsApp / Telefone:</label>
+                <input type="tel" id="client-phone" placeholder="Seu WhatsApp (com DDD)" required>
+            </div>
+            <div class="input-group">
+                <label for="client-name">Nome Completo:</label>
+                <input type="text" id="client-name" placeholder="Seu Nome Completo" required>
             </div>
         </section>
 
-        <!-- ESPAÇADOR PARA EVITAR SOBREPOSIÇÃO DO BOTÃO FIXO -->
-        <div style="height: 100px; width: 100%;"></div>
-
-        <!-- Botão de Ação -->
-        <footer class="footer-action">
-            <button class="btn-whatsapp" id="btn-continuar" onclick="abrirModalConfirmacao()">
-                Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
-            </button>
-        </footer>
-
+        <button class="btn-whatsapp" onclick="abrirModalConfirmacao()">Continuar Agendamento <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO DE AGENDAMENTO -->
-    <div id="modal-confirmacao" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 9999;">
-        <div style="background: #FFFFFF; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-            <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: #000;">Confirmar Agendamento</h3>
-            
-            <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6;">
-                <!-- Preenchido via JavaScript -->
-            </div>
-            
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
-                Reveja os dados acima. Ao confirmar, o seu horário será reservado e será direcionado ao WhatsApp.
-            </p>
-            
-            <div style="display: flex; gap: 10px; flex-direction: column;">
-                <button onclick="confirmarEEnviar()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer; font-size: 1rem; transition: 0.2s;">
-                    <i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar
-                </button>
-                <button onclick="fecharModalConfirmacao()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: 1px solid #CCC; background: #FFF; color: #333; cursor: pointer; font-size: 1rem; transition: 0.2s;">
-                    Voltar e Editar
-                </button>
+    <!-- Modal de Confirmação -->
+    <div id="modal-confirmacao">
+        <div class="modal-content">
+            <h3 style="margin-top: 0;">Confirmar Agendamento</h3>
+            <div id="resumo-agendamento" style="background: #0B132B; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;"></div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="confirmarEEnviar()" style="padding: 12px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer;">Confirmar e Enviar</button>
+                <button onclick="fecharModalConfirmacao()" style="padding: 12px; border-radius: 8px; font-weight: bold; border: 1px solid #2B3A67; background: #1C2541; color: #FFF; cursor: pointer;">Voltar</button>
             </div>
         </div>
     </div>
