@@ -10,6 +10,7 @@ const precosServicosTabela = {
 
 let usuarioLogado = "";
 let offsetSemana = 0;
+let modoMensalistaAtivo = false;
 
 function renderizarSeletorServicos(containerId, classeCheckbox, callbackMudanca) {
     const container = document.getElementById(containerId);
@@ -237,14 +238,21 @@ async function carregarAgendaSemanal() {
                         const ag = item.dado;
                         const isConcluido = ag.status === 'concluido';
                         const isEncaixe = ag.servico && ag.servico.includes("[ENCAIXE]");
+                        const isMensalista = ag.recorrente === true || (ag.servico && ag.servico.includes("[MENSALISTA]"));
                         
-                        itemSlot.className = isConcluido ? "slot-item concluded" : "slot-item booked";
+                        // COR ROXA APLICADA PARA MENSALISTAS
+                        if (isMensalista) {
+                            itemSlot.className = "slot-item mensalista";
+                        } else {
+                            itemSlot.className = isConcluido ? "slot-item concluded" : "slot-item booked";
+                        }
+
                         itemSlot.onclick = () => abrirGerenciadorAgendamento(ag.id);
                         itemSlot.innerHTML = `
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-weight:bold;">${item.horario}</span>
-                                <span style="font-size: 0.5rem; color: ${isConcluido ? '#3498db' : '#25D366'}; font-weight: bold;">
-                                    ${isConcluido ? 'P' : (isEncaixe ? 'ENC' : 'C')}
+                                <span style="font-size: 0.5rem; color: ${isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : '#25D366')}; font-weight: bold;">
+                                    ${isMensalista ? 'M' : (isConcluido ? 'P' : (isEncaixe ? 'ENC' : 'C'))}
                                 </span>
                             </div>
                             <div style="font-weight: 600; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ag.cliente}">
@@ -298,6 +306,11 @@ async function alternarBloqueioHorario(dataIso, horario, estaBloqueado) {
 }
 
 function abrirModalAgendamentoManual() {
+    modoMensalistaAtivo = false;
+    document.getElementById("titulo-modal-manual").textContent = "Agendamento Avulso";
+    document.getElementById("bloco-mensalista-opcoes").style.display = "none";
+    document.getElementById("bloco-encaixe-check").style.display = "block";
+
     const hoje = new Date();
     document.getElementById("manual-data").value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
     document.getElementById("manual-cliente").value = "";
@@ -312,6 +325,24 @@ function abrirModalAgendamentoManual() {
     });
 
     atualizarHorariosManuaisDisponiveis();
+    document.getElementById("modal-agendamento-manual").classList.add("active");
+}
+
+function abrirModalMensalista() {
+    modoMensalistaAtivo = true;
+    document.getElementById("titulo-modal-manual").textContent = "Cadastrar Mensalista";
+    document.getElementById("bloco-mensalista-opcoes").style.display = "block";
+    document.getElementById("bloco-encaixe-check").style.display = "none";
+
+    const hoje = new Date();
+    document.getElementById("manual-data").value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    document.getElementById("manual-cliente").value = "";
+    document.getElementById("manual-telefone").value = "";
+
+    document.getElementById("label-horario-manual").textContent = "Horário Fixo:";
+    document.getElementById("container-input-horario").innerHTML = `<input type="time" id="manual-horario" value="10:00" style="width: 100%; padding: 10px; background: #FFF; border: 1px solid #9b59b6; border-radius: 6px;">`;
+
+    renderizarSeletorServicos("manual-servicos-container", "manual-servico-chk", null);
     document.getElementById("modal-agendamento-manual").classList.add("active");
 }
 
@@ -331,7 +362,7 @@ function alternarModoEncaixe() {
 }
 
 async function atualizarHorariosManuaisDisponiveis() {
-    if (document.getElementById("manual-encaixe").checked) return;
+    if (modoMensalistaAtivo || document.getElementById("manual-encaixe").checked) return;
     const dataSel = document.getElementById("manual-data").value;
     const horarioSelect = document.getElementById("manual-horario");
     if (!dataSel || !horarioSelect) return;
@@ -359,9 +390,9 @@ async function salvarAgendamentoManual(event) {
 
     const cliente = document.getElementById("manual-cliente").value.trim();
     const telefone = document.getElementById("manual-telefone").value.trim();
-    const data = document.getElementById("manual-data").value;
+    const dataBaseStr = document.getElementById("manual-data").value;
     const horario = document.getElementById("manual-horario")?.value;
-    const ehEncaixe = document.getElementById("manual-encaixe").checked;
+    const ehEncaixe = !modoMensalistaAtivo && document.getElementById("manual-encaixe").checked;
 
     let servicosSelecionados = [];
     let precoTotal = 0;
@@ -370,29 +401,43 @@ async function salvarAgendamentoManual(event) {
         precoTotal += Number(chk.dataset.preco);
     });
 
-    if (!cliente || !data || !horario || servicosSelecionados.length === 0) {
+    if (!cliente || !dataBaseStr || !horario || servicosSelecionados.length === 0) {
         mostrarAlerta("Preencha todos os campos e selecione ao menos um serviço.", false);
         return;
     }
 
     try {
-        const servicoFinal = ehEncaixe ? `[ENCAIXE] ${servicosSelecionados.join(", ")}` : servicosSelecionados.join(", ");
+        let iteracoes = modoMensalistaAtivo ? parseInt(document.getElementById("manual-recorrencia-semanas").value) || 4 : 1;
 
-        const { error } = await _supabase.from("agendamentos").insert([{
-            barbeiro: usuarioLogado,
-            cliente: cliente,
-            telefone: telefone || "Balcão",
-            servico: servicoFinal,
-            preco_total: precoTotal > 0 ? precoTotal : 35,
-            data: data,
-            horario: horario,
-            status: 'ativo'
-        }]);
+        for (let i = 0; i < iteracoes; i++) {
+            let d = new Date(dataBaseStr + "T00:00:00");
+            d.setDate(d.getDate() + (i * 7));
+            let dataIso = d.toISOString().split("T")[0];
 
-        if (error) throw error;
+            let servicoFinal = servicosSelecionados.join(", ");
+            if (modoMensalistaAtivo) {
+                servicoFinal = `[MENSALISTA] ${servicoFinal}`;
+            } else if (ehEncaixe) {
+                servicoFinal = `[ENCAIXE] ${servicoFinal}`;
+            }
+
+            const { error } = await _supabase.from("agendamentos").insert([{
+                barbeiro: usuarioLogado,
+                cliente: cliente,
+                telefone: telefone || "Balcão",
+                servico: servicoFinal,
+                preco_total: precoTotal > 0 ? precoTotal : 35,
+                data: dataIso,
+                horario: horario,
+                status: 'ativo',
+                recorrente: modoMensalistaAtivo
+            }]);
+
+            if (error) throw error;
+        }
 
         fecharModalAgendamentoManual();
-        mostrarAlerta("Agendamento salvo com sucesso!", true);
+        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso para as próximas semanas!" : "Agendamento salvo com sucesso!", true);
         carregarAgendaSemanal();
     } catch (err) {
         mostrarAlerta("Erro ao salvar: " + err.message, false);
@@ -422,7 +467,6 @@ async function abrirGerenciadorAgendamento(id) {
         paymentBox.style.display = "none";
         rescheduleBox.style.display = "none";
 
-        // Função para recalcular e atualizar em tempo real o valor total na tela
         function atualizarValorTotalDinamico() {
             let acrescimo = 0;
             document.querySelectorAll(".extra-servico-chk:checked").forEach(chk => {
@@ -432,7 +476,6 @@ async function abrirGerenciadorAgendamento(id) {
             document.getElementById("valor-total-atualizado").textContent = `R$ ${totalFinal.toFixed(2).replace(".", ",")}`;
         }
 
-        // Renderiza os serviços extras em formato Pills com escuta de clique para atualização dinâmica
         renderizarSeletorServicos("extras-servicos-container", "extra-servico-chk", atualizarValorTotalDinamico);
         atualizarValorTotalDinamico();
         
