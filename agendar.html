@@ -29,7 +29,69 @@
         <!-- Seleção de Serviços -->
         <section class="section">
             <h2>1. Escolha os Serviços</h2>
-            <div id="servicos-cliente-container"></div>
+            <div class="services-grid">
+                
+                <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte (40 min)</h3></div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Barba (20 min)</h3></div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (10 min)</h3></div>
+                    <span class="price">R$ 15,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
+                    <span class="price">R$ 15,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Corte e Sobrancelha', 50)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Sobrancelha (60 min)</h3></div>
+                    <span class="price">R$ 50,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Corte e Pigmentação', 70)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Pigmentação (1h20)</h3></div>
+                    <span class="price">R$ 70,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
+                    <span class="price">R$ 35,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
+                    <span class="price">R$ 70,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
+                    <span class="price">R$ 90,00</span>
+                </div>
+
+                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)">
+                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
+                    <span class="price">R$ 120,00</span>
+                </div>
+
+            </div>
         </section>
 
         <!-- Resumo Flutuante Dinâmico -->
@@ -67,7 +129,7 @@
             <div class="client-inputs">
                 <div class="input-group">
                     <label for="client-phone">WhatsApp / Telefone:</label>
-                    <input type="tel" id="client-phone" placeholder="O seu WhatsApp (com indicativo regional)" required onblur="buscarClientePorTelefone()">
+                    <input type="tel" id="client-phone" placeholder="O seu WhatsApp (com indicativo regional)" required>
                 </div>
 
                 <div class="input-group">
@@ -112,15 +174,9 @@
         </div>
     </div>
 
-    <!-- Script principal unificado -->
     <script src="script.js"></script>
     <script>
-        // Inicializa a renderização dos serviços ao carregar a página de agendamento
         document.addEventListener("DOMContentLoaded", () => {
-            if (document.getElementById("servicos-cliente-container")) {
-                renderizarSeletorServicos("servicos-cliente-container", "cliente-servico-chk", atualizarResumoCliente);
-            }
-            // Define a data mínima como hoje
             const hoje = new Date().toISOString().split("T")[0];
             const inputData = document.getElementById("date");
             if (inputData) {
@@ -130,12 +186,31 @@
             }
         });
 
-        function atualizarResumoCliente() {
-            let qtd = 0;
+        let servicosSelecionadosCliente = {};
+
+        function toggleService(element, nomeServico, precoServico) {
+            const icon = element.querySelector('.checkbox-icon');
+            
+            if (servicosSelecionadosCliente[nomeServico]) {
+                delete servicosSelecionadosCliente[nomeServico];
+                element.classList.remove('active');
+                icon.className = 'fa-regular fa-square checkbox-icon';
+            } else {
+                servicosSelecionadosCliente[nomeServico] = { preco: precoServico };
+                element.classList.add('active');
+                icon.className = 'fa-solid fa-square-check checkbox-icon';
+            }
+
+            atualizarResumoFlutuanteCliente();
+        }
+
+        function atualizarResumoFlutuanteCliente() {
+            const chaves = Object.keys(servicosSelecionadosCliente);
+            const qtd = chaves.length;
             let total = 0;
-            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
-                qtd++;
-                total += Number(chk.dataset.preco);
+
+            chaves.forEach(serv => {
+                total += servicosSelecionadosCliente[serv].preco;
             });
 
             const resumoFlutuante = document.getElementById("resumo-flutuante");
@@ -172,28 +247,24 @@
             const horario = document.getElementById("time").value;
             const nome = document.getElementById("client-name").value;
             const telefone = document.getElementById("client-phone").value;
+            const chavesServicos = Object.keys(servicosSelecionadosCliente);
 
             if (!data || !horario || !nome || !telefone) {
-                alert("Preencha todos os campos (serviços, data, horário e dados pessoais).");
+                alert("Por favor, preencha a data, o horário, o seu nome e o telefone.");
                 return;
             }
 
-            let servicos = [];
-            let total = 0;
-            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
-                servicos.push(chk.value);
-                total += Number(chk.dataset.preco);
-            });
-
-            if (servicos.length === 0) {
+            if (chavesServicos.length === 0) {
                 alert("Selecione ao menos um serviço.");
                 return;
             }
 
+            let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
+
             document.getElementById("resumo-agendamento").innerHTML = `
                 <strong>Cliente:</strong> ${nome}<br>
                 <strong>Telefone:</strong> ${telefone}<br>
-                <strong>Serviços:</strong> ${servicos.join(", ")}<br>
+                <strong>Serviços:</strong> ${chavesServicos.join(", ")}<br>
                 <strong>Data:</strong> ${data.split("-").reverse().join("/")}<br>
                 <strong>Horário:</strong> ${horario}<br>
                 <strong>Total:</strong> R$ ${total.toFixed(2).replace(".", ",")}
@@ -210,20 +281,15 @@
             const horario = document.getElementById("time").value;
             const nome = document.getElementById("client-name").value;
             const telefone = document.getElementById("client-phone").value;
-
-            let servicos = [];
-            let total = 0;
-            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
-                servicos.push(chk.value);
-                total += Number(chk.dataset.preco);
-            });
+            const chavesServicos = Object.keys(servicosSelecionadosCliente);
+            let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
 
             try {
                 const { error } = await _supabase.from("agendamentos").insert([{
                     barbeiro: "Willian",
                     cliente: nome,
                     telefone: telefone,
-                    servico: servicos.join(", "),
+                    servico: chavesServicos.join(", "),
                     preco_total: total,
                     data: data,
                     horario: horario,
@@ -232,16 +298,14 @@
 
                 if (error) throw error;
 
-                // Redireciona para o WhatsApp com mensagem formatada
-                const textoWp = encodeURIComponent(`Olá, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${servicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
-                window.location.href = `https://wa.me/5531900000000?text=${textoWp}`;
+                // Número de WhatsApp configurado para o Willian (55 31 97555-2202)
+                const numeroWhatsAppWillian = "5531975552202"; 
+
+                const textoWp = encodeURIComponent(`Olá, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${chavesServicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
+                window.location.href = `https://wa.me/${numeroWhatsAppWillian}?text=${textoWp}`;
             } catch (err) {
                 alert("Erro ao realizar agendamento: " + err.message);
             }
-        }
-
-        async function buscarClientePorTelefone() {
-            // Opcional para preenchimento automático se desejar implementar
         }
     </script>
 </body>
