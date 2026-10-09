@@ -3,7 +3,7 @@ const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const precosServicosTabela = {
-    "Corte de Cabelo": 45.00, "Barba Completa": 35.00, "Combo Cabelo + Barba": 70.00,
+    "Corte de Cabelo": 35.00, "Barba Completa": 35.00, "Combo Cabelo + Barba": 70.00,
     "Sobrancelha": 15.00, "Pigmentação": 35.00, "Alisamento": 35.00, "Hidratação": 35.00,
     "Selagem": 70.00, "Luzes": 90.00, "Platinado": 120.00
 };
@@ -240,7 +240,6 @@ async function carregarAgendaSemanal() {
                         const isEncaixe = ag.servico && ag.servico.includes("[ENCAIXE]");
                         const isMensalista = ag.recorrente === true || (ag.servico && ag.servico.includes("[MENSALISTA]"));
                         
-                        // COR ROXA APLICADA PARA MENSALISTAS
                         if (isMensalista) {
                             itemSlot.className = "slot-item mensalista";
                         } else {
@@ -328,7 +327,21 @@ function abrirModalAgendamentoManual() {
     document.getElementById("modal-agendamento-manual").classList.add("active");
 }
 
-function abrirModalMensalista() {
+// GERENCIAMENTO DO MODAL DE MENSALISTAS (Lista + Cadastro)
+async function abrirModalMensalista() {
+    const modalMensalista = document.getElementById("modal-gerenciar-mensalistas");
+    if (!modalMensalista) return;
+
+    modalMensalista.classList.add("active");
+    carregarListaMensalistasAtivos();
+}
+
+function fecharModalMensalistas() {
+    document.getElementById("modal-gerenciar-mensalistas").classList.remove("active");
+}
+
+function abrirFormNovoMensalista() {
+    fecharModalMensalistas();
     modoMensalistaAtivo = true;
     document.getElementById("titulo-modal-manual").textContent = "Cadastrar Mensalista";
     document.getElementById("bloco-mensalista-opcoes").style.display = "block";
@@ -344,6 +357,59 @@ function abrirModalMensalista() {
 
     renderizarSeletorServicos("manual-servicos-container", "manual-servico-chk", null);
     document.getElementById("modal-agendamento-manual").classList.add("active");
+}
+
+async function carregarListaMensalistasAtivos() {
+    const container = document.getElementById("lista-mensalistas-container");
+    if (!container) return;
+
+    container.innerHTML = "<p style='color: #666; text-align: center;'>A carregar mensalistas...</p>";
+
+    try {
+        const { data, error } = await _supabase
+            .from("agendamentos")
+            .select("*")
+            .eq("barbeiro", usuarioLogado)
+            .eq("recorrente", true)
+            .eq("status", "ativo")
+            .order("data", { ascending: true });
+
+        if (error) throw error;
+
+        container.innerHTML = "";
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p style='color: #666; text-align: center;'>Nenhum mensalista ativo no momento.</p>";
+            return;
+        }
+
+        data.forEach(item => {
+            const card = document.createElement("div");
+            card.style.cssText = "background: #FAF5FF; border: 1px solid #9b59b6; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;";
+            
+            card.innerHTML = `
+                <div>
+                    <strong style="color: #000; font-size: 0.85rem;"><i class="fa-solid fa-star" style="color: #9b59b6;"></i> ${item.cliente} (${item.telefone})</strong><br>
+                    <span style="font-size: 0.75rem; color: #555;">Início: ${item.data.split("-").reverse().join("/")} às ${item.horario} - R$ ${Number(item.preco_total || 35).toFixed(2).replace(".", ",")}</span>
+                </div>
+                <button onclick="cancelarMensalista(${item.id})" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">Cancelar</button>
+            `;
+            container.appendChild(card);
+        });
+    } catch (err) {
+        container.innerHTML = "<p style='color: red; text-align: center;'>Erro ao carregar mensalistas.</p>";
+    }
+}
+
+async function cancelarMensalista(id) {
+    if (!confirm("Deseja realmente cancelar este mensalista?")) return;
+    try {
+        const { error } = await _supabase.from("agendamentos").update({ status: 'cancelado' }).eq('id', id);
+        if (error) throw error;
+        carregarListaMensalistasAtivos();
+        carregarAgendaSemanal();
+    } catch (err) {
+        mostrarAlerta("Erro ao cancelar mensalista.", false);
+    }
 }
 
 function alternarModoEncaixe() {
@@ -437,7 +503,7 @@ async function salvarAgendamentoManual(event) {
         }
 
         fecharModalAgendamentoManual();
-        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso para as próximas semanas!" : "Agendamento salvo com sucesso!", true);
+        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso!" : "Agendamento salvo com sucesso!", true);
         carregarAgendaSemanal();
     } catch (err) {
         mostrarAlerta("Erro ao salvar: " + err.message, false);
