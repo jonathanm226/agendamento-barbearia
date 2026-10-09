@@ -49,7 +49,6 @@
         .slot-item:hover { opacity: 0.85; }
         .slot-item.booked { border-left-color: #25D366; background: #F0FFF4; }
         .slot-item.concluded { border-left-color: #3498db; background: #F0F8FF; }
-        /* COR ROXA RESTAURADA PARA MENSALISTAS */
         .slot-item.mensalista { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.1); }
         .slot-item.blocked { border-left-color: #e74c3c; background: #FFF5F5; }
         .slot-item.available { border-left-color: #000000; background: #FFFFFF; }
@@ -108,9 +107,9 @@
                     <button onclick="abrirModalAgendamentoManual()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #25D366; color: #FFF;" title="Agendamento Avulso ou Encaixe">
                         <i class="fa-solid fa-plus"></i> Novo
                     </button>
-                    <!-- BOTÃO DE MENSALISTA RESTAURADO -->
-                    <button onclick="abrirModalMensalista()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #9b59b6; color: #FFF;" title="Cadastrar Mensalista Recorrente">
-                        <i class="fa-solid fa-star"></i> Mensalista
+                    <!-- BOTÃO MENSALISTAS (ABRE A LISTA E OPÇÃO DE NOVO) -->
+                    <button onclick="abrirModalMensalista()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #9b59b6; color: #FFF;" title="Gerenciar Mensalistas">
+                        <i class="fa-solid fa-star"></i> Mensalistas
                     </button>
                     <button onclick="carregarAgendaSemanal()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #000; color: #FFF;">
                         <i class="fa-solid fa-rotate"></i>
@@ -172,7 +171,24 @@
 
     </div>
 
-    <!-- Modais -->
+    <!-- MODAL DE GERENCIAMENTO DE MENSALISTAS (Lista + Novo) -->
+    <div id="modal-gerenciar-mensalistas" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 440px;">
+            <h3><i class="fa-solid fa-star" style="color: #9b59b6;"></i> Clientes Mensalistas</h3>
+            
+            <button onclick="abrirFormNovoMensalista()" class="btn-whatsapp" style="background: #000000; color: #FFFFFF; margin-bottom: 15px; padding: 12px;">
+                <i class="fa-solid fa-plus"></i> Novo Mensalista
+            </button>
+
+            <div id="lista-mensalistas-container" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px;">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <button class="custom-modal-btn btn-modal-cancelar" onclick="fecharModalMensalistas()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modais de Atendimento -->
     <div id="custom-action-modal" class="custom-modal-overlay">
         <div class="custom-modal">
             <h3>Gerenciar Atendimento</h3>
