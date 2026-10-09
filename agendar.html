@@ -1,52 +1,13 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Willian Cortes | Agendamento</title>
-
-
-
-
-
-
-
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </head>
 <body>
 
@@ -68,71 +29,7 @@
         <!-- Seleção de Serviços -->
         <section class="section">
             <h2>1. Escolha os Serviços</h2>
-            <div class="services-grid">
-                
-                <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte (40 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Barba (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (10 min)</h3></div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
-                    <span class="price">R$ 15,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Corte e Sobrancelha', 50)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Sobrancelha (60 min)</h3></div>
-                    <span class="price">R$ 50,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Corte e Pigmentação', 70)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Pigmentação (1h20)</h3></div>
-                    <span class="price">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
-                    <span class="price">R$ 35,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
-                    <span class="price">R$ 70,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
-                    <span class="price">R$ 90,00</span>
-                </div>
-
-                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)">
-                    <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
-                    <span class="price">R$ 120,00</span>
-                </div>
-
-            </div>
-
-
+            <div id="servicos-cliente-container"></div>
         </section>
 
         <!-- Resumo Flutuante Dinâmico -->
@@ -158,7 +55,7 @@
                 <div class="input-group" style="width: 100%;">
                     <label for="time">Horário:</label>
                     <select id="time" style="width: 100%; box-sizing: border-box;">
-                        <!-- Carregado dinamicamente via script.js -->
+                        <option value="">Selecione a data primeiro</option>
                     </select>
                 </div>
             </div>
@@ -198,7 +95,6 @@
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: #000;">Confirmar Agendamento</h3>
             
             <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6;">
-                <!-- Preenchido via JavaScript -->
             </div>
             
             <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
@@ -216,6 +112,137 @@
         </div>
     </div>
 
+    <!-- Script principal unificado -->
     <script src="script.js"></script>
+    <script>
+        // Inicializa a renderização dos serviços ao carregar a página de agendamento
+        document.addEventListener("DOMContentLoaded", () => {
+            if (document.getElementById("servicos-cliente-container")) {
+                renderizarSeletorServicos("servicos-cliente-container", "cliente-servico-chk", atualizarResumoCliente);
+            }
+            // Define a data mínima como hoje
+            const hoje = new Date().toISOString().split("T")[0];
+            const inputData = document.getElementById("date");
+            if (inputData) {
+                inputData.min = hoje;
+                inputData.value = hoje;
+                checkAvailableTimes();
+            }
+        });
+
+        function atualizarResumoCliente() {
+            let qtd = 0;
+            let total = 0;
+            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
+                qtd++;
+                total += Number(chk.dataset.preco);
+            });
+
+            const resumoFlutuante = document.getElementById("resumo-flutuante");
+            if (qtd > 0) {
+                resumoFlutuante.style.display = "flex";
+                document.getElementById("resumo-qtd-servicos").textContent = `${qtd} serviço(s) selecionado(s)`;
+                document.getElementById("resumo-valor-total").textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+            } else {
+                resumoFlutuante.style.display = "none";
+            }
+        }
+
+        function checkAvailableTimes() {
+            const dataSel = document.getElementById("date").value;
+            const selectTime = document.getElementById("time");
+            if (!dataSel || !selectTime) return;
+
+            const horarios = obterHorariosParaData(dataSel);
+            selectTime.innerHTML = "";
+            if (horarios.length === 0) {
+                selectTime.innerHTML = "<option value=''>Fechado neste dia (Dom/Seg)</option>";
+                return;
+            }
+            horarios.forEach(h => {
+                const opt = document.createElement("option");
+                opt.value = h;
+                opt.textContent = h;
+                selectTime.appendChild(opt);
+            });
+        }
+
+        function abrirModalConfirmacao() {
+            const data = document.getElementById("date").value;
+            const horario = document.getElementById("time").value;
+            const nome = document.getElementById("client-name").value;
+            const telefone = document.getElementById("client-phone").value;
+
+            if (!data || !horario || !nome || !telefone) {
+                alert("Preencha todos os campos (serviços, data, horário e dados pessoais).");
+                return;
+            }
+
+            let servicos = [];
+            let total = 0;
+            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
+                servicos.push(chk.value);
+                total += Number(chk.dataset.preco);
+            });
+
+            if (servicos.length === 0) {
+                alert("Selecione ao menos um serviço.");
+                return;
+            }
+
+            document.getElementById("resumo-agendamento").innerHTML = `
+                <strong>Cliente:</strong> ${nome}<br>
+                <strong>Telefone:</strong> ${telefone}<br>
+                <strong>Serviços:</strong> ${servicos.join(", ")}<br>
+                <strong>Data:</strong> ${data.split("-").reverse().join("/")}<br>
+                <strong>Horário:</strong> ${horario}<br>
+                <strong>Total:</strong> R$ ${total.toFixed(2).replace(".", ",")}
+            `;
+            document.getElementById("modal-confirmacao").style.display = "flex";
+        }
+
+        function fecharModalConfirmacao() {
+            document.getElementById("modal-confirmacao").style.display = "none";
+        }
+
+        async function confirmarEEnviar() {
+            const data = document.getElementById("date").value;
+            const horario = document.getElementById("time").value;
+            const nome = document.getElementById("client-name").value;
+            const telefone = document.getElementById("client-phone").value;
+
+            let servicos = [];
+            let total = 0;
+            document.querySelectorAll(".cliente-servico-chk:checked").forEach(chk => {
+                servicos.push(chk.value);
+                total += Number(chk.dataset.preco);
+            });
+
+            try {
+                const { error } = await _supabase.from("agendamentos").insert([{
+                    barbeiro: "Willian",
+                    cliente: nome,
+                    telefone: telefone,
+                    servico: servicos.join(", "),
+                    preco_total: total,
+                    data: data,
+                    horario: horario,
+                    status: 'ativo'
+                }]);
+
+                if (error) throw error;
+
+                // Redireciona para o WhatsApp com mensagem formatada
+                const textoWp = encodeURIComponent(`Olá, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${servicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
+                window.location.href = `https://wa.me/5531900000000?text=${textoWp}`;
+            } catch (err) {
+                alert("Erro ao realizar agendamento: " + err.message);
+            }
+        }
+
+        async function buscarClientePorTelefone() {
+            // Opcional para preenchimento automático se desejar implementar
+        }
+    </script>
 </body>
 </html>
