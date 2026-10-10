@@ -219,23 +219,67 @@
             }
         }
 
-        function checkAvailableTimes() {
+        async function checkAvailableTimes() {
             const dataSel = document.getElementById("date").value;
             const selectTime = document.getElementById("time");
             if (!dataSel || !selectTime) return;
 
+            selectTime.innerHTML = "<option value=''>Carregando horários...</option>";
+
             const horarios = obterHorariosParaData(dataSel);
-            selectTime.innerHTML = "";
             if (horarios.length === 0) {
                 selectTime.innerHTML = "<option value=''>Fechado neste dia (Dom/Seg)</option>";
                 return;
             }
-            horarios.forEach(h => {
-                const opt = document.createElement("option");
-                opt.value = h;
-                opt.textContent = h;
-                selectTime.appendChild(opt);
-            });
+
+            try {
+                // Busca agendamentos e bloqueios da data
+                const { data: agendamentos } = await _supabase
+                    .from("agendamentos")
+                    .select("horario")
+                    .eq("data", dataSel)
+                    .neq("status", "cancelado");
+
+                const { data: bloqueios } = await _supabase
+                    .from("bloqueios_agenda")
+                    .select("horario")
+                    .eq("data", dataSel);
+
+                const horariosOcupados = agendamentos ? agendamentos.map(a => a.horario.substring(0, 5)) : [];
+                const horariosBloqueados = bloqueios ? bloqueios.map(b => b.horario.substring(0, 5)) : [];
+                const diaTodoBloqueado = bloqueios ? bloqueios.some(b => b.horario === 'TODOS') : false;
+
+                selectTime.innerHTML = "";
+
+                if (diaTodoBloqueado) {
+                    selectTime.innerHTML = "<option value=''>Dia totalmente bloqueado</option>";
+                    return;
+                }
+
+                selectTime.appendChild(new Option("Selecione um horário", ""));
+
+                horarios.forEach(h => {
+                    let label = h;
+                    let horaInt = parseInt(h.split(":")[0]);
+                    
+                    // Marca horários de emergência (antes das 07:00 ou a partir das 19:00)
+                    if (horaInt <= 6 || horaInt >= 19) {
+                        label += " (Emergência)";
+                    }
+
+                    const isIndisponivel = horariosOcupados.includes(h) || horariosBloqueados.includes(h);
+                    
+                    const opt = document.createElement("option");
+                    opt.value = h;
+                    opt.textContent = isIndisponivel ? `${label} - Indisponível` : label;
+                    opt.disabled = isIndisponivel; 
+                    
+                    selectTime.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+                selectTime.innerHTML = "<option value=''>Erro ao carregar horários</option>";
+            }
         }
 
         function abrirModalConfirmacao() {
@@ -281,6 +325,21 @@
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
 
             try {
+                // VERIFICAÇÃO DE CONFLITO ANTES DE SALVAR (evitar erros com novos mensalistas/agendamentos simultâneos)
+                const { data: conflito } = await _supabase
+                    .from("agendamentos")
+                    .select("id")
+                    .eq("data", data)
+                    .eq("horario", horario)
+                    .neq("status", "cancelado");
+                    
+                if (conflito && conflito.length > 0) {
+                    alert("Desculpe, este horário acabou de ser reservado por outra pessoa. Por favor, escolha outro.");
+                    fecharModalConfirmacao();
+                    checkAvailableTimes();
+                    return;
+                }
+
                 const { error } = await _supabase.from("agendamentos").insert([{
                     barbeiro: "Willian",
                     cliente: nome,
