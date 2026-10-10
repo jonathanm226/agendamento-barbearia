@@ -253,7 +253,7 @@
                 selectTime.innerHTML = "";
 
                 if (diaTodoBloqueado) {
-                    selectTime.innerHTML = "<option value=''>Dia totalmente bloqueado</option>";
+                    selectTime.innerHTML = "<option value=''>Sem expediente neste dia</option>";
                     selectTime.disabled = true; // Trava o campo se o dia estiver bloqueado
                     return;
                 }
@@ -267,7 +267,7 @@
                     
                     // Adiciona o emoji de sirene para horários de emergência (5h, 6h e a partir das 19h)
                     if (horaInt <= 6 || horaInt >= 19) {
-                        label += " 🚨 (Emergência)";
+                        label += " 🚨 (Emergencial)";
                     }
 
                     const isIndisponivel = horariosOcupados.includes(h) || horariosBloqueados.includes(h);
