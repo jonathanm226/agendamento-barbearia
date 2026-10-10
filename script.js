@@ -71,7 +71,7 @@ function obterHorariosParaData(dataString) {
     if (diaSem === 0 || diaSem === 1) return []; // Fechado Dom e Seg
 
     let horarios = [];
-    let horaInicio = (diaSem === 6) ? 5 : (diaSem === 4 ? 5.5 : 7);
+    let horaInicio = 5; // Padrão iniciando às 05:00 para emergências matinais
     let horaFim = 21;
     let currentMin = Math.round(horaInicio * 60);
     let endMin = horaFim * 60;
