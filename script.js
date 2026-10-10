@@ -473,37 +473,66 @@ async function salvarAgendamentoManual(event) {
     }
 
     try {
-        let iteracoes = modoMensalistaAtivo ? parseInt(document.getElementById("manual-recorrencia-semanas").value) || 4 : 1;
+        let agendamentosArray = [];
 
-        for (let i = 0; i < iteracoes; i++) {
-            let d = new Date(dataBaseStr + "T00:00:00");
-            d.setDate(d.getDate() + (i * 7));
-            let dataIso = d.toISOString().split("T")[0];
+        if (modoMensalistaAtivo) {
+            // Pega as configurações de recorrência escolhidas
+            const frequenciaDias = parseInt(document.getElementById("manual-frequencia").value) || 7;
+            const duracaoMeses = parseInt(document.getElementById("manual-duracao-meses").value) || 12;
 
+            // Calcula a data limite baseado na duração escolhida (ex: 1 ano pra frente)
+            let dataFim = new Date(dataBaseStr + "T00:00:00");
+            dataFim.setMonth(dataFim.getMonth() + duracaoMeses);
+
+            let dataAtual = new Date(dataBaseStr + "T00:00:00");
+
+            // Loop para criar os agendamentos até atingir a data fim
+            while (dataAtual <= dataFim) {
+                let dataIso = dataAtual.toISOString().split("T")[0];
+                let servicoFinal = `[MENSALISTA] ${servicosSelecionados.join(", ")}`;
+
+                agendamentosArray.push({
+                    barbeiro: usuarioLogado,
+                    cliente: cliente,
+                    telefone: telefone || "Balcão",
+                    servico: servicoFinal,
+                    preco_total: precoTotal > 0 ? precoTotal : 35,
+                    data: dataIso,
+                    horario: horario,
+                    status: 'ativo',
+                    recorrente: true
+                });
+                
+                // Pula para a próxima data (ex: soma +15 dias ou +28 dias)
+                dataAtual.setDate(dataAtual.getDate() + frequenciaDias);
+            }
+        } else {
+            // Lógica normal para avulsos ou encaixes
             let servicoFinal = servicosSelecionados.join(", ");
-            if (modoMensalistaAtivo) {
-                servicoFinal = `[MENSALISTA] ${servicoFinal}`;
-            } else if (ehEncaixe) {
+            if (ehEncaixe) {
                 servicoFinal = `[ENCAIXE] ${servicoFinal}`;
             }
 
-            const { error } = await _supabase.from("agendamentos").insert([{
+            agendamentosArray.push({
                 barbeiro: usuarioLogado,
                 cliente: cliente,
                 telefone: telefone || "Balcão",
                 servico: servicoFinal,
                 preco_total: precoTotal > 0 ? precoTotal : 35,
-                data: dataIso,
+                data: dataBaseStr,
                 horario: horario,
                 status: 'ativo',
-                recorrente: modoMensalistaAtivo
-            }]);
-
-            if (error) throw error;
+                recorrente: false
+            });
         }
 
+        // Salva tudo de uma vez no banco de dados (Batch Insert)
+        const { error } = await _supabase.from("agendamentos").insert(agendamentosArray);
+
+        if (error) throw error;
+
         fecharModalAgendamentoManual();
-        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso!" : "Agendamento salvo com sucesso!", true);
+        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso para todo o período!" : "Agendamento salvo com sucesso!", true);
         carregarAgendaSemanal();
     } catch (err) {
         mostrarAlerta("Erro ao salvar: " + err.message, false);
