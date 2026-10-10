@@ -225,6 +225,7 @@
             if (!dataSel || !selectTime) return;
 
             selectTime.innerHTML = "<option value=''>Carregando horários...</option>";
+            selectTime.disabled = true; // Desabilita enquanto carrega
 
             const horarios = obterHorariosParaData(dataSel);
             if (horarios.length === 0) {
@@ -253,18 +254,20 @@
 
                 if (diaTodoBloqueado) {
                     selectTime.innerHTML = "<option value=''>Dia totalmente bloqueado</option>";
+                    selectTime.disabled = true; // Trava o campo se o dia estiver bloqueado
                     return;
                 }
 
+                selectTime.disabled = false; // Libera o campo se houver horários
                 selectTime.appendChild(new Option("Selecione um horário", ""));
 
                 horarios.forEach(h => {
                     let label = h;
                     let horaInt = parseInt(h.split(":")[0]);
                     
-                    // Marca horários de emergência (antes das 07:00 ou a partir das 19:00)
+                    // Adiciona o emoji de sirene para horários de emergência (5h, 6h e a partir das 19h)
                     if (horaInt <= 6 || horaInt >= 19) {
-                        label += " (Emergência)";
+                        label += " 🚨 (Emergência)";
                     }
 
                     const isIndisponivel = horariosOcupados.includes(h) || horariosBloqueados.includes(h);
@@ -279,6 +282,7 @@
             } catch (err) {
                 console.error(err);
                 selectTime.innerHTML = "<option value=''>Erro ao carregar horários</option>";
+                selectTime.disabled = true;
             }
         }
 
