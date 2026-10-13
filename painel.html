@@ -107,7 +107,7 @@
                     <button onclick="abrirModalAgendamentoManual()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #25D366; color: #FFF;" title="Agendamento Avulso ou Encaixe">
                         <i class="fa-solid fa-plus"></i> Novo
                     </button>
-                    <!-- BOTÃO MENSALISTAS (ABRE A LISTA E OPÇÃO DE NOVO) -->
+                    <!-- BOTÃO MENSALISTAS -->
                     <button onclick="abrirModalMensalista()" class="btn-whatsapp" style="width: auto; padding: 4px 8px; font-size: 0.65rem; background: #9b59b6; color: #FFF;" title="Gerenciar Mensalistas">
                         <i class="fa-solid fa-star"></i> Mensalistas
                     </button>
@@ -237,10 +237,19 @@
                 <label style="font-size: 0.75rem; color: #555;">Serviços:</label>
                 <div id="manual-servicos-container"></div>
 
-                <!-- Bloco exclusivo de recorrência para Mensalista -->
+                <!-- Bloco exclusivo de recorrência para Mensalista ATUALIZADO (Meses e Frequência) -->
                 <div id="bloco-mensalista-opcoes" style="display: none; margin-bottom: 10px; background: #FAF5FF; padding: 10px; border-radius: 6px; border: 1px solid #9b59b6;">
-                    <label style="font-size: 0.8rem; color: #9b59b6; font-weight: bold; display: block; margin-bottom: 4px;">Repetir por quantas semanas?</label>
-                    <input type="number" id="manual-recorrencia-semanas" value="4" min="1" max="12" style="background: #FFF;">
+                    <div class="input-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 0.8rem; color: #9b59b6; font-weight: bold; display: block; margin-bottom: 4px;">Duração (Meses):</label>
+                        <input type="number" id="manual-duracao-meses" value="1" min="1" max="12" style="background: #FFF;">
+                    </div>
+                    <div class="input-group">
+                        <label style="font-size: 0.8rem; color: #9b59b6; font-weight: bold; display: block; margin-bottom: 4px;">Frequência (Vezes no mês):</label>
+                        <select id="manual-frequencia" style="background: #FFF; padding: 12px;">
+                            <option value="4">4x ao mês (A cada 7 dias)</option>
+                            <option value="2">2x ao mês (A cada 15 dias)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="bloco-encaixe-check">
@@ -267,6 +276,18 @@
             <div class="custom-modal-buttons" style="margin-top: 10px;">
                 <button class="custom-modal-btn btn-modal-confirmar" onclick="salvarAgendamentoManual(event)">Salvar</button>
                 <button class="custom-modal-btn btn-modal-cancelar" onclick="fecharModalAgendamentoManual()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Ação (Cancelamento Mensalista) -->
+    <div id="modal-confirmacao-acao" class="custom-modal-overlay" style="z-index: 10001;">
+        <div class="custom-modal" style="max-width: 320px;">
+            <h3 style="margin-bottom: 12px; font-size: 1.1rem; color: #e74c3c;"><i class="fa-solid fa-triangle-exclamation"></i> Atenção</h3>
+            <p id="confirmacao-mensagem" style="color: #333; font-size: 0.90rem; margin-bottom: 20px; text-align: center;"></p>
+            <div style="display: flex; gap: 8px; flex-direction: column;">
+                <button id="btn-confirmar-acao" class="custom-modal-btn btn-modal-excluir">Sim, Cancelar Mensalista</button>
+                <button class="custom-modal-btn btn-modal-cancelar" onclick="fecharModalConfirmacaoAcao()">Voltar</button>
             </div>
         </div>
     </div>
