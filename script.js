@@ -390,16 +390,26 @@ async function carregarListaMensalistasAtivos() {
             return;
         }
 
+        // Agrupar por cliente para não repetir o mesmo nome dezenas de vezes na lista
+        const mensalistasAgrupados = {};
         data.forEach(item => {
+            const chave = `${item.cliente}-${item.telefone}`;
+            if (!mensalistasAgrupados[chave]) {
+                mensalistasAgrupados[chave] = item; // Guarda o primeiro agendamento futuro
+            }
+        });
+
+        Object.values(mensalistasAgrupados).forEach(item => {
             const card = document.createElement("div");
             card.style.cssText = "background: #FAF5FF; border: 1px solid #9b59b6; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;";
             
+            // Adição das aspas simples no onclick e passagem do cliente/telefone
             card.innerHTML = `
                 <div>
                     <strong style="color: #000; font-size: 0.85rem;"><i class="fa-solid fa-star" style="color: #9b59b6;"></i> ${item.cliente} (${item.telefone})</strong><br>
-                    <span style="font-size: 0.75rem; color: #555;">Início: ${item.data.split("-").reverse().join("/")} às ${item.horario} - R$ ${Number(item.preco_total || 35).toFixed(2).replace(".", ",")}</span>
+                    <span style="font-size: 0.75rem; color: #555;">Próximo: ${item.data.split("-").reverse().join("/")} às ${item.horario}</span>
                 </div>
-                <button onclick="cancelarMensalista(${item.id})" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">Cancelar</button>
+                <button onclick="cancelarMensalista('${item.cliente}', '${item.telefone}')" style="background: #FFF5F5; color: #e74c3c; border: 1px solid #e74c3c; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer;">Cancelar</button>
             `;
             container.appendChild(card);
         });
@@ -408,10 +418,19 @@ async function carregarListaMensalistasAtivos() {
     }
 }
 
-async function cancelarMensalista(id) {
-    if (!confirm("Deseja realmente cancelar este mensalista?")) return;
+async function cancelarMensalista(cliente, telefone) {
+    // Alerta mais claro para garantir que o barbeiro sabe o que está a fazer
+    if (!confirm(`Deseja realmente cancelar TODAS as marcações futuras do mensalista ${cliente}?`)) return;
     try {
-        const { error } = await _supabase.from("agendamentos").update({ status: 'cancelado' }).eq('id', id);
+        // Atualiza todos os agendamentos recorrentes deste cliente para 'cancelado' de uma só vez
+        const { error } = await _supabase
+            .from("agendamentos")
+            .update({ status: 'cancelado' })
+            .eq('barbeiro', usuarioLogado)
+            .eq('recorrente', true)
+            .eq('cliente', cliente)
+            .eq('telefone', telefone);
+
         if (error) throw error;
         carregarListaMensalistasAtivos();
         carregarAgendaSemanal();
