@@ -60,6 +60,26 @@ function fecharAlerta() {
     document.getElementById("modal-alerta").classList.remove("active");
 }
 
+function abrirModalConfirmacaoAcao(mensagem, callbackConfirmar) {
+    document.getElementById("confirmacao-mensagem").textContent = mensagem;
+    const btnConfirmar = document.getElementById("btn-confirmar-acao");
+    
+    // Clona o botão para remover event listeners anteriores
+    const novoBtn = btnConfirmar.cloneNode(true);
+    btnConfirmar.parentNode.replaceChild(novoBtn, btnConfirmar);
+    
+    novoBtn.onclick = () => {
+        fecharModalConfirmacaoAcao();
+        callbackConfirmar();
+    };
+    
+    document.getElementById("modal-confirmacao-acao").classList.add("active");
+}
+
+function fecharModalConfirmacaoAcao() {
+    document.getElementById("modal-confirmacao-acao").classList.remove("active");
+}
+
 function diaDaSemana(dateString) {
     const [y, m, d] = dateString.split("-").map(Number);
     return new Date(y, m - 1, d).getDay();
@@ -418,25 +438,25 @@ async function carregarListaMensalistasAtivos() {
     }
 }
 
-async function cancelarMensalista(cliente, telefone) {
-    // Alerta mais claro para garantir que o barbeiro sabe o que está a fazer
-    if (!confirm(`Deseja realmente cancelar TODAS as marcações futuras do mensalista ${cliente}?`)) return;
-    try {
-        // Atualiza todos os agendamentos recorrentes deste cliente para 'cancelado' de uma só vez
-        const { error } = await _supabase
-            .from("agendamentos")
-            .update({ status: 'cancelado' })
-            .eq('barbeiro', usuarioLogado)
-            .eq('recorrente', true)
-            .eq('cliente', cliente)
-            .eq('telefone', telefone);
+function cancelarMensalista(cliente, telefone) {
+    // Usando o novo Modal CSS ao invés do confirm() feio
+    abrirModalConfirmacaoAcao(`Deseja realmente cancelar TODAS as marcações futuras do mensalista ${cliente}?`, async () => {
+        try {
+            const { error } = await _supabase
+                .from("agendamentos")
+                .update({ status: 'cancelado' })
+                .eq('barbeiro', usuarioLogado)
+                .eq('recorrente', true)
+                .eq('cliente', cliente)
+                .eq('telefone', telefone);
 
-        if (error) throw error;
-        carregarListaMensalistasAtivos();
-        carregarAgendaSemanal();
-    } catch (err) {
-        mostrarAlerta("Erro ao cancelar mensalista.", false);
-    }
+            if (error) throw error;
+            carregarListaMensalistasAtivos();
+            carregarAgendaSemanal();
+        } catch (err) {
+            mostrarAlerta("Erro ao cancelar mensalista.", false);
+        }
+    });
 }
 
 function alternarModoEncaixe() {
@@ -503,8 +523,11 @@ async function salvarAgendamentoManual(event) {
         let agendamentosArray = [];
 
         if (modoMensalistaAtivo) {
-            const frequenciaDias = parseInt(document.getElementById("manual-frequencia")?.value) || 7;
-            const duracaoMeses = 12;
+            const frequenciaEscolha = document.getElementById("manual-frequencia").value; // "4" ou "2"
+            const duracaoMeses = parseInt(document.getElementById("manual-duracao-meses").value) || 1;
+            
+            // Se for 4x ao mês, repete a cada 7 dias. Se for 2x, repete a cada 15 dias.
+            const frequenciaDias = (frequenciaEscolha === "4") ? 7 : 14; 
 
             let dataFim = new Date(dataBaseStr + "T00:00:00");
             dataFim.setMonth(dataFim.getMonth() + duracaoMeses);
