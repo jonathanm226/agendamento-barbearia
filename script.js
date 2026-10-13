@@ -71,8 +71,15 @@ function obterHorariosParaData(dataString) {
     if (diaSem === 0 || diaSem === 1) return []; // Fechado Dom e Seg
 
     let horarios = [];
-    let horaInicio = 8; // Ajustado para iniciar às 08:00
-    let horaFim = 20;   // Ajustado para encerrar às 20:00 (ajuste se preferir outro intervalo)
+
+    // Se for quinta (4), sexta (5) ou sábado (6), inclui os horários emergenciais matinais (05:00 e 06:00)
+    if (diaSem === 4 || diaSem === 5 || diaSem === 6) {
+        horarios.push("05:00", "06:00");
+    }
+
+    // Horários regulares em blocos de 1 em 1 hora (das 08:00 às 20:00)
+    let horaInicio = 8;
+    let horaFim = 20;
     let currentMin = Math.round(horaInicio * 60);
     let endMin = horaFim * 60;
     
@@ -80,9 +87,11 @@ function obterHorariosParaData(dataString) {
         let h = Math.floor(currentMin / 60);
         let m = currentMin % 60;
         horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-        currentMin += 60; // Alterado para blocos de 1 em 1 hora (60 min)
+        currentMin += 60; // Blocos de 1 em 1 hora
     }
-    return horarios;
+    
+    // Remove duplicatas caso houver e ordena cronologicamente
+    return [...new Set(horarios)].sort((a, b) => a.localeCompare(b));
 }
 
 function fazerLogin() {
