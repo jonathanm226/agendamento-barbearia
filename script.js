@@ -71,8 +71,8 @@ function obterHorariosParaData(dataString) {
     if (diaSem === 0 || diaSem === 1) return []; // Fechado Dom e Seg
 
     let horarios = [];
-    let horaInicio = 5; // Padrão iniciando às 05:00 para emergências matinais
-    let horaFim = 21;
+    let horaInicio = 8; // Ajustado para iniciar às 08:00
+    let horaFim = 20;   // Ajustado para encerrar às 20:00 (ajuste se preferir outro intervalo)
     let currentMin = Math.round(horaInicio * 60);
     let endMin = horaFim * 60;
     
@@ -80,7 +80,7 @@ function obterHorariosParaData(dataString) {
         let h = Math.floor(currentMin / 60);
         let m = currentMin % 60;
         horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-        currentMin += 40; 
+        currentMin += 60; // Alterado para blocos de 1 em 1 hora (60 min)
     }
     return horarios;
 }
@@ -327,7 +327,6 @@ function abrirModalAgendamentoManual() {
     document.getElementById("modal-agendamento-manual").classList.add("active");
 }
 
-// GERENCIAMENTO DO MODAL DE MENSALISTAS (Lista + Cadastro)
 async function abrirModalMensalista() {
     const modalMensalista = document.getElementById("modal-gerenciar-mensalistas");
     if (!modalMensalista) return;
@@ -476,17 +475,14 @@ async function salvarAgendamentoManual(event) {
         let agendamentosArray = [];
 
         if (modoMensalistaAtivo) {
-            // Pega as configurações de recorrência escolhidas
-            const frequenciaDias = parseInt(document.getElementById("manual-frequencia").value) || 7;
-            const duracaoMeses = parseInt(document.getElementById("manual-duracao-meses").value) || 12;
+            const frequenciaDias = parseInt(document.getElementById("manual-frequencia")?.value) || 7;
+            const duracaoMeses = 12;
 
-            // Calcula a data limite baseado na duração escolhida (ex: 1 ano pra frente)
             let dataFim = new Date(dataBaseStr + "T00:00:00");
             dataFim.setMonth(dataFim.getMonth() + duracaoMeses);
 
             let dataAtual = new Date(dataBaseStr + "T00:00:00");
 
-            // Loop para criar os agendamentos até atingir a data fim
             while (dataAtual <= dataFim) {
                 let dataIso = dataAtual.toISOString().split("T")[0];
                 let servicoFinal = `[MENSALISTA] ${servicosSelecionados.join(", ")}`;
@@ -503,11 +499,9 @@ async function salvarAgendamentoManual(event) {
                     recorrente: true
                 });
                 
-                // Pula para a próxima data (ex: soma +15 dias ou +28 dias)
                 dataAtual.setDate(dataAtual.getDate() + frequenciaDias);
             }
         } else {
-            // Lógica normal para avulsos ou encaixes
             let servicoFinal = servicosSelecionados.join(", ");
             if (ehEncaixe) {
                 servicoFinal = `[ENCAIXE] ${servicoFinal}`;
@@ -526,7 +520,6 @@ async function salvarAgendamentoManual(event) {
             });
         }
 
-        // Salva tudo de uma vez no banco de dados (Batch Insert)
         const { error } = await _supabase.from("agendamentos").insert(agendamentosArray);
 
         if (error) throw error;
