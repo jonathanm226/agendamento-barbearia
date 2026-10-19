@@ -107,7 +107,7 @@
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="input-group" style="width: 100%;">
                     <label for="date">Data:</label>
-                    <input type="date" id="date" onchange="checkAvailableTimes()" style="width: 100%; box-sizing: border-box;">
+                    <input type="date" id="date" onchange="verificarEAtualizarData()" style="width: 100%; box-sizing: border-box;">
                 </div>
                 <div class="input-group" style="width: 100%;">
                     <label for="time">Horário:</label>
@@ -171,32 +171,52 @@
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        // Função auxiliar para calcular os limites de datas permitidas (semana corrente + semana futura)
+        function obterLimitesDatas() {
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
 
-            // Calcula a segunda-feira da semana corrente
             const diaSemana = hoje.getDay();
             const diffParaSegunda = (diaSemana === 0 ? -6 : 1) - diaSemana;
             const segundaCorrente = new Date(hoje);
             segundaCorrente.setDate(hoje.getDate() + diffParaSegunda);
 
-            // Data mínima permitida (hoje)
-            const minDateStr = hoje.toISOString().split("T")[0];
-
-            // Calcula o limite máximo: domingo da próxima semana (limitando a 2 semanas no total: semana corrente + semana futura)
             const domingoFuturo = new Date(segundaCorrente);
-            domingoFuturo.setDate(segundaCorrente.getDate() + 13);
-            const maxDateStr = domingoFuturo.toISOString().split("T")[0];
+            domingoFuturo.setDate(segundaCorrente.getDate() + 13); // Domingo da próxima semana
+
+            return { minDate: hoje, maxDate: domingoFuturo };
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const { minDate, maxDate } = obterLimitesDatas();
+            const minDateStr = minDate.toISOString().split("T")[0];
+            const maxDateStr = maxDate.toISOString().split("T")[0];
 
             const inputData = document.getElementById("date");
             if (inputData) {
                 inputData.min = minDateStr;
-                inputData.max = maxDateStr; // Limita a disponibilidade a 2 semanas
+                inputData.max = maxDateStr; 
                 inputData.value = minDateStr;
                 checkAvailableTimes();
             }
         });
+
+        // Validação imediata ao alterar a data no celular/computador
+        function verificarEAtualizarData() {
+            const dataInput = document.getElementById("date").value;
+            if (!dataInput) return;
+
+            const { minDate, maxDate } = obterLimitesDatas();
+            const dataSelecionada = new Date(dataInput + "T00:00:00");
+
+            if (dataSelecionada < minDate || dataSelecionada > maxDate) {
+                alert("Ops! Só é permitido agendamentos até o final da próxima semana.");
+                const minDateStr = minDate.toISOString().split("T")[0];
+                document.getElementById("date").value = minDateStr; // Reseta para a data de hoje
+            }
+            
+            checkAvailableTimes();
+        }
 
         let servicosSelecionadosCliente = {};
 
@@ -301,13 +321,13 @@
         }
 
         function abrirModalConfirmacao() {
-            const data = document.getElementById("date").value;
+            const dataInput = document.getElementById("date").value;
             const horario = document.getElementById("time").value;
             const nome = document.getElementById("client-name").value;
             const telefone = document.getElementById("client-phone").value;
             const chavesServicos = Object.keys(servicosSelecionadosCliente);
 
-            if (!data || !horario || !nome || !telefone) {
+            if (!dataInput || !horario || !nome || !telefone) {
                 alert("Por favor, preencha a data, o horário, o seu nome e o telefone.");
                 return;
             }
@@ -317,13 +337,22 @@
                 return;
             }
 
+            // Validação de segurança extra para celulares
+            const { minDate, maxDate } = obterLimitesDatas();
+            const dataSelecionada = new Date(dataInput + "T00:00:00");
+
+            if (dataSelecionada < minDate || dataSelecionada > maxDate) {
+                alert("Desculpe, só é permitido agendamento até o final da próxima semana.");
+                return;
+            }
+
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
 
             document.getElementById("resumo-agendamento").innerHTML = `
                 <strong>Cliente:</strong> ${nome}<br>
                 <strong>Telefone:</strong> ${telefone}<br>
                 <strong>Serviços:</strong> ${chavesServicos.join(", ")}<br>
-                <strong>Data:</strong> ${data.split("-").reverse().join("/")}<br>
+                <strong>Data:</strong> ${dataInput.split("-").reverse().join("/")}<br>
                 <strong>Horário:</strong> ${horario}<br>
                 <strong>Total:</strong> R$ ${total.toFixed(2).replace(".", ",")}
             `;
