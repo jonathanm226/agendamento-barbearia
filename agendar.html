@@ -6,13 +6,11 @@
     <title>Willian Cortes | Agendamento</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- SDK do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <div class="app-container">
-
         <!-- Cabeçalho com a Logo -->
         <header class="barber-header">
             <div class="brand-info">
@@ -26,9 +24,24 @@
             </div>
         </header>
 
-        <!-- Seleção de Serviços -->
+        <!-- 1. Seleção de Profissional -->
         <section class="section">
-            <h2>1. Escolha os Serviços</h2>
+            <h2>1. Escolha o Profissional</h2>
+            <div class="barbers-grid">
+                <div class="barber-card active" onclick="selecionarBarbeiro(this, 'Willian', '5531975552202')">
+                    <div class="barber-avatar"><i class="fa-solid fa-scissors"></i></div>
+                    <h3>Willian Cortes</h3>
+                </div>
+                <div class="barber-card" onclick="selecionarBarbeiro(this, 'Pedro', '5531989173401')">
+                    <div class="barber-avatar"><i class="fa-solid fa-scissors"></i></div>
+                    <h3>Pedro</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Seleção de Serviços -->
+        <section class="section">
+            <h2>2. Escolha os Serviços</h2>
             <div class="services-grid">
                 
                 <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
@@ -98,9 +111,9 @@
             <span id="resumo-duracao" style="font-size: 0.8rem; color: #FFFFFF; background: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold;">0 min</span>
         </div>
 
-        <!-- Seleção de Data e Horário -->
+        <!-- 3. Seleção de Data e Horário -->
         <section class="section">
-            <h2>2. Data e Horário</h2>
+            <h2>3. Data e Horário</h2>
             <p style="font-size: 0.8rem; color: #666; margin: -5px 0 12px 0;">
                 <i class="fa-solid fa-circle-info"></i> Horários a partir das 19:00 são emergenciais (Corte/Base: R$ 50,00 | Adicional Sobrancelha: R$ 20,00).
             </p>
@@ -118,9 +131,9 @@
             </div>
         </section>
 
-        <!-- Identificação do Cliente -->
+        <!-- 4. Identificação do Cliente -->
         <section class="section">
-            <h2>3. Os Seus Dados</h2>
+            <h2>4. Os Seus Dados</h2>
             <div class="client-inputs">
                 <div class="input-group">
                     <label for="client-phone">WhatsApp / Telefone:</label>
@@ -134,7 +147,6 @@
             </div>
         </section>
 
-        <!-- ESPAÇADOR PARA EVITAR SOBREPOSIÇÃO DO BOTÃO FIXO -->
         <div style="height: 100px; width: 100%;"></div>
 
         <!-- Botão de Ação -->
@@ -143,7 +155,6 @@
                 Continuar Agendamento <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
             </button>
         </footer>
-
     </div>
 
     <!-- MODAL DE CONFIRMAÇÃO DE AGENDAMENTO -->
@@ -171,7 +182,22 @@
 
     <script src="script.js"></script>
     <script>
-        // Função auxiliar para calcular os limites de datas permitidas (semana corrente + semana futura)
+        // Variáveis globais para rastrear o profissional selecionado
+        let barbeiroSelecionado = "Willian";
+        let whatsappBarbeiro = "5531975552202";
+
+        // Função de seleção do Barbeiro
+        function selecionarBarbeiro(element, nome, wpp) {
+            document.querySelectorAll('.barber-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            
+            barbeiroSelecionado = nome;
+            whatsappBarbeiro = wpp;
+            
+            // Atualiza a grade de horários assim que troca de barbeiro
+            checkAvailableTimes(); 
+        }
+
         function obterLimitesDatas() {
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
@@ -182,7 +208,7 @@
             segundaCorrente.setDate(hoje.getDate() + diffParaSegunda);
 
             const domingoFuturo = new Date(segundaCorrente);
-            domingoFuturo.setDate(segundaCorrente.getDate() + 13); // Domingo da próxima semana
+            domingoFuturo.setDate(segundaCorrente.getDate() + 13); 
 
             return { minDate: hoje, maxDate: domingoFuturo };
         }
@@ -201,7 +227,6 @@
             }
         });
 
-        // Validação imediata ao alterar a data no celular/computador
         function verificarEAtualizarData() {
             const dataInput = document.getElementById("date").value;
             if (!dataInput) return;
@@ -212,7 +237,7 @@
             if (dataSelecionada < minDate || dataSelecionada > maxDate) {
                 alert("Ops! Só é permitido agendamentos até o final da próxima semana.");
                 const minDateStr = minDate.toISOString().split("T")[0];
-                document.getElementById("date").value = minDateStr; // Reseta para a data de hoje
+                document.getElementById("date").value = minDateStr; 
             }
             
             checkAvailableTimes();
@@ -260,7 +285,7 @@
             const selectTime = document.getElementById("time");
             if (!dataSel || !selectTime) return;
 
-            selectTime.innerHTML = "<option value=''>Carregando horários...</option>";
+            selectTime.innerHTML = "<option value=''>A carregar horários...</option>";
             selectTime.disabled = true;
 
             const horarios = obterHorariosParaData(dataSel);
@@ -270,16 +295,19 @@
             }
 
             try {
+                // Filtra horários e bloqueios ESPECÍFICOS do barbeiro selecionado
                 const { data: agendamentos } = await _supabase
                     .from("agendamentos")
                     .select("horario")
                     .eq("data", dataSel)
+                    .eq("barbeiro", barbeiroSelecionado)
                     .neq("status", "cancelado");
 
                 const { data: bloqueios } = await _supabase
                     .from("bloqueios_agenda")
                     .select("horario")
-                    .eq("data", dataSel);
+                    .eq("data", dataSel)
+                    .eq("barbeiro", barbeiroSelecionado);
 
                 const horariosOcupados = agendamentos ? agendamentos.map(a => a.horario.substring(0, 5)) : [];
                 const horariosBloqueados = bloqueios ? bloqueios.map(b => b.horario.substring(0, 5)) : [];
@@ -296,9 +324,16 @@
                 selectTime.disabled = false;
                 selectTime.appendChild(new Option("Selecione um horário", ""));
 
+                // --- NOVA LÓGICA: CAPTURAR HORA ATUAL PARA VERIFICAR EXPIRADOS ---
+                const agora = new Date();
+                const hojeIso = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+                const horaAtual = agora.getHours();
+                const minutoAtual = agora.getMinutes();
+
                 horarios.forEach(h => {
                     let label = h;
                     let horaInt = parseInt(h.split(":")[0]);
+                    let minInt = parseInt(h.split(":")[1]);
                     
                     if (horaInt <= 6 || horaInt >= 19) {
                         label += " 🚨 (Emergencial)";
@@ -306,10 +341,28 @@
 
                     const isIndisponivel = horariosOcupados.includes(h) || horariosBloqueados.includes(h);
                     
+                    // Verifica se o horário já passou (apenas se a data escolhida for hoje)
+                    let isExpirado = false;
+                    if (dataSel === hojeIso) {
+                        if (horaInt < horaAtual || (horaInt === horaAtual && minInt <= minutoAtual)) {
+                            isExpirado = true;
+                        }
+                    }
+                    
                     const opt = document.createElement("option");
                     opt.value = h;
-                    opt.textContent = isIndisponivel ? `${label} - Indisponível` : label;
-                    opt.disabled = isIndisponivel; 
+                    
+                    // Aplica as regras de exibição e bloqueio
+                    if (isExpirado) {
+                        opt.textContent = `${label} - Expirado`;
+                        opt.disabled = true; // Bloqueia o clique
+                    } else if (isIndisponivel) {
+                        opt.textContent = `${label} - Indisponível`;
+                        opt.disabled = true; // Bloqueia o clique
+                    } else {
+                        opt.textContent = label;
+                        opt.disabled = false; // Permite o clique
+                    }
                     
                     selectTime.appendChild(opt);
                 });
@@ -337,7 +390,6 @@
                 return;
             }
 
-            // Validação de segurança extra para celulares
             const { minDate, maxDate } = obterLimitesDatas();
             const dataSelecionada = new Date(dataInput + "T00:00:00");
 
@@ -349,6 +401,7 @@
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
 
             document.getElementById("resumo-agendamento").innerHTML = `
+                <strong>Profissional:</strong> ${barbeiroSelecionado}<br>
                 <strong>Cliente:</strong> ${nome}<br>
                 <strong>Telefone:</strong> ${telefone}<br>
                 <strong>Serviços:</strong> ${chavesServicos.join(", ")}<br>
@@ -372,11 +425,13 @@
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
 
             try {
+                // Checa conflito específico para o barbeiro selecionado
                 const { data: conflito } = await _supabase
                     .from("agendamentos")
                     .select("id")
                     .eq("data", data)
                     .eq("horario", horario)
+                    .eq("barbeiro", barbeiroSelecionado)
                     .neq("status", "cancelado");
                     
                 if (conflito && conflito.length > 0) {
@@ -386,8 +441,9 @@
                     return;
                 }
 
+                // Insere com o nome do barbeiro correto
                 const { error } = await _supabase.from("agendamentos").insert([{
-                    barbeiro: "Willian",
+                    barbeiro: barbeiroSelecionado,
                     cliente: nome,
                     telefone: telefone,
                     servico: chavesServicos.join(", "),
@@ -399,9 +455,10 @@
 
                 if (error) throw error;
 
-                const numeroWhatsAppWillian = "5531975552202"; 
-                const textoWp = encodeURIComponent(`Olá, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${chavesServicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
-                window.location.href = `https://wa.me/${numeroWhatsAppWillian}?text=${textoWp}`;
+                // Redireciona para o WhatsApp correto dependendo de quem o cliente escolheu
+                const numeroWhatsApp = whatsappBarbeiro; 
+                const textoWp = encodeURIComponent(`Olá ${barbeiroSelecionado}, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${chavesServicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
+                window.location.href = `https://wa.me/${numeroWhatsApp}?text=${textoWp}`;
             } catch (err) {
                 alert("Erro ao realizar agendamento: " + err.message);
             }
