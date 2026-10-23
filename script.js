@@ -64,7 +64,6 @@ function abrirModalConfirmacaoAcao(mensagem, callbackConfirmar) {
     document.getElementById("confirmacao-mensagem").textContent = mensagem;
     const btnConfirmar = document.getElementById("btn-confirmar-acao");
     
-    // Clona o botão para remover event listeners anteriores
     const novoBtn = btnConfirmar.cloneNode(true);
     btnConfirmar.parentNode.replaceChild(novoBtn, btnConfirmar);
     
@@ -92,12 +91,11 @@ function obterHorariosParaData(dataString) {
 
     let horarios = [];
 
-    // Se for quinta (4), sexta (5) ou sábado (6), inclui os horários emergenciais matinais (05:00 e 06:00)
+    // Se for quinta (4), sexta (5) ou sábado (6), inclui os horários emergenciais matinais
     if (diaSem === 4 || diaSem === 5 || diaSem === 6) {
         horarios.push("05:00", "06:00");
     }
 
-    // Horários regulares em blocos de 1 em 1 hora (das 08:00 às 20:00)
     let horaInicio = 8;
     let horaFim = 20;
     let currentMin = Math.round(horaInicio * 60);
@@ -107,10 +105,9 @@ function obterHorariosParaData(dataString) {
         let h = Math.floor(currentMin / 60);
         let m = currentMin % 60;
         horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-        currentMin += 60; // Blocos de 1 em 1 hora
+        currentMin += 60; 
     }
     
-    // Remove duplicatas caso houver e ordena cronologicamente
     return [...new Set(horarios)].sort((a, b) => a.localeCompare(b));
 }
 
@@ -123,12 +120,25 @@ function fazerLogin() {
         return;
     }
 
+    // LOGIN WILLIAN
     if (usuarioInput === 'willian' && senhaInput === 'willian123') {
         usuarioLogado = "Willian";
         document.getElementById("login-section").style.display = "none";
         document.getElementById("dashboard-barbeiro").style.display = "block";
+        document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Willian";
         offsetSemana = 0;
         carregarAgendaSemanal();
+        
+    // LOGIN PEDRO (NOVO BARBEIRO)
+    } else if (usuarioInput === 'pedro' && senhaInput === 'pedro123') {
+        usuarioLogado = "Pedro";
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("dashboard-barbeiro").style.display = "block";
+        document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Pedro";
+        offsetSemana = 0;
+        carregarAgendaSemanal();
+        
+    // LOGIN ADMIN
     } else if (usuarioInput === 'admin' && senhaInput === 'admin123') {
         usuarioLogado = "Admin";
         document.getElementById("login-section").style.display = "none";
@@ -410,12 +420,11 @@ async function carregarListaMensalistasAtivos() {
             return;
         }
 
-        // Agrupar por cliente para não repetir o mesmo nome dezenas de vezes na lista
         const mensalistasAgrupados = {};
         data.forEach(item => {
             const chave = `${item.cliente}-${item.telefone}`;
             if (!mensalistasAgrupados[chave]) {
-                mensalistasAgrupados[chave] = item; // Guarda o primeiro agendamento futuro
+                mensalistasAgrupados[chave] = item;
             }
         });
 
@@ -423,7 +432,6 @@ async function carregarListaMensalistasAtivos() {
             const card = document.createElement("div");
             card.style.cssText = "background: #FAF5FF; border: 1px solid #9b59b6; border-radius: 6px; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;";
             
-            // Adição das aspas simples no onclick e passagem do cliente/telefone
             card.innerHTML = `
                 <div>
                     <strong style="color: #000; font-size: 0.85rem;"><i class="fa-solid fa-star" style="color: #9b59b6;"></i> ${item.cliente} (${item.telefone})</strong><br>
@@ -439,7 +447,6 @@ async function carregarListaMensalistasAtivos() {
 }
 
 function cancelarMensalista(cliente, telefone) {
-    // Usando o novo Modal CSS ao invés do confirm() feio
     abrirModalConfirmacaoAcao(`Deseja realmente cancelar TODAS as marcações futuras do mensalista ${cliente}?`, async () => {
         try {
             const { error } = await _supabase
@@ -523,10 +530,9 @@ async function salvarAgendamentoManual(event) {
         let agendamentosArray = [];
 
         if (modoMensalistaAtivo) {
-            const frequenciaEscolha = document.getElementById("manual-frequencia").value; // "4" ou "2"
+            const frequenciaEscolha = document.getElementById("manual-frequencia").value; 
             const duracaoMeses = parseInt(document.getElementById("manual-duracao-meses").value) || 1;
             
-            // Se for 4x ao mês, repete a cada 7 dias. Se for 2x, repete a cada 15 dias.
             const frequenciaDias = (frequenciaEscolha === "4") ? 7 : 14; 
 
             let dataFim = new Date(dataBaseStr + "T00:00:00");
@@ -559,7 +565,7 @@ async function salvarAgendamentoManual(event) {
             }
 
             agendamentosArray.push({
-                barbeiro: usuarioLogado,
+                barbeiro: usuarioLogado, // Agendamento vai diretamente para a agenda do barbeiro logado
                 cliente: cliente,
                 telefone: telefone || "Balcão",
                 servico: servicoFinal,
@@ -576,7 +582,7 @@ async function salvarAgendamentoManual(event) {
         if (error) throw error;
 
         fecharModalAgendamentoManual();
-        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso para todo o período!" : "Agendamento salvo com sucesso!", true);
+        mostrarAlerta(modoMensalistaAtivo ? "Mensalista cadastrado com sucesso!" : "Agendamento salvo com sucesso!", true);
         carregarAgendaSemanal();
     } catch (err) {
         mostrarAlerta("Erro ao salvar: " + err.message, false);
@@ -769,7 +775,7 @@ async function carregarResumoAdmin() {
         ativos.forEach(item => {
             const card = document.createElement("div");
             card.style.cssText = "background: #FFF; padding: 10px; border-radius: 6px; border: 1px solid #DDD;";
-            card.innerHTML = `<strong>${item.horario} - ${item.barbeiro}</strong><br>Cliente: ${item.cliente} | ${item.servico} | R$ ${item.preco_total || 35},00`;
+            card.innerHTML = `<strong>${item.horario} - Profissional: ${item.barbeiro}</strong><br>Cliente: ${item.cliente} | ${item.servico} | R$ ${item.preco_total || 35},00`;
             container.appendChild(card);
         });
     } catch (err) {
