@@ -30,7 +30,7 @@
             <div class="barbers-grid">
                 <div class="barber-card active" onclick="selecionarBarbeiro(this, 'Willian', '5531975552202')">
                     <div class="barber-avatar"><i class="fa-solid fa-scissors"></i></div>
-                    <h3>Willian Cortes</h3>
+                    <h3>Willian</h3>
                 </div>
                 <div class="barber-card" onclick="selecionarBarbeiro(this, 'Pedro', '5531989173401')">
                     <div class="barber-avatar"><i class="fa-solid fa-scissors"></i></div>
@@ -44,57 +44,57 @@
             <h2>2. Escolha os Serviços</h2>
             <div class="services-grid">
                 
-                <div class="service-card" onclick="toggleService(this, 'Corte', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Corte', 35, 40)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte (40 min)</h3></div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Barba', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Barba', 35, 20)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Barba (20 min)</h3></div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15)">
+                <div class="service-card" onclick="toggleService(this, 'Sobrancelha', 15, 10)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Sobrancelha (10 min)</h3></div>
                     <span class="price">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15)">
+                <div class="service-card" onclick="toggleService(this, 'Acabamento', 15, 15)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Acabamento (15 min)</h3></div>
                     <span class="price">R$ 15,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Corte e Sobrancelha', 50)">
+                <div class="service-card" onclick="toggleService(this, 'Corte e Sobrancelha', 50, 60)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Corte e Sobrancelha (60 min)</h3></div>
                     <span class="price">R$ 50,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Pigmentação', 35, 20)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Pigmentação (20 min)</h3></div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Alisamento', 35, 40)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Alisamento (40 min)</h3></div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35)">
+                <div class="service-card" onclick="toggleService(this, 'Hidratação', 35, 20)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Hidratação (20 min)</h3></div>
                     <span class="price">R$ 35,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Selagem', 70)">
+                <div class="service-card" onclick="toggleService(this, 'Selagem', 70, 45)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Selagem (45 min)</h3></div>
                     <span class="price">R$ 70,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Luzes', 90)">
+                <div class="service-card" onclick="toggleService(this, 'Luzes', 90, 60)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Luzes (60 min)</h3></div>
                     <span class="price">R$ 90,00</span>
                 </div>
 
-                <div class="service-card" onclick="toggleService(this, 'Platinado', 120)">
+                <div class="service-card" onclick="toggleService(this, 'Platinado', 120, 90)">
                     <div class="service-info"><h3><i class="fa-regular fa-square checkbox-icon"></i> Platinado (90 min)</h3></div>
                     <span class="price">R$ 120,00</span>
                 </div>
@@ -245,7 +245,8 @@
 
         let servicosSelecionadosCliente = {};
 
-        function toggleService(element, nomeServico, precoServico) {
+        // ATUALIZADO: Agora recebe o tempo em minutos
+        function toggleService(element, nomeServico, precoServico, duracaoServico) {
             const icon = element.querySelector('.checkbox-icon');
             
             if (servicosSelecionadosCliente[nomeServico]) {
@@ -253,7 +254,8 @@
                 element.classList.remove('active');
                 icon.className = 'fa-regular fa-square checkbox-icon';
             } else {
-                servicosSelecionadosCliente[nomeServico] = { preco: precoServico };
+                // ATUALIZADO: Guardando também a duração
+                servicosSelecionadosCliente[nomeServico] = { preco: precoServico, duracao: duracaoServico };
                 element.classList.add('active');
                 icon.className = 'fa-solid fa-square-check checkbox-icon';
             }
@@ -261,13 +263,16 @@
             atualizarResumoFlutuanteCliente();
         }
 
+        // ATUALIZADO: Lógica de cálculo e exibição do tempo total adicionada
         function atualizarResumoFlutuanteCliente() {
             const chaves = Object.keys(servicosSelecionadosCliente);
             const qtd = chaves.length;
             let total = 0;
+            let duracaoTotal = 0;
 
             chaves.forEach(serv => {
                 total += servicosSelecionadosCliente[serv].preco;
+                duracaoTotal += servicosSelecionadosCliente[serv].duracao;
             });
 
             const resumoFlutuante = document.getElementById("resumo-flutuante");
@@ -275,6 +280,7 @@
                 resumoFlutuante.style.display = "flex";
                 document.getElementById("resumo-qtd-servicos").textContent = `${qtd} serviço(s) selecionado(s)`;
                 document.getElementById("resumo-valor-total").textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+                document.getElementById("resumo-duracao").textContent = `${duracaoTotal} min`;
             } else {
                 resumoFlutuante.style.display = "none";
             }
