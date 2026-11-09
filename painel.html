@@ -120,6 +120,15 @@
                 </div>
             </div>
 
+            <!-- SELETOR DE ALTERNÂNCIA DE AGENDA (EXCLUSIVO PARA O WILLIAN) -->
+            <div id="seletor-agenda-container" style="display: none; background: #F0F0F0; border: 1px solid #DDD; padding: 6px; border-radius: 6px; margin-bottom: 8px; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.75rem; font-weight: bold; color: #333;"><i class="fa-solid fa-user-gear"></i> Visualizando Agenda:</span>
+                <select id="select-agenda-ativo" onchange="mudarAgendaAtivaVisualizacao()" style="width: auto; padding: 4px 8px; font-size: 0.75rem; background: #FFF; border: 1px solid #999; border-radius: 4px;">
+                    <option value="Willian">Willian (Minha Agenda)</option>
+                    <option value="Pedro">Pedro</option>
+                </select>
+            </div>
+
             <!-- Resumo da Semana -->
             <div style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 8px; border-radius: 6px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: #000; text-transform: uppercase; margin-bottom: 4px; text-align: center; font-size: 0.75rem;">Resumo da Semana</div>
