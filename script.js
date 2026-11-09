@@ -9,6 +9,7 @@ const precosServicosTabela = {
 };
 
 let usuarioLogado = "";
+let barbeiroVisualizado = ""; // Guarda qual agenda está sendo exibida no momento
 let offsetSemana = 0;
 let modoMensalistaAtivo = false;
 
@@ -91,7 +92,6 @@ function obterHorariosParaData(dataString) {
 
     let horarios = [];
 
-    // Se for quinta (4), sexta (5) ou sábado (6), inclui os horários emergenciais matinais
     if (diaSem === 4 || diaSem === 5 || diaSem === 6) {
         horarios.push("05:00", "06:00");
     }
@@ -120,21 +120,36 @@ function fazerLogin() {
         return;
     }
 
-    // LOGIN WILLIAN
+    const seletorAgendaDiv = document.getElementById("seletor-agenda-container");
+
+    // LOGIN WILLIAN (Pode ver a própria agenda e a do Pedro)
     if (usuarioInput === 'willian' && senhaInput === 'willian123') {
         usuarioLogado = "Willian";
+        barbeiroVisualizado = "Willian"; // Começa vendo a própria agenda
+        
         document.getElementById("login-section").style.display = "none";
         document.getElementById("dashboard-barbeiro").style.display = "block";
+        
+        // Exibe o seletor de alternância para o Willian
+        seletorAgendaDiv.style.display = "flex";
+        document.getElementById("select-agenda-ativo").value = "Willian";
         document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Willian";
+        
         offsetSemana = 0;
         carregarAgendaSemanal();
         
-    // LOGIN PEDRO (NOVO BARBEIRO)
+    // LOGIN PEDRO (Vê apenas a própria agenda, sem seletor de alternância)
     } else if (usuarioInput === 'pedro' && senhaInput === 'pedro123') {
         usuarioLogado = "Pedro";
+        barbeiroVisualizado = "Pedro"; // Pedro só pode ver a dele
+        
         document.getElementById("login-section").style.display = "none";
         document.getElementById("dashboard-barbeiro").style.display = "block";
+        
+        // Oculta o seletor de alternância para o Pedro
+        seletorAgendaDiv.style.display = "none";
         document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Pedro";
+        
         offsetSemana = 0;
         carregarAgendaSemanal();
         
@@ -149,8 +164,20 @@ function fazerLogin() {
     }
 }
 
+// Função executada quando o Willian alterna a seleção no combobox
+function mudarAgendaAtivaVisualizacao() {
+    const select = document.getElementById("select-agenda-ativo");
+    if (!select) return;
+    
+    barbeiroVisualizado = select.value;
+    document.getElementById("titulo-agenda-barbeiro").textContent = `Agenda - ${barbeiroVisualizado}`;
+    offsetSemana = 0;
+    carregarAgendaSemanal();
+}
+
 function fazerLogout() {
     usuarioLogado = "";
+    barbeiroVisualizado = "";
     document.getElementById("dashboard-barbeiro").style.display = "none";
     document.getElementById("dashboard-admin").style.display = "none";
     document.getElementById("login-section").style.display = "block";
@@ -190,9 +217,12 @@ async function carregarAgendaSemanal() {
     const diasSemana = obterDiasDaSemana(offsetSemana);
     lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[5].label}`;
 
+    // Utiliza 'barbeiroVisualizado' para buscar os dados correspondentes à agenda selecionada no painel
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
+
     try {
-        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", usuarioLogado).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
-        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", usuarioLogado).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
+        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
+        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
 
         let qtdConcluidos = 0;
         let qtdEncaixes = 0;
@@ -318,11 +348,12 @@ async function carregarAgendaSemanal() {
 }
 
 async function alternarBloqueioDia(dataIso, estaBloqueado) {
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
     try {
         if (estaBloqueado) {
-            await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", usuarioLogado).eq("data", dataIso).eq("horario", "TODOS");
+            await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", alvoBarbeiro).eq("data", dataIso).eq("horario", "TODOS");
         } else {
-            await _supabase.from("bloqueios_agenda").insert([{ barbeiro: usuarioLogado, data: dataIso, horario: "TODOS", tipo: "dia_todo" }]);
+            await _supabase.from("bloqueios_agenda").insert([{ barbeiro: alvoBarbeiro, data: dataIso, horario: "TODOS", tipo: "dia_todo" }]);
         }
         carregarAgendaSemanal();
     } catch (err) {
@@ -331,11 +362,12 @@ async function alternarBloqueioDia(dataIso, estaBloqueado) {
 }
 
 async function alternarBloqueioHorario(dataIso, horario, estaBloqueado) {
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
     try {
         if (estaBloqueado) {
-            await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", usuarioLogado).eq("data", dataIso).eq("horario", horario);
+            await _supabase.from("bloqueios_agenda").delete().eq("barbeiro", alvoBarbeiro).eq("data", dataIso).eq("horario", horario);
         } else {
-            await _supabase.from("bloqueios_agenda").insert([{ barbeiro: usuarioLogado, data: dataIso, horario: horario, tipo: "horario" }]);
+            await _supabase.from("bloqueios_agenda").insert([{ barbeiro: alvoBarbeiro, data: dataIso, horario: horario, tipo: "horario" }]);
         }
         carregarAgendaSemanal();
     } catch (err) {
@@ -403,11 +435,13 @@ async function carregarListaMensalistasAtivos() {
 
     container.innerHTML = "<p style='color: #666; text-align: center;'>A carregar mensalistas...</p>";
 
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
+
     try {
         const { data, error } = await _supabase
             .from("agendamentos")
             .select("*")
-            .eq("barbeiro", usuarioLogado)
+            .eq("barbeiro", alvoBarbeiro)
             .eq("recorrente", true)
             .eq("status", "ativo")
             .order("data", { ascending: true });
@@ -447,12 +481,13 @@ async function carregarListaMensalistasAtivos() {
 }
 
 function cancelarMensalista(cliente, telefone) {
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
     abrirModalConfirmacaoAcao(`Deseja realmente cancelar TODAS as marcações futuras do mensalista ${cliente}?`, async () => {
         try {
             const { error } = await _supabase
                 .from("agendamentos")
                 .update({ status: 'cancelado' })
-                .eq('barbeiro', usuarioLogado)
+                .eq('barbeiro', alvoBarbeiro)
                 .eq('recorrente', true)
                 .eq('cliente', cliente)
                 .eq('telefone', telefone);
@@ -526,6 +561,9 @@ async function salvarAgendamentoManual(event) {
         return;
     }
 
+    // Define em qual agenda o agendamento será salvo (se o Willian estiver vendo a do Pedro e clicar em novo, vai para o Pedro, ou se estiver na dele, vai para a dele)
+    const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
+
     try {
         let agendamentosArray = [];
 
@@ -545,7 +583,7 @@ async function salvarAgendamentoManual(event) {
                 let servicoFinal = `[MENSALISTA] ${servicosSelecionados.join(", ")}`;
 
                 agendamentosArray.push({
-                    barbeiro: usuarioLogado,
+                    barbeiro: alvoBarbeiro,
                     cliente: cliente,
                     telefone: telefone || "Balcão",
                     servico: servicoFinal,
@@ -565,7 +603,7 @@ async function salvarAgendamentoManual(event) {
             }
 
             agendamentosArray.push({
-                barbeiro: usuarioLogado, // Agendamento vai diretamente para a agenda do barbeiro logado
+                barbeiro: alvoBarbeiro, 
                 cliente: cliente,
                 telefone: telefone || "Balcão",
                 servico: servicoFinal,
@@ -602,6 +640,7 @@ async function abrirGerenciadorAgendamento(id) {
 
         const precoOriginal = Number(data.preco_total || 35);
         detailsBox.innerHTML = `
+            <strong>Profissional:</strong> ${data.barbeiro}<br>
             <strong>Cliente:</strong> ${data.cliente}<br>
             <strong>Telefone:</strong> ${data.telefone || 'Não informado'}<br>
             <strong>Serviço Atual:</strong> ${data.servico}<br>
