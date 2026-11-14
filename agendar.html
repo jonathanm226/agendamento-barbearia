@@ -115,7 +115,7 @@
         <section class="section">
             <h2>3. Data e Horário</h2>
             <p style="font-size: 0.8rem; color: #666; margin: -5px 0 12px 0;">
-                <i class="fa-solid fa-circle-info"></i> Horários a partir das 19:00 são emergenciais (Corte/Base: R$ 50,00 | Adicional Sobrancelha: R$ 20,00).
+                <i class="fa-solid fa-circle-info"></i> Horários especiais (05:00, 06:00 e a partir das 19:00) são emergenciais e exigem PIX (CNPJ: <strong>53801280000101</strong>) para garantir a reserva[cite: 24].
             </p>
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="input-group" style="width: 100%;">
@@ -124,9 +124,13 @@
                 </div>
                 <div class="input-group" style="width: 100%;">
                     <label for="time">Horário:</label>
-                    <select id="time" style="width: 100%; box-sizing: border-box;">
+                    <select id="time" onchange="verificarHorarioEmergencial()" style="width: 100%; box-sizing: border-box;">
                         <option value="">Selecione a data primeiro</option>
                     </select>
+                    <div id="aviso-emergencial-pix" style="display: none; background: #FFF8E7; border: 1px solid #F59E0B; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 10px 12px; margin-top: 8px; font-size: 0.82rem; color: #78350F; line-height: 1.4;">
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> Horário Emergencial Selecionado:</strong><br>
+                        Para garantir este horário especial, realize o PIX para a chave CNPJ: <strong>53801280000101</strong> e envie o comprovante no WhatsApp[cite: 24].
+                    </div>
                 </div>
             </div>
         </section>
@@ -162,15 +166,15 @@
         <div style="background: #FFFFFF; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
             <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.3rem; color: #000;">Confirmar Agendamento</h3>
             
-            <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 20px; font-size: 0.95rem; color: #333; line-height: 1.6;">
+            <div id="resumo-agendamento" style="text-align: left; background: #F9F9F9; padding: 15px; border-radius: 8px; border: 1px solid #EAEAEA; margin-bottom: 15px; font-size: 0.95rem; color: #333; line-height: 1.6;">
             </div>
             
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
+            <p id="texto-instrucao-modal" style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
                 Reveja os dados acima. Ao confirmar, o seu horário será reservado e será direcionado ao WhatsApp.
             </p>
             
             <div style="display: flex; gap: 10px; flex-direction: column;">
-                <button onclick="confirmarEEnviar()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer; font-size: 1rem; transition: 0.2s;">
+                <button id="btn-confirmar-envio" onclick="confirmarEEnviar()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: none; background: #25D366; color: #FFF; cursor: pointer; font-size: 1rem; transition: 0.2s;">
                     <i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar
                 </button>
                 <button onclick="fecharModalConfirmacao()" style="padding: 14px; border-radius: 8px; font-weight: bold; border: 1px solid #CCC; background: #FFF; color: #333; cursor: pointer; font-size: 1rem; transition: 0.2s;">
@@ -182,19 +186,28 @@
 
     <script src="script.js"></script>
     <script>
-        // Variáveis globais para rastrear o profissional selecionado
         let barbeiroSelecionado = "Willian";
         let whatsappBarbeiro = "5531975552202";
 
-        // Função de seleção do Barbeiro
+        function isHorarioEmergencial(horarioStr) {
+            if (!horarioStr) return false;
+            const horaInt = parseInt(horarioStr.split(":")[0], 10);
+            return horaInt <= 6 || horaInt >= 19;
+        }
+
+        function verificarHorarioEmergencial() {
+            const horario = document.getElementById("time").value;
+            const avisoBox = document.getElementById("aviso-emergencial-pix");
+            if (!avisoBox) return;
+            avisoBox.style.display = isHorarioEmergencial(horario) ? "block" : "none";
+        }
+
         function selecionarBarbeiro(element, nome, wpp) {
             document.querySelectorAll('.barber-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             
             barbeiroSelecionado = nome;
             whatsappBarbeiro = wpp;
-            
-            // Atualiza a grade de horários assim que troca de barbeiro
             checkAvailableTimes(); 
         }
 
@@ -245,7 +258,6 @@
 
         let servicosSelecionadosCliente = {};
 
-        // ATUALIZADO: Agora recebe o tempo em minutos
         function toggleService(element, nomeServico, precoServico, duracaoServico) {
             const icon = element.querySelector('.checkbox-icon');
             
@@ -254,7 +266,6 @@
                 element.classList.remove('active');
                 icon.className = 'fa-regular fa-square checkbox-icon';
             } else {
-                // ATUALIZADO: Guardando também a duração
                 servicosSelecionadosCliente[nomeServico] = { preco: precoServico, duracao: duracaoServico };
                 element.classList.add('active');
                 icon.className = 'fa-solid fa-square-check checkbox-icon';
@@ -263,7 +274,6 @@
             atualizarResumoFlutuanteCliente();
         }
 
-        // ATUALIZADO: Lógica de cálculo e exibição do tempo total adicionada
         function atualizarResumoFlutuanteCliente() {
             const chaves = Object.keys(servicosSelecionadosCliente);
             const qtd = chaves.length;
@@ -293,6 +303,7 @@
 
             selectTime.innerHTML = "<option value=''>A carregar horários...</option>";
             selectTime.disabled = true;
+            verificarHorarioEmergencial();
 
             const horarios = obterHorariosParaData(dataSel);
             if (horarios.length === 0) {
@@ -301,7 +312,6 @@
             }
 
             try {
-                // Filtra horários e bloqueios ESPECÍFICOS do barbeiro selecionado
                 const { data: agendamentos } = await _supabase
                     .from("agendamentos")
                     .select("horario")
@@ -330,7 +340,6 @@
                 selectTime.disabled = false;
                 selectTime.appendChild(new Option("Selecione um horário", ""));
 
-                // --- NOVA LÓGICA: CAPTURAR HORA ATUAL PARA VERIFICAR EXPIRADOS ---
                 const agora = new Date();
                 const hojeIso = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
                 const horaAtual = agora.getHours();
@@ -341,13 +350,11 @@
                     let horaInt = parseInt(h.split(":")[0]);
                     let minInt = parseInt(h.split(":")[1]);
                     
-                    if (horaInt <= 6 || horaInt >= 19) {
+                    if (isHorarioEmergencial(h)) {
                         label += " 🚨 (Emergencial)";
                     }
 
                     const isIndisponivel = horariosOcupados.includes(h) || horariosBloqueados.includes(h);
-                    
-                    // Verifica se o horário já passou (apenas se a data escolhida for hoje)
                     let isExpirado = false;
                     if (dataSel === hojeIso) {
                         if (horaInt < horaAtual || (horaInt === horaAtual && minInt <= minutoAtual)) {
@@ -358,16 +365,15 @@
                     const opt = document.createElement("option");
                     opt.value = h;
                     
-                    // Aplica as regras de exibição e bloqueio
                     if (isExpirado) {
                         opt.textContent = `${label} - Expirado`;
-                        opt.disabled = true; // Bloqueia o clique
+                        opt.disabled = true;
                     } else if (isIndisponivel) {
                         opt.textContent = `${label} - Indisponível`;
-                        opt.disabled = true; // Bloqueia o clique
+                        opt.disabled = true;
                     } else {
                         opt.textContent = label;
-                        opt.disabled = false; // Permite o clique
+                        opt.disabled = false;
                     }
                     
                     selectTime.appendChild(opt);
@@ -405,6 +411,7 @@
             }
 
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
+            const emergencial = isHorarioEmergencial(horario);
 
             document.getElementById("resumo-agendamento").innerHTML = `
                 <strong>Profissional:</strong> ${barbeiroSelecionado}<br>
@@ -412,9 +419,26 @@
                 <strong>Telefone:</strong> ${telefone}<br>
                 <strong>Serviços:</strong> ${chavesServicos.join(", ")}<br>
                 <strong>Data:</strong> ${dataInput.split("-").reverse().join("/")}<br>
-                <strong>Horário:</strong> ${horario}<br>
+                <strong>Horário:</strong> ${horario}${emergencial ? ' 🚨 <span style="color:#B45309;font-weight:bold;">(Emergencial)</span>' : ''}<br>
                 <strong>Total:</strong> R$ ${total.toFixed(2).replace(".", ",")}
             `;
+
+            const instrucaoEl = document.getElementById("texto-instrucao-modal");
+            const btnConfirmarEnvio = document.getElementById("btn-confirmar-envio");
+
+            if (emergencial) {
+                instrucaoEl.innerHTML = `
+                    <div style="background: #FFF8E7; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; color: #78350F; text-align: left; font-size: 0.85rem; line-height: 1.45;">
+                        <strong><i class="fa-solid fa-pix"></i> PIX Obrigatório (CNPJ: 53801280000101):</strong><br>
+                        Por ser um <strong>horário emergencial</strong>, realize o PIX para a chave CNPJ <strong>53801280000101</strong> e envie o comprovante no WhatsApp[cite: 24].
+                    </div>
+                `;
+                btnConfirmarEnvio.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Finalizar e Enviar PIX`;
+            } else {
+                instrucaoEl.innerHTML = `Reveja os dados acima. Ao confirmar, o seu horário será reservado e será direcionado ao WhatsApp.`;
+                btnConfirmarEnvio.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar`;
+            }
+
             document.getElementById("modal-confirmacao").style.display = "flex";
         }
 
@@ -429,9 +453,9 @@
             const telefone = document.getElementById("client-phone").value;
             const chavesServicos = Object.keys(servicosSelecionadosCliente);
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
+            const emergencial = isHorarioEmergencial(horario);
 
             try {
-                // Checa conflito específico para o barbeiro selecionado
                 const { data: conflito } = await _supabase
                     .from("agendamentos")
                     .select("id")
@@ -447,12 +471,15 @@
                     return;
                 }
 
-                // Insere com o nome do barbeiro correto
+                const servicoRegistro = emergencial
+                    ? `[EMERGENCIAL] ${chavesServicos.join(", ")}`
+                    : chavesServicos.join(", ");
+
                 const { error } = await _supabase.from("agendamentos").insert([{
                     barbeiro: barbeiroSelecionado,
                     cliente: nome,
                     telefone: telefone,
-                    servico: chavesServicos.join(", "),
+                    servico: servicoRegistro,
                     preco_total: total,
                     data: data,
                     horario: horario,
@@ -461,9 +488,27 @@
 
                 if (error) throw error;
 
-                // Redireciona para o WhatsApp correto dependendo de quem o cliente escolheu
-                const numeroWhatsApp = whatsappBarbeiro; 
-                const textoWp = encodeURIComponent(`Olá ${barbeiroSelecionado}, gostaria de confirmar meu agendamento:\n*Cliente:* ${nome}\n*Serviço(s):* ${chavesServicos.join(", ")}\n*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n*Total:* R$ ${total.toFixed(2).replace(".", ",")}`);
+                const numeroWhatsApp = whatsappBarbeiro;
+                let textoMensagem = "";
+
+                if (emergencial) {
+                    textoMensagem =
+                        `Olá ${barbeiroSelecionado}, gostaria de confirmar meu agendamento em *HORÁRIO EMERGENCIAL 🚨*:\n` +
+                        `*Cliente:* ${nome}\n` +
+                        `*Serviço(s):* ${chavesServicos.join(", ")}\n` +
+                        `*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n` +
+                        `*Total:* R$ ${total.toFixed(2).replace(".", ",")}\n\n` +
+                        `Realizei o PIX (Chave CNPJ: 53801280000101) e estou enviando o comprovante a seguir para garantir o horário![cite: 24]`;
+                } else {
+                    textoMensagem =
+                        `Olá ${barbeiroSelecionado}, gostaria de confirmar meu agendamento:\n` +
+                        `*Cliente:* ${nome}\n` +
+                        `*Serviço(s):* ${chavesServicos.join(", ")}\n` +
+                        `*Data:* ${data.split("-").reverse().join("/")} às ${horario}\n` +
+                        `*Total:* R$ ${total.toFixed(2).replace(".", ",")}`;
+                }
+
+                const textoWp = encodeURIComponent(textoMensagem);
                 window.location.href = `https://wa.me/${numeroWhatsApp}?text=${textoWp}`;
             } catch (err) {
                 alert("Erro ao realizar agendamento: " + err.message);
