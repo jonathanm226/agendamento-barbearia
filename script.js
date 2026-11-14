@@ -3,32 +3,41 @@ const SUPABASE_KEY = "sb_publishable_-30z4xAhwJPYmy1bfSEjCw_loKUe8uL";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const precosServicosTabela = {
-    "Corte de Cabelo": 35.00, "Barba Completa": 35.00, "Combo Cabelo + Barba": 70.00,
-    "Sobrancelha": 15.00, "Pigmentação": 35.00, "Alisamento": 35.00, "Hidratação": 35.00,
-    "Selagem": 70.00, "Luzes": 90.00, "Platinado": 120.00
+    "Corte": 35.00, "Barba": 35.00, "Sobrancelha": 15.00, "Acabamento": 15.00,
+    "Corte e Sobrancelha": 50.00, "Pigmentação": 35.00, "Alisamento": 35.00,
+    "Hidratação": 35.00, "Selagem": 70.00, "Luzes": 90.00, "Platinado": 120.00
+};
+
+const precosProdutosTabela = {
+    "Pomada": 40.00,
+    "Gel": 30.00,
+    "Minoxidil": 90.00,
+    "Óleo para Barba": 40.00,
+    "Balm para Barba": 50.00,
+    "Body Splash": 50.00
 };
 
 let usuarioLogado = "";
-let barbeiroVisualizado = ""; // Guarda qual agenda está sendo exibida no momento
+let barbeiroVisualizado = ""; 
 let offsetSemana = 0;
 let modoMensalistaAtivo = false;
 
-function renderizarSeletorServicos(containerId, classeCheckbox, callbackMudanca) {
+function renderizarSeletorItens(containerId, tabelaItens, classeCheckbox, callbackMudanca) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
     container.innerHTML = "";
     container.className = "servicos-selector-grid";
 
-    Object.keys(precosServicosTabela).forEach(serv => {
-        const preco = precosServicosTabela[serv];
+    Object.keys(tabelaItens).forEach(itemNome => {
+        const preco = tabelaItens[itemNome];
         
         const pill = document.createElement("div");
         pill.className = "servico-pill";
         pill.innerHTML = `
-            <span class="nome"><i class="fa-regular fa-square"></i> ${serv}</span>
+            <span class="nome"><i class="fa-regular fa-square"></i> ${itemNome}</span>
             <span class="valor">R$ ${preco.toFixed(2).replace(".", ",")}</span>
-            <input type="checkbox" class="${classeCheckbox}" value="${serv}" data-preco="${preco}" style="display: none;">
+            <input type="checkbox" class="${classeCheckbox}" value="${itemNome}" data-preco="${preco}" style="display: none;">
         `;
 
         pill.onclick = () => {
@@ -47,6 +56,14 @@ function renderizarSeletorServicos(containerId, classeCheckbox, callbackMudanca)
 
         container.appendChild(pill);
     });
+}
+
+function renderizarSeletorServicos(containerId, classeCheckbox, callbackMudanca) {
+    renderizarSeletorItens(containerId, precosServicosTabela, classeCheckbox, callbackMudanca);
+}
+
+function renderizarSeletorProdutos(containerId, classeCheckbox, callbackMudanca) {
+    renderizarSeletorItens(containerId, precosProdutosTabela, classeCheckbox, callbackMudanca);
 }
 
 function mostrarAlerta(mensagem, sucesso = true) {
@@ -122,15 +139,13 @@ function fazerLogin() {
 
     const seletorAgendaDiv = document.getElementById("seletor-agenda-container");
 
-    // LOGIN WILLIAN (Pode ver a própria agenda e a do Pedro)
     if (usuarioInput === 'willian' && senhaInput === 'willian123') {
         usuarioLogado = "Willian";
-        barbeiroVisualizado = "Willian"; // Começa vendo a própria agenda
+        barbeiroVisualizado = "Willian";
         
         document.getElementById("login-section").style.display = "none";
         document.getElementById("dashboard-barbeiro").style.display = "block";
         
-        // Exibe o seletor de alternância para o Willian
         seletorAgendaDiv.style.display = "flex";
         document.getElementById("select-agenda-ativo").value = "Willian";
         document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Willian";
@@ -138,22 +153,19 @@ function fazerLogin() {
         offsetSemana = 0;
         carregarAgendaSemanal();
         
-    // LOGIN PEDRO (Vê apenas a própria agenda, sem seletor de alternância)
     } else if (usuarioInput === 'pedro' && senhaInput === 'pedro123') {
         usuarioLogado = "Pedro";
-        barbeiroVisualizado = "Pedro"; // Pedro só pode ver a dele
+        barbeiroVisualizado = "Pedro";
         
         document.getElementById("login-section").style.display = "none";
         document.getElementById("dashboard-barbeiro").style.display = "block";
         
-        // Oculta o seletor de alternância para o Pedro
         seletorAgendaDiv.style.display = "none";
         document.getElementById("titulo-agenda-barbeiro").textContent = "Agenda - Pedro";
         
         offsetSemana = 0;
         carregarAgendaSemanal();
         
-    // LOGIN ADMIN
     } else if (usuarioInput === 'admin' && senhaInput === 'admin123') {
         usuarioLogado = "Admin";
         document.getElementById("login-section").style.display = "none";
@@ -164,7 +176,6 @@ function fazerLogin() {
     }
 }
 
-// Função executada quando o Willian alterna a seleção no combobox
 function mudarAgendaAtivaVisualizacao() {
     const select = document.getElementById("select-agenda-ativo");
     if (!select) return;
@@ -217,7 +228,6 @@ async function carregarAgendaSemanal() {
     const diasSemana = obterDiasDaSemana(offsetSemana);
     lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[5].label}`;
 
-    // Utiliza 'barbeiroVisualizado' para buscar os dados correspondentes à agenda selecionada no painel
     const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
 
     try {
@@ -561,7 +571,6 @@ async function salvarAgendamentoManual(event) {
         return;
     }
 
-    // Define em qual agenda o agendamento será salvo (se o Willian estiver vendo a do Pedro e clicar em novo, vai para o Pedro, ou se estiver na dele, vai para a dele)
     const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
 
     try {
@@ -570,7 +579,6 @@ async function salvarAgendamentoManual(event) {
         if (modoMensalistaAtivo) {
             const frequenciaEscolha = document.getElementById("manual-frequencia").value; 
             const duracaoMeses = parseInt(document.getElementById("manual-duracao-meses").value) || 1;
-            
             const frequenciaDias = (frequenciaEscolha === "4") ? 7 : 14; 
 
             let dataFim = new Date(dataBaseStr + "T00:00:00");
@@ -627,6 +635,30 @@ async function salvarAgendamentoManual(event) {
     }
 }
 
+function enviarLembreteClienteWhatsApp(agendamento) {
+    const telLimpo = String(agendamento.telefone || "").replace(/\D/g, "");
+    if (telLimpo.length < 10) {
+        mostrarAlerta("Este cliente não possui um número de WhatsApp válido cadastrado.", false);
+        return;
+    }
+
+    const telFinal = telLimpo.startsWith("55") ? telLimpo : `55${telLimpo}`;
+    const dataFormatada = agendamento.data.split("-").reverse().join("/");
+    const horaFormatada = String(agendamento.horario).substring(0, 5);
+
+    const textoLembrete = encodeURIComponent(
+        `Olá ${agendamento.cliente}! Tudo bem? ✂️\n\n` +
+        `Passando para lembrar do seu agendamento na *Willian Cortes*:\n` +
+        `💈 *Profissional:* ${agendamento.barbeiro}\n` +
+        `📅 *Data:* ${dataFormatada}\n` +
+        `⏰ *Horário:* ${horaFormatada}\n` +
+        `✂️ *Serviço(s):* ${agendamento.servico}\n\n` +
+        `Qualquer imprevisto, por favor nos avise com antecedência. Te aguardamos!`
+    );
+
+    window.open(`https://wa.me/${telFinal}?text=${textoLembrete}`, "_blank");
+}
+
 async function abrirGerenciadorAgendamento(id) {
     try {
         const { data } = await _supabase.from("agendamentos").select("*").eq("id", id).single();
@@ -651,16 +683,37 @@ async function abrirGerenciadorAgendamento(id) {
         paymentBox.style.display = "none";
         rescheduleBox.style.display = "none";
 
+        let produtosWrapper = document.getElementById("extras-produtos-wrapper");
+        if (!produtosWrapper) {
+            produtosWrapper = document.createElement("div");
+            produtosWrapper.id = "extras-produtos-wrapper";
+            produtosWrapper.style.cssText = "margin-top: 12px; margin-bottom: 12px;";
+            produtosWrapper.innerHTML = `
+                <label style="display: block; font-size: 0.85rem; font-weight: bold; color: #333; margin-bottom: 6px;">
+                    <i class="fa-solid fa-bag-shopping"></i> Produtos Vendidos (Opcional):
+                </label>
+                <div id="extras-produtos-container"></div>
+            `;
+            const servicosContainer = document.getElementById("extras-servicos-container");
+            if (servicosContainer && servicosContainer.parentNode) {
+                servicosContainer.parentNode.insertBefore(produtosWrapper, servicosContainer.nextSibling);
+            } else {
+                paymentBox.insertBefore(produtosWrapper, paymentBox.firstChild);
+            }
+        }
+
         function atualizarValorTotalDinamico() {
             let acrescimo = 0;
-            document.querySelectorAll(".extra-servico-chk:checked").forEach(chk => {
+            document.querySelectorAll(".extra-servico-chk:checked, .extra-produto-chk:checked").forEach(chk => {
                 acrescimo += Number(chk.dataset.preco);
             });
             const totalFinal = precoOriginal + acrescimo;
-            document.getElementById("valor-total-atualizado").textContent = `R$ ${totalFinal.toFixed(2).replace(".", ",")}`;
+            const totalEl = document.getElementById("valor-total-atualizado");
+            if (totalEl) totalEl.textContent = `R$ ${totalFinal.toFixed(2).replace(".", ",")}`;
         }
 
         renderizarSeletorServicos("extras-servicos-container", "extra-servico-chk", atualizarValorTotalDinamico);
+        renderizarSeletorProdutos("extras-produtos-container", "extra-produto-chk", atualizarValorTotalDinamico);
         atualizarValorTotalDinamico();
         
         function renderizarBotoesPrincipais() {
@@ -692,6 +745,13 @@ async function abrirGerenciadorAgendamento(id) {
                             }
                         });
 
+                        document.querySelectorAll(".extra-produto-chk:checked").forEach(chk => {
+                            const nomeProd = chk.value;
+                            const pProd = Number(chk.dataset.preco);
+                            servicosList.push(`Produto: ${nomeProd}`);
+                            acrescimo += pProd;
+                        });
+
                         const novoPrecoTotal = precoOriginal + acrescimo;
 
                         try {
@@ -721,6 +781,12 @@ async function abrirGerenciadorAgendamento(id) {
                     buttonsBox.appendChild(btnSalvarPg);
                     buttonsBox.appendChild(btnVoltar);
                 };
+
+                const btnLembrete = document.createElement("button");
+                btnLembrete.className = "custom-modal-btn btn-modal-lembrete";
+                btnLembrete.style.cssText = "background-color: #25D366; color: #FFFFFF; border: none;";
+                btnLembrete.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar Lembrete ao Cliente`;
+                btnLembrete.onclick = () => enviarLembreteClienteWhatsApp(data);
 
                 const btnReagendar = document.createElement("button");
                 btnReagendar.className = "custom-modal-btn btn-modal-editar";
@@ -776,6 +842,7 @@ async function abrirGerenciadorAgendamento(id) {
                 };
 
                 buttonsBox.appendChild(btnAtendido);
+                buttonsBox.appendChild(btnLembrete);
                 buttonsBox.appendChild(btnReagendar);
                 buttonsBox.appendChild(btnCancelar);
             }
