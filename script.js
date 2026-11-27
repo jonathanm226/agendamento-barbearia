@@ -105,16 +105,13 @@ function diaDaSemana(dateString) {
 function obterHorariosParaData(dataString) {
     if (!dataString) return [];
     const diaSem = diaDaSemana(dataString);
-    if (diaSem === 0 || diaSem === 1) return []; // Fechado Dom e Seg
+    if (diaSem === 0 || diaSem === 6) return []; // Fechado Sábado e Domingo (atendimento Seg a Sex)
 
-    let horarios = [];
-
-    if (diaSem === 4 || diaSem === 5 || diaSem === 6) {
-        horarios.push("05:00", "06:00");
-    }
+    // Horários emergenciais da manhã disponíveis de segunda a sexta
+    let horarios = ["05:00", "06:00"];
 
     let horaInicio = 8;
-    let horaFim = 20;
+    let horaFim = 23; // Último agendamento às 23:00 (19:00 às 23:00 seguem lógica emergencial)
     let currentMin = Math.round(horaInicio * 60);
     let endMin = horaFim * 60;
     
@@ -208,7 +205,8 @@ function obterDiasDaSemana(offset) {
     const segunda = new Date(hoje);
     segunda.setDate(hoje.getDate() + diffParaSegunda);
 
-    for (let i = 0; i < 6; i++) { 
+    // Segunda (0) a Sexta (4)
+    for (let i = 0; i < 5; i++) { 
         const d = new Date(segunda);
         d.setDate(segunda.getDate() + i);
         const isoString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -226,13 +224,13 @@ async function carregarAgendaSemanal() {
     container.innerHTML = "<p style='color: #666; text-align: center; width: 100%; font-size: 0.7rem;'>A carregar...</p>";
 
     const diasSemana = obterDiasDaSemana(offsetSemana);
-    lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[5].label}`;
+    lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[4].label}`;
 
     const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
 
     try {
-        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
-        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
+        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[4].iso);
+        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[4].iso);
 
         let qtdConcluidos = 0;
         let qtdEncaixes = 0;
@@ -317,6 +315,7 @@ async function carregarAgendaSemanal() {
                         const ag = item.dado;
                         const isConcluido = ag.status === 'concluido';
                         const isEncaixe = ag.servico && ag.servico.includes("[ENCAIXE]");
+                        const isEmergencial = ag.servico && ag.servico.includes("[EMERGENCIAL]");
                         const isMensalista = ag.recorrente === true || (ag.servico && ag.servico.includes("[MENSALISTA]"));
                         
                         if (isMensalista) {
@@ -325,12 +324,15 @@ async function carregarAgendaSemanal() {
                             itemSlot.className = isConcluido ? "slot-item concluded" : "slot-item booked";
                         }
 
+                        const badgeCor = isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : (isEmergencial ? '#D97706' : '#25D366'));
+                        const badgeTexto = isMensalista ? 'M' : (isConcluido ? 'P' : (isEncaixe ? 'ENC' : (isEmergencial ? 'EMG' : 'C')));
+
                         itemSlot.onclick = () => abrirGerenciadorAgendamento(ag.id);
                         itemSlot.innerHTML = `
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="font-weight:bold;">${item.horario}</span>
-                                <span style="font-size: 0.5rem; color: ${isMensalista ? '#9b59b6' : (isConcluido ? '#3498db' : '#25D366')}; font-weight: bold;">
-                                    ${isMensalista ? 'M' : (isConcluido ? 'P' : (isEncaixe ? 'ENC' : 'C'))}
+                                <span style="font-size: 0.5rem; color: ${badgeCor}; font-weight: bold;">
+                                    ${badgeTexto}
                                 </span>
                             </div>
                             <div style="font-weight: 600; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${ag.cliente}">
@@ -647,16 +649,16 @@ function enviarLembreteClienteWhatsApp(agendamento) {
     const horaFormatada = String(agendamento.horario).substring(0, 5);
 
     const textoLembrete = encodeURIComponent(
-        `Olá ${agendamento.cliente}! Tudo bem? ✂️\n\n` +
+        `Olá ${agendamento.cliente}! Tudo bem? \u2702\uFE0F\n\n` +
         `Passando para lembrar do seu agendamento na *Willian Cortes*:\n` +
-        `💈 *Profissional:* ${agendamento.barbeiro}\n` +
-        `📅 *Data:* ${dataFormatada}\n` +
-        `⏰ *Horário:* ${horaFormatada}\n` +
-        `✂️ *Serviço(s):* ${agendamento.servico}\n\n` +
+        `\uD83D\uDC88 *Profissional:* ${agendamento.barbeiro}\n` +
+        `\uD83D\uDCC5 *Data:* ${dataFormatada}\n` +
+        `\u23F0 *Horário:* ${horaFormatada}\n` +
+        `\u2702\uFE0F *Serviço(s):* ${agendamento.servico}\n\n` +
         `Qualquer imprevisto, por favor nos avise com antecedência. Te aguardamos!`
     );
 
-    window.open(`https://wa.me/${telFinal}?text=${textoLembrete}`, "_blank");
+    window.open(`https://api.whatsapp.com/send?phone=${telFinal}&text=${textoLembrete}`, "_blank");
 }
 
 async function abrirGerenciadorAgendamento(id) {
