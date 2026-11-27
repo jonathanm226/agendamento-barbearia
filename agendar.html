@@ -208,6 +208,7 @@
     <script>
         let barbeiroSelecionado = "Willian";
         let whatsappBarbeiro = "5531975552202";
+        const DIAS_ANTECEDENCIA_MAXIMA = 35;
 
         function isHorarioEmergencial(horarioStr) {
             if (!horarioStr) return false;
@@ -231,25 +232,27 @@
             checkAvailableTimes(); 
         }
 
+        function formatarDataLocal(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, "0");
+            const dia = String(data.getDate()).padStart(2, "0");
+            return `${ano}-${mes}-${dia}`;
+        }
+
         function obterLimitesDatas() {
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
 
-            const diaSemana = hoje.getDay();
-            const diffParaSegunda = (diaSemana === 0 ? -6 : 1) - diaSemana;
-            const segundaCorrente = new Date(hoje);
-            segundaCorrente.setDate(hoje.getDate() + diffParaSegunda);
+            const dataLimite = new Date(hoje);
+            dataLimite.setDate(hoje.getDate() + DIAS_ANTECEDENCIA_MAXIMA);
 
-            const domingoFuturo = new Date(segundaCorrente);
-            domingoFuturo.setDate(segundaCorrente.getDate() + 13); 
-
-            return { minDate: hoje, maxDate: domingoFuturo };
+            return { minDate: hoje, maxDate: dataLimite };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             const { minDate, maxDate } = obterLimitesDatas();
-            const minDateStr = minDate.toISOString().split("T")[0];
-            const maxDateStr = maxDate.toISOString().split("T")[0];
+            const minDateStr = formatarDataLocal(minDate);
+            const maxDateStr = formatarDataLocal(maxDate);
 
             const inputData = document.getElementById("date");
             if (inputData) {
@@ -268,9 +271,8 @@
             const dataSelecionada = new Date(dataInput + "T00:00:00");
 
             if (dataSelecionada < minDate || dataSelecionada > maxDate) {
-                alert("Ops! Só é permitido agendamentos até o final da próxima semana.");
-                const minDateStr = minDate.toISOString().split("T")[0];
-                document.getElementById("date").value = minDateStr; 
+                alert(`Ops! Só é permitido realizar agendamentos com até ${DIAS_ANTECEDENCIA_MAXIMA} dias de antecedência.`);
+                document.getElementById("date").value = formatarDataLocal(minDate); 
             }
             
             checkAvailableTimes();
@@ -426,7 +428,7 @@
             const dataSelecionada = new Date(dataInput + "T00:00:00");
 
             if (dataSelecionada < minDate || dataSelecionada > maxDate) {
-                alert("Desculpe, só é permitido agendamento até o final da próxima semana.");
+                alert(`Desculpe, só é permitido realizar agendamentos com até ${DIAS_ANTECEDENCIA_MAXIMA} dias de antecedência.`);
                 return;
             }
 
