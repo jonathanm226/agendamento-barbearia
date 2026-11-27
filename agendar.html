@@ -135,7 +135,7 @@
         <section class="section">
             <h2>3. Data e Horário</h2>
             <p style="font-size: 0.8rem; color: #666; margin: -5px 0 12px 0;">
-                <i class="fa-solid fa-circle-info"></i> Atendimento de segunda a sexta. Horários especiais (05:00, 06:00 e das 19:00 às 23:00) são emergenciais e exigem PIX (CNPJ: <strong>53801280000101</strong>) para garantir a reserva.
+                <i class="fa-solid fa-circle-info"></i> Atendimento de segunda a sábado. Horários especiais (05:00, 06:00 e das 19:00 às 23:00) são emergenciais e exigem PIX (CNPJ: <strong>53801280000101</strong>) para garantir a reserva.
             </p>
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="input-group" style="width: 100%;">
@@ -329,7 +329,7 @@
 
             const horarios = obterHorariosParaData(dataSel);
             if (horarios.length === 0) {
-                selectTime.innerHTML = "<option value=''>Fechado neste dia (Sáb/Dom)</option>";
+                selectTime.innerHTML = "<option value=''>Fechado neste dia (Domingo)</option>";
                 return;
             }
 
@@ -469,6 +469,9 @@
         }
 
         async function confirmarEEnviar() {
+            const btnConfirmar = document.getElementById("btn-confirmar-envio");
+            if (btnConfirmar && btnConfirmar.disabled) return;
+
             const data = document.getElementById("date").value;
             const horario = document.getElementById("time").value;
             const nome = document.getElementById("client-name").value;
@@ -476,6 +479,11 @@
             const chavesServicos = Object.keys(servicosSelecionadosCliente);
             let total = chavesServicos.reduce((acc, serv) => acc + servicosSelecionadosCliente[serv].preco, 0);
             const emergencial = isHorarioEmergencial(horario);
+
+            if (btnConfirmar) {
+                btnConfirmar.disabled = true;
+                btnConfirmar.textContent = "Reservando...";
+            }
 
             try {
                 const { data: conflito } = await _supabase
@@ -534,6 +542,10 @@
                 window.location.href = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${textoWp}`;
             } catch (err) {
                 alert("Erro ao realizar agendamento: " + err.message);
+            } finally {
+                if (btnConfirmar) {
+                    btnConfirmar.disabled = false;
+                }
             }
         }
     </script>
