@@ -21,6 +21,7 @@ let usuarioLogado = "";
 let barbeiroVisualizado = ""; 
 let offsetSemana = 0;
 let modoMensalistaAtivo = false;
+let carregandoAgenda = false;
 
 function renderizarSeletorItens(containerId, tabelaItens, classeCheckbox, callbackMudanca) {
     const container = document.getElementById(containerId);
@@ -105,9 +106,9 @@ function diaDaSemana(dateString) {
 function obterHorariosParaData(dataString) {
     if (!dataString) return [];
     const diaSem = diaDaSemana(dataString);
-    if (diaSem === 0 || diaSem === 6) return []; // Fechado Sábado e Domingo (atendimento Seg a Sex)
+    if (diaSem === 0) return []; // Fechado apenas aos domingos (segunda a sábado aberto)
 
-    // Horários emergenciais da manhã disponíveis de segunda a sexta
+    // Horários emergenciais da manhã disponíveis de segunda a sábado
     let horarios = ["05:00", "06:00"];
 
     let horaInicio = 8;
@@ -205,8 +206,8 @@ function obterDiasDaSemana(offset) {
     const segunda = new Date(hoje);
     segunda.setDate(hoje.getDate() + diffParaSegunda);
 
-    // Segunda (0) a Sexta (4)
-    for (let i = 0; i < 5; i++) { 
+    // Segunda (0) a Sábado (5)
+    for (let i = 0; i < 6; i++) { 
         const d = new Date(segunda);
         d.setDate(segunda.getDate() + i);
         const isoString = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -217,20 +218,22 @@ function obterDiasDaSemana(offset) {
 }
 
 async function carregarAgendaSemanal() {
+    if (carregandoAgenda) return;
     const container = document.getElementById("grade-semanal-container");
     const lblPeriodo = document.getElementById("label-periodo-semana");
     if (!container) return;
-    
+
+    carregandoAgenda = true;
     container.innerHTML = "<p style='color: #666; text-align: center; width: 100%; font-size: 0.7rem;'>A carregar...</p>";
 
     const diasSemana = obterDiasDaSemana(offsetSemana);
-    lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[4].label}`;
+    lblPeriodo.textContent = `${diasSemana[0].label} até ${diasSemana[5].label}`;
 
     const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
 
     try {
-        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[4].iso);
-        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[4].iso);
+        const { data: agendamentos } = await _supabase.from("agendamentos").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
+        const { data: bloqueios } = await _supabase.from("bloqueios_agenda").select("*").eq("barbeiro", alvoBarbeiro).gte("data", diasSemana[0].iso).lte("data", diasSemana[5].iso);
 
         let qtdConcluidos = 0;
         let qtdEncaixes = 0;
@@ -356,6 +359,8 @@ async function carregarAgendaSemanal() {
         });
     } catch (err) {
         console.error("Erro agenda:", err);
+    } finally {
+        carregandoAgenda = false;
     }
 }
 
@@ -555,6 +560,9 @@ function fecharModalAgendamentoManual() {
 async function salvarAgendamentoManual(event) {
     if (event) event.preventDefault();
 
+    const btnSalvar = document.getElementById("btn-salvar-manual");
+    if (btnSalvar && btnSalvar.disabled) return;
+
     const cliente = document.getElementById("manual-cliente").value.trim();
     const telefone = document.getElementById("manual-telefone").value.trim();
     const dataBaseStr = document.getElementById("manual-data").value;
@@ -575,7 +583,27 @@ async function salvarAgendamentoManual(event) {
 
     const alvoBarbeiro = (usuarioLogado === 'Willian') ? barbeiroVisualizado : usuarioLogado;
 
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = "Salvando...";
+    }
+
     try {
+        if (!modoMensalistaAtivo && !ehEncaixe) {
+            const { data: conflito } = await _supabase
+                .from("agendamentos")
+                .select("id")
+                .eq("barbeiro", alvoBarbeiro)
+                .eq("data", dataBaseStr)
+                .eq("horario", horario)
+                .neq("status", "cancelado");
+
+            if (conflito && conflito.length > 0) {
+                mostrarAlerta("Já existe um agendamento ativo neste horário. Ative o Modo Encaixe se desejar encaixar.", false);
+                return;
+            }
+        }
+
         let agendamentosArray = [];
 
         if (modoMensalistaAtivo) {
@@ -589,7 +617,7 @@ async function salvarAgendamentoManual(event) {
             let dataAtual = new Date(dataBaseStr + "T00:00:00");
 
             while (dataAtual <= dataFim) {
-                let dataIso = dataAtual.toISOString().split("T")[0];
+                let dataIso = `${dataAtual.getFullYear()}-${String(dataAtual.getMonth() + 1).padStart(2, '0')}-${String(dataAtual.getDate()).padStart(2, '0')}`;
                 let servicoFinal = `[MENSALISTA] ${servicosSelecionados.join(", ")}`;
 
                 agendamentosArray.push({
@@ -634,6 +662,11 @@ async function salvarAgendamentoManual(event) {
         carregarAgendaSemanal();
     } catch (err) {
         mostrarAlerta("Erro ao salvar: " + err.message, false);
+    } finally {
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = "Salvar";
+        }
     }
 }
 
